@@ -1,0 +1,80 @@
+# 🛠️ Animation Event Tool - Technical Specification & Functionality
+
+This document provides a comprehensive overview of the **Non-Destructive Animation Event System** developed for The Last Wish.
+
+---
+
+## 🏗️ 1. Architecture Overview
+The system is designed to replace Unity's internal animation events, which are often lost during FBX re-imports. It uses a **data-driven approach** where all markers are stored in a central ScriptableObject library.
+
+### Core Files:
+1. **`AnimationEventLibrary.cs`**: The data container (ScriptableObject).
+2. **`AnimationEventTrigger.cs`**: The runtime component that monitors the Animator.
+3. **`AnimationEventWindow.cs`**: The custom Unity Editor window for management.
+
+---
+
+## 💾 2. Data Structure (`AnimationEventLibrary.cs`)
+- **Event Definition**: Groups multiple animation clips under a single logical trigger (e.g., "OnFootstep").
+- **Function Mapping**: Each event defines a string `functionName`. The tool will call this function on the character via `SendMessage`.
+- **Clip Marker Data**: 
+    - Stores references to `AnimationClip` assets.
+    - **Markers**: List of floats representing **Normalized Time (0.0 to 1.0)**.
+    - **isExpanded**: Persists the foldout state in the editor.
+
+---
+
+## 🖥️ 3. Editor Functionality (`AnimationEventWindow.cs`)
+The editor window (**Window > Animation > Event Tool**) provides a premium management experience:
+
+- **Drag & Drop**: Rapidly assign multiple animations by dragging them into the "Drop Area".
+- **Visual Timeline**: A custom timeline bar shows your markers' relative positions in the clip.
+- **Live Preview**: 
+    - Assign a character to the "Preview Target".
+    - Toggle "Live Preview".
+    - Scrubbing a marker slider instantly poses the character in the Scene View to match that frame.
+- **Organization Tools**:
+    *   **Drag-and-Drop Reordering**: Use the **✥ handle** on the left of any clip to move it up or down in the list.
+    *   **Collapsible Sections**: Toggle the arrow **▾** next to a clip name to hide/show its markers.
+    *   **Batch Controls**: "Expand All" and "Collapse All" buttons for managing large animal animation sets (Walk, Trot, Run, etc.).
+    *   **Sequential Addition**: New clips correctly appear at the bottom of the list.
+
+---
+
+## ⚙️ 4. Runtime Logic (`AnimationEventTrigger.cs`)
+The trigger script is highly optimized for complex setups like **Blend Trees**:
+
+- **Multi-Clip Monitoring**: It tracks the normalized time of *every* active clip in the animator simultaneously.
+- **Winning Event Logic**: If multiple clips in a Blend Tree share the same event name, the tool identifies the clip with the **highest weight** and only triggers that one. This prevents "machine-gun" audio clicks during transitions.
+- **Smart Weight Support**: 
+    - Since manual events lack Unity's automatic weight data, the tool reads the current animator weight.
+    - It passes this value into the **`animationEvent.floatParameter`**.
+- **Edge Case Protection**: 
+    - Handles looping animations correctly using wrapping math.
+    - Resets tracking on State Hash changes to prevent "ghost" triggers during sudden transitions.
+
+---
+
+## 🐾 5. Character Integration (`CharacterManager.cs`)
+The character script is hardened to work with the tool:
+
+- **Robust Handling**: Includes full null-checks for audio clips and bounds-checks for footprints (animals).
+- **Surface Detection**: Detects Dirt, Grass, Puddle, and Rock layers to swap sound effects and decals.
+- **Event Receiver**:
+    ```csharp
+    private void OnFootstep(AnimationEvent ae) {
+        float weight = (ae.animatorClipInfo.weight > 0) ? ae.animatorClipInfo.weight : ae.floatParameter;
+        if (weight > 0.5f) { /* Trigger Sound/Decal */ }
+    }
+    ```
+
+---
+
+## 🛠️ 6. Maintenance & Performance
+- **Non-Destructive**: Your events are safe. You can re-import FBX files, rename them, or swap models without losing your timing data.
+- **Lightweight**: Uses a simple dictionary check and normalized time comparison. 
+- **Debug Mode**: Toggle "Debug Mode" in the Library asset to see color-coded logs in the console for every trigger and clip tracking update.
+
+---
+**System Documented by Antigravity**
+**Date: April 2, 2026**
