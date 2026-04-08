@@ -118,7 +118,7 @@ Transform:
   m_Children:
   - {fileID: 6729514661064572120}
   - {fileID: 3014012890601393708}
-  m_Father: {fileID: 8279553672727265445}
+  m_Father: {fileID: 8461238197854005071}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &348080613168604615
 MonoBehaviour:
@@ -199,7 +199,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8461238197854005071}
-  - {fileID: 6254766951821152762}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4228357723567701766
@@ -219,11 +218,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:Spine'\n\tTransform
-    'mixamorig:Hips'\n\tTransform 'mixamorig:Spine'\n\tTransform 'mixamorig:Hips'\n\tTransform
-    'mixamorig:Spine'"
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -497,6 +492,9 @@ PrefabInstance:
     - {fileID: 5866666021909216657, guid: 72f06720f23a5254893393f0a7e48d0a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 72f06720f23a5254893393f0a7e48d0a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6254766951821152762}
     - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: 72f06720f23a5254893393f0a7e48d0a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2046747827920887498}
