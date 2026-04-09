@@ -43,9 +43,13 @@ namespace AnimationRigging.Tools
         private Vector3 lastRayStart;
         private Vector3 lastHitPoint;
         private bool hasHitSomething;
+        private bool isCurrentlyPressed;
+        private Transform myTransform;
 
         private void Start()
         {
+            myTransform = transform;
+
             if (mainCamera == null)
             {
                 mainCamera = Camera.main;
@@ -54,7 +58,7 @@ namespace AnimationRigging.Tools
             // If no target is assigned, try to use this object's transform
             if (targetTransform == null)
             {
-                targetTransform = transform;
+                targetTransform = myTransform;
             }
 
             // Set initial Z if not specified (optional, but good for keeping original depth)
@@ -67,17 +71,17 @@ namespace AnimationRigging.Tools
         private void Update()
         {
             // Support both New Input System and Old for flexibility
-            bool isPressed = false;
+            isCurrentlyPressed = false;
 
 #if ENABLE_INPUT_SYSTEM
             if (Mouse.current != null && Mouse.current.leftButton.isPressed)
-                isPressed = true;
+                isCurrentlyPressed = true;
 #else
             if (Input.GetMouseButton(0))
-                isPressed = true;
+                isCurrentlyPressed = true;
 #endif
 
-            if (isPressed)
+            if (isCurrentlyPressed)
             {
                 MoveTargetToMouse();
             }
@@ -145,16 +149,7 @@ namespace AnimationRigging.Tools
         private void LateUpdate()
         {
             // If the user is NOT pressing the button, disable the game-view visuals
-            bool isPressed = false;
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.isPressed)
-                isPressed = true;
-#else
-            if (Input.GetMouseButton(0))
-                isPressed = true;
-#endif
-
-            if (!isPressed)
+            if (!isCurrentlyPressed)
             {
                 if (hitMarker != null) hitMarker.gameObject.SetActive(false);
                 hasHitSomething = false; // Reset hit state when released

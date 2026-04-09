@@ -28,6 +28,13 @@ namespace Player.Control
         [Tooltip("How fast the layer weight blends to 1 when switching weapons.")]
         public float layerBlendSpeed = 10f;
 
+        // Private Hashes for Performance (Mobile Optimization)
+        private int strafeParamHash;
+        private int reloadParamHash;
+        private int fireParamHash;
+        private int reloadStateHash;
+        private int reloadTagHash;
+
         // Private Settings (Hardcoded as requested)
         private string reloadParameter = "Reload"; // Updated to Capital R
         private string fireParameter = "isFiring";
@@ -41,12 +48,23 @@ namespace Player.Control
         private float currentStrafe;
         private float targetStrafe;
         private float targetLayerWeight = 1f; // Always active for persistent weapon layers
-        private float currentLayerWeight;
         private float lastActionTime;
+        private AnimatorStateInfo currentWeaponState;
 
         private void Awake()
         {
             animator = GetComponent<Animator>();
+            
+            // Pre-calculate hashes to avoid string comparisons in Update (Essential for mobile)
+            strafeParamHash = Animator.StringToHash(strafeParameter);
+            reloadParamHash = Animator.StringToHash(reloadParameter);
+            fireParamHash = Animator.StringToHash(fireParameter);
+            
+            // We use fullPathHash or shortNameHash for state checks. 
+            // Since we know the layer, shortNameHash is efficient if unique.
+            reloadStateHash = Animator.StringToHash(reloadStateName);
+            reloadTagHash = Animator.StringToHash(reloadStateTag);
+
             if (animator == null)
             {
                 Debug.LogWarning("[PlayerController] No Animator found on the same GameObject!");
@@ -60,7 +78,7 @@ namespace Player.Control
         private void Start()
         {
             // Guaranteed log to prove the script is active
-            Debug.Log($"<color=green>[PlayerController]</color> Script is ACTIVE on <b>{gameObject.name}</b>. Press R to Reload.");
+            Debug.Log($"<color=green>[PlayerController]</color> Optimized Script is ACTIVE on <b>{gameObject.name}</b>.");
         }
 
         private void LogAnimatorParameters()
@@ -75,6 +93,14 @@ namespace Player.Control
 
         private void Update()
         {
+            if (animator == null) return;
+
+            // Cache the state once per frame for all check methods
+            if (weaponLayerIndex >= 0 && weaponLayerIndex < animator.layerCount)
+            {
+                currentWeaponState = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
+            }
+
             HandleMovement();
             HandleActions();
             UpdateLayerWeights();
@@ -82,8 +108,6 @@ namespace Player.Control
 
         private void HandleMovement()
         {
-            if (animator == null) return;
-
 #if ENABLE_INPUT_SYSTEM
             if (Keyboard.current != null)
             {
@@ -101,7 +125,7 @@ namespace Player.Control
 
             // Smoothly interpolate the Starf parameter to the target value
             currentStrafe = Mathf.MoveTowards(currentStrafe, targetStrafe, Time.deltaTime * strafeSmoothing);
-            animator.SetFloat(strafeParameter, currentStrafe);
+            animator.SetFloat(strafeParamHash, currentStrafe);
 
             // One-Shot Logic: Once we reach (or get very close to) our target lane, return to 0
             if (Mathf.Abs(currentStrafe - targetStrafe) < 0.05f && targetStrafe != 0f)
@@ -112,8 +136,6 @@ namespace Player.Control
 
         private void HandleActions()
         {
-            if (animator == null) return;
-
             bool shootingInput = false;
             bool reloadPressed = false;
             bool isActuallyReloading = IsReloadingAnimationPlaying();
@@ -126,32 +148,15 @@ namespace Player.Control
             if (Input.GetKeyDown(KeyCode.R)) reloadPressed = true;
 #endif
 
-            // EMERGENCY DEBUG: If you press R, we want to know even if isActuallyReloading is true
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame && debugMode)
-                Debug.Log("[PlayerController] RAW KEYBOARD 'R' DETECTED.");
-#else
-            if (Input.GetKeyDown(KeyCode.R) && debugMode)
-                Debug.Log("[PlayerController] RAW KEYBOARD 'R' DETECTED.");
-#endif
-
             // Handle Firing State
             bool canFire = !isActuallyReloading;
-            animator.SetBool(fireParameter, shootingInput && canFire);
+            animator.SetBool(fireParamHash, shootingInput && canFire);
 
             // Handle Reload Input
-            if (reloadPressed)
+            if (reloadPressed && !isActuallyReloading)
             {
-                if (!isActuallyReloading)
-                {
-                    if (debugMode) Debug.Log($"[PlayerController] EXECUTE RELOAD. Setting Bool '{reloadParameter}' to TRUE.");
-                    animator.SetBool(reloadParameter, true);
-                    Invoke(nameof(ResetReloadParameter), 0.15f); // Slightly longer for safety
-                }
-                else if (debugMode)
-                {
-                    Debug.LogWarning($"[PlayerController] RELOAD BLOCKED. isActuallyReloading is TRUE.");
-                }
+                animator.SetBool(reloadParamHash, true);
+                Invoke(nameof(ResetReloadParameter), 0.15f); // Slightly longer for safety
             }
 
             // Keep weapon layer fully active
@@ -162,39 +167,28 @@ namespace Player.Control
         {
             if (animator == null || weaponLayerIndex < 0 || weaponLayerIndex >= animator.layerCount) return false;
 
-            // 1. Check current state
-            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
-            bool isInReload = currentState.IsName(reloadStateName) || (!string.IsNullOrEmpty(reloadStateTag) && currentState.IsTag(reloadStateTag));
+            // Use the cached state info from Update to avoid multiple API calls per frame
+            bool isInReload = currentWeaponState.shortNameHash == reloadStateHash || currentWeaponState.tagHash == reloadTagHash;
             
             // 2. Check next state (transitioning into)
             bool isTransitioningToReload = false;
             if (animator.IsInTransition(weaponLayerIndex))
             {
                 AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(weaponLayerIndex);
-                isTransitioningToReload = nextState.IsName(reloadStateName) || (!string.IsNullOrEmpty(reloadStateTag) && nextState.IsTag(reloadStateTag));
+                isTransitioningToReload = nextState.shortNameHash == reloadStateHash || nextState.tagHash == reloadTagHash;
             }
 
-            bool result = isInReload || isTransitioningToReload;
-
-            // Special debug logs to help identify the "1 second" issue
-            if (debugMode && !result && Time.time < lastActionTime + 2.0f && Time.time > lastActionTime)
+            if (isInReload)
             {
-                // We just pressed reload but it's not detected yet
-                Debug.LogWarning($"[PlayerController] Reload triggered but not yet detected in Layer {weaponLayerIndex}. " + 
-                                 $"Current State Full Path: {currentState.fullPathHash}");
-            }
-
-            if (result && isInReload)
-            {
-                return currentState.normalizedTime < 0.99f;
+                return currentWeaponState.normalizedTime < 0.99f;
             }
             
-            return result;
+            return isTransitioningToReload;
         }
 
         private void ResetReloadParameter()
         {
-            animator.SetBool(reloadParameter, false);
+            animator.SetBool(reloadParamHash, false);
         }
 
         private void UpdateLayerWeights()
