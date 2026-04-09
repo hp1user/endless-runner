@@ -1,0 +1,36 @@
+# Endless Runner Project Summary & AI Prompt
+
+This summary provides a technical overview of the "Endless Runner" character controller system for an AI assistant to continue development.
+
+## 1. Input & Locomotion
+- **Script**: PlayerController.cs
+- **Parameter**: `Starf` (Float, -1 to 1)
+- **Logic**: Discrete A/D presses or mobile swipes. A single press sends the character to -1 or 1 and then automatically blends back to 0. 
+- **Layering**: Locomotion (Running/Strafing) is handled exclusively on **Layer 0 (Base Layer)**.
+
+## 2. Weapon & Animation Layers
+- **Architecture**: Persistent weapon layers using **Avatar Masks** (Upper Body only) set to **Override**.
+- **Active Layer**: The current weapon (e.g., Assault Rifle) stays at **Weight 1.0** continuously (handled by `PlayerController.cs`).
+- **Weapon States**:
+    - **isFiring** (Bool): True while input is held. Loops between Idle and Fire within the weapon layer.
+    - **Reload** (Bool): Triggered by pressing 'R'. Detection is state-aware to ensure it finishes completely.
+- **Layers**:
+    - Layer 0: Locomotion
+    - Layer 1: Assault Rifle (Idle, Fire, Reload)
+    - Layer 2+: Future Weapons (Pistol, etc.)
+
+## 3. Aiming & Animation Rigging
+- **Script**: AimTargetController.cs
+- **Logic**: Raycasts from the camera to a Z-locked plane (XY movement only).
+- **Target**: Moves a 3D Transform (`Aim Target`) that drives the Animation Rigging "Two Bone IK" or "Multi-Aim" constraints.
+- **Visuals**: Moves a `Hit Marker` sphere to the landing point.
+
+## 4. Key Parameters to Remember
+- `Starf` (Float)
+- `isFiring` (Bool)
+- `Reload` (Bool, Capital R)
+- `weaponLayerIndex` (Int, defaults to 1)
+
+## 5. Script Locations
+- `Assets/Scripts/Player/PlayerController.cs`
+- `Assets/Scripts/Animation/AimTargetController.cs`
