@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // REQUIRED for the new system
 using System;
 
 public class TouchManager : MonoBehaviour
@@ -8,7 +9,6 @@ public class TouchManager : MonoBehaviour
 
     private Vector2 startTouchPos;
     private bool isSwiping;
-    private bool isSimulatingTouch; // Tracks if the mouse is being held down
 
     // Events for Swiping
     public static event Action OnSwipeLeft;
@@ -22,78 +22,45 @@ public class TouchManager : MonoBehaviour
 
     void Update()
     {
-        // 1. MOBILE DEVICE INPUT
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
+        // 1. Abort if no pointing device is detected (Mouse, Touchscreen, Pen)
+        if (Pointer.current == null) return;
 
-            switch (touch.phase)
+        // 2. Read the unified Pointer states
+        bool pressedThisFrame = Pointer.current.press.wasPressedThisFrame;
+        bool isPressed = Pointer.current.press.isPressed;
+        bool releasedThisFrame = Pointer.current.press.wasReleasedThisFrame;
+
+        Vector2 position = Pointer.current.position.ReadValue();
+        CurrentTouchPosition = position;
+
+        // 3. Logic Routing
+        if (pressedThisFrame)
+        {
+            startTouchPos = position;
+            isSwiping = false;
+            IsShooting = true; // Assume they are shooting until it becomes a swipe
+        }
+        else if (isPressed)
+        {
+            Vector2 currentDelta = position - startTouchPos;
+
+            // If they moved the pointer far enough, it's a swipe, not a shot
+            if (!isSwiping && currentDelta.magnitude > swipeThreshold)
             {
-                case TouchPhase.Began:
-                    HandleTouchBegan(touch.position);
-                    break;
-                case TouchPhase.Moved:
-                case TouchPhase.Stationary:
-                    HandleTouchMoved(touch.position);
-                    break;
-                case TouchPhase.Ended:
-                case TouchPhase.Canceled:
-                    HandleTouchEnded();
-                    break;
+                isSwiping = true;
+                IsShooting = false; // Cancel shooting, they are swiping
+                DetectSwipeDirection(currentDelta);
             }
         }
-        // 2. UNITY EDITOR / MOUSE FALLBACK
-        else
+        else if (releasedThisFrame)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                isSimulatingTouch = true;
-                HandleTouchBegan(Input.mousePosition);
-            }
-            else if (Input.GetMouseButton(0) && isSimulatingTouch)
-            {
-                HandleTouchMoved(Input.mousePosition);
-            }
-            else if (Input.GetMouseButtonUp(0) && isSimulatingTouch)
-            {
-                isSimulatingTouch = false;
-                HandleTouchEnded();
-            }
-            else if (!isSimulatingTouch)
-            {
-                // Ensure shooting is false if nothing is being pressed
-                IsShooting = false;
-            }
-        }
-    }
-
-    // --- Core Logic Extracted for Reusability ---
-
-    private void HandleTouchBegan(Vector2 position)
-    {
-        CurrentTouchPosition = position;
-        startTouchPos = position;
-        isSwiping = false;
-        IsShooting = true; // Assume they are shooting until it becomes a swipe
-    }
-
-    private void HandleTouchMoved(Vector2 position)
-    {
-        CurrentTouchPosition = position;
-        Vector2 currentDelta = position - startTouchPos;
-
-        // If they moved the mouse/finger far enough, it's a swipe, not a shot
-        if (!isSwiping && currentDelta.magnitude > swipeThreshold)
-        {
-            isSwiping = true;
             IsShooting = false;
-            DetectSwipeDirection(currentDelta);
         }
-    }
-
-    private void HandleTouchEnded()
-    {
-        IsShooting = false;
+        else if (!isPressed)
+        {
+            // Failsafe to ensure shooting turns off when nothing is touching
+            IsShooting = false;
+        }
     }
 
     private void DetectSwipeDirection(Vector2 delta)
