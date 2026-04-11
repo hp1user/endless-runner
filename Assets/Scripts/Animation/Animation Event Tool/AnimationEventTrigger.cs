@@ -22,101 +22,140 @@ namespace AnimationTools
 
         private Animator _animator;
         private Dictionary<AnimationClip, float> _lastNormalizedTimes = new();
-        private int _lastStateHash;
+        private int[] _lastStateHashes;
 
         private void Start()
         {
+            Debug.Log($"<color=white>[AnimTool-System]</color> AnimationEventTrigger <b>Active</b> on {gameObject.name}. Scanning for Animator...", this);
+            
             _animator = GetComponent<Animator>();
+            if (_animator != null)
+            {
+                _lastStateHashes = new int[_animator.layerCount];
+                Debug.Log($"<color=white>[AnimTool-System]</color> Success: Animator found with <b>{_animator.layerCount}</b> layers.", this);
+            }
+            else
+            {
+                Debug.LogError($"<color=red>[AnimTool-Error]</color> CRITICAL: No Animator found on {gameObject.name}! Events will NOT fire.", this);
+            }
+
             if (library == null)
             {
-                Debug.LogWarning($"[AnimationEventTrigger] Library is missing on {gameObject.name}", this);
+                Debug.LogError($"<color=red>[AnimTool-Error]</color> CRITICAL: Library is missing on {gameObject.name}! No events are defined.", this);
+            }
+            else
+            {
+                Debug.Log($"<color=white>[AnimTool-System]</color> Library found: <b>{library.name}</b>. Debug Mode focus: <b>{library.debugMode}</b>", this);
             }
         }
 
         private void Update()
         {
+            // PROOF OF LIFE: This log runs even if logic fails. Check Console!
+            if (Time.frameCount % 60 == 0) // Every ~1 second
+            {
+                bool isSetup = (library != null && _animator != null);
+                if (!isSetup) Debug.LogWarning($"[AnimTool-Update] Ticking but Setup incomplete. Lib: {library != null}, Anim: {_animator != null}");
+            }
+
             if (library == null || _animator == null) return;
 
-            // Get current animator state info
-            var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-            var clipInfo = _animator.GetCurrentAnimatorClipInfo(0);
-
-            if (clipInfo.Length == 0) return;
-
-            // Handle state changes
-            if (stateInfo.fullPathHash != _lastStateHash)
+            // Ensure our hash tracker matches the current layer count
+            if (_lastStateHashes == null || _lastStateHashes.Length != _animator.layerCount)
             {
-                _lastStateHash = stateInfo.fullPathHash;
-                _lastNormalizedTimes.Clear();
+                _lastStateHashes = new int[_animator.layerCount];
             }
 
-            float currentNormalizedTime = Mathf.Repeat(stateInfo.normalizedTime, 1f);
-
-            // HEARTBEAT: Log every 120 frames (~2 seconds) to confirm the script is alive
-            if (library.debugMode && Time.frameCount % 120 == 0)
-            {
-                Debug.Log($"<color=white>[AnimTool-Heartbeat]</color> Monitoring <b>{clipInfo.Length}</b> active clips. Root State: <b>{stateInfo.fullPathHash}</b>", this);
-            }
-
-            // Buffer for events to fire - ensures only the highest-weight clip triggers each event name
+            // Buffer for events to fire
             Dictionary<string, (string function, float time, AnimationClip clip, float weight)> winningEvents = new();
 
-            // Iterate through ALL active clips in the blend tree
-            for (int j = 0; j < clipInfo.Length; j++)
+            // Iterate through ALL layers
+            for (int i = 0; i < _animator.layerCount; i++)
             {
-                AnimationClip clip = clipInfo[j].clip;
-                float weight = clipInfo[j].weight;
+                var stateInfo = _animator.GetCurrentAnimatorStateInfo(i);
+                var clipInfo = _animator.GetCurrentAnimatorClipInfo(i);
 
-                if (weight < 0.05f) continue;
-
-                if (!_lastNormalizedTimes.TryGetValue(clip, out float lastTime))
+                // Deep Scan Log
+                if (library.debugMode && Time.frameCount % 300 == 0)
                 {
-                    if (library.debugMode) Debug.Log($"<color=orange>[AnimTool]</color> Tracking new clip: <b>{clip.name}</b>", this);
-                    lastTime = currentNormalizedTime;
-                    _lastNormalizedTimes[clip] = currentNormalizedTime;
+                    Debug.Log($"[AnimTool-LayerScan] Layer {i}: Clips Found = {clipInfo.Length}. Playing State = {stateInfo.fullPathHash}");
                 }
 
-                var markers = library.GetAllMarkersForClip(clip);
-                foreach (var marker in markers)
+                if (clipInfo.Length == 0) continue;
+
+                if (stateInfo.fullPathHash != _lastStateHashes[i])
                 {
-                    if (CheckIfMarkerPassed(lastTime, currentNormalizedTime, marker.time))
+                    _lastStateHashes[i] = stateInfo.fullPathHash;
+                }
+
+                float currentNormalizedTime = Mathf.Repeat(stateInfo.normalizedTime, 1f);
+
+                for (int j = 0; j < clipInfo.Length; j++)
+                {
+                    AnimationClip clip = clipInfo[j].clip;
+                    float weight = clipInfo[j].weight;
+
+                    if (weight < 0.05f) continue;
+
+                    if (!_lastNormalizedTimes.TryGetValue(clip, out float lastTime))
                     {
-                        // Check if we already have this event buffered from another clip
-                        if (!winningEvents.ContainsKey(marker.name) || weight > winningEvents[marker.name].weight)
+                        if (library.debugMode) Debug.Log($"<color=orange>[AnimTool]</color> Tracking Clip: <b>{clip.name}</b> (Layer {i})", this);
+                        lastTime = currentNormalizedTime;
+                        _lastNormalizedTimes[clip] = currentNormalizedTime;
+                    }
+
+                    var markers = library.GetAllMarkersForClip(clip);
+                    
+                    // EXTRA LOG: Check if markers are even defined for this clip
+                    if (library.debugMode && markers.Count == 0 && Time.frameCount % 600 == 0)
+                    {
+                        Debug.LogWarning($"[AnimTool-LibraryCheck] No markers defined in Library for active clip: {clip.name}");
+                    }
+
+                    foreach (var marker in markers)
+                    {
+                        if (CheckIfMarkerPassed(lastTime, currentNormalizedTime, marker.time))
                         {
-                            winningEvents[marker.name] = (marker.function, marker.time, clip, weight);
+                            if (!winningEvents.ContainsKey(marker.name) || weight > winningEvents[marker.name].weight)
+                            {
+                                winningEvents[marker.name] = (marker.function, marker.time, clip, weight);
+                            }
                         }
                     }
+                    _lastNormalizedTimes[clip] = currentNormalizedTime;
                 }
-                _lastNormalizedTimes[clip] = currentNormalizedTime;
             }
 
-            // Fire the "Winning" (highest weight) events
+            // HEARTBEAT
+            if (library.debugMode && Time.frameCount % 120 == 0)
+            {
+                Debug.Log($"<color=white>[AnimTool-Heartbeat]</color> Monitoring <b>{_animator.layerCount}</b> layers. Tracked Clips: <b>{_lastNormalizedTimes.Count}</b>", this);
+            }
+
+            // Fire the "Winning" (highest weight) events across all layers
             foreach (var entry in winningEvents)
             {
                 var data = entry.Value;
-                if (library.debugMode)
-                {
-                    Debug.Log($"<color=cyan>[AnimTool]</color> Triggering <b>{entry.Key}</b> from clip <b>{data.clip.name}</b> (Weight: {data.weight:F2})", this);
-                }
                 TriggerEvent(entry.Key, data.function, data.time, data.clip, data.weight);
             }
 
-            if (_lastNormalizedTimes.Count > 10) CleanUpDictionary(clipInfo);
+            if (_lastNormalizedTimes.Count > 15) CleanUpDictionary();
         }
 
-        private void CleanUpDictionary(AnimatorClipInfo[] currentClips)
+        private void CleanUpDictionary()
         {
-            // Simple cleanup to prevent old clips from staying in memory
+            // Simple cleanup logic: if a clip is no longer being played in any layer, remove it
+            var activeClips = new HashSet<AnimationClip>();
+            for (int i = 0; i < _animator.layerCount; i++)
+            {
+                var clips = _animator.GetCurrentAnimatorClipInfo(i);
+                foreach (var c in clips) activeClips.Add(c.clip);
+            }
+
             var keysToRemove = new List<AnimationClip>();
             foreach (var key in _lastNormalizedTimes.Keys)
             {
-                bool found = false;
-                for (int i = 0; i < currentClips.Length; i++)
-                {
-                    if (currentClips[i].clip == key) { found = true; break; }
-                }
-                if (!found) keysToRemove.Add(key);
+                if (!activeClips.Contains(key)) keysToRemove.Add(key);
             }
             foreach (var key in keysToRemove) _lastNormalizedTimes.Remove(key);
         }

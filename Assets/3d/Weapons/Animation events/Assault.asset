@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f18ab765f1bf8e549878614e1249720e, type: 3}
+  m_Name: Assault
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationTools.AnimationEventLibrary
+  debugMode: 0
+  events:
+  - eventName: Fire
+    functionName: isFiring
+    clipData:
+    - clip: {fileID: -203655887218126122, guid: 0cfa1bc604c727a4294adcdf07e7232b, type: 3}
+      markers:
+      - 0.31
+      isExpanded: 1
+  - eventName: MagOut
+    functionName: Reload
+    clipData:
+    - clip: {fileID: -203655887218126122, guid: a9f3143e5d6591b40b00b3f320c41d4d, type: 3}
+      markers:
+      - 0.163
+      isExpanded: 1
+  - eventName: MagIn
+    functionName: Reload
+    clipData:
+    - clip: {fileID: -203655887218126122, guid: a9f3143e5d6591b40b00b3f320c41d4d, type: 3}
+      markers:
+      - 0.507
+      isExpanded: 1

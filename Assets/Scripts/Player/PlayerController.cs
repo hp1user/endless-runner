@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -8,18 +9,21 @@ namespace Player.Control
     /// <summary>
     /// Player Controller for an endless runner.
     /// Handles discrete horizontal movement (Starf), weapon layers, and reloading.
-    /// UsesGetComponent for Animator and discrete input for strafing.
+    /// Uses GetComponent for Animator and discrete input for strafing.
     /// </summary>
     public class PlayerController : MonoBehaviour
     {
         private Animator animator;
 
         [Header("Movement Settings")]
-        [Tooltip("The name of the float parameter for horizontal movement in the animator.")]
-        public string strafeParameter = "Starf";
+        [Tooltip("How far apart the lanes are on the X-axis.")]
+        public float laneDistance = 2.0f;
         
-        [Tooltip("How fast the Starf value reaches the target (-1, 0, 1).")]
-        public float strafeSmoothing = 8f;
+        [Tooltip("How fast the player physically moves between lanes.")]
+        public float movementSpeed = 10f;
+
+        [Tooltip("How fast the animaor's Starf value reach the target.")]
+        public float strafeAnimationSmoothing = 8f;
 
         [Header("Weapon Layer Settings")]
         [Tooltip("The index of the weapon animation layer (e.g., 1 for Assault Rifle).")]
@@ -33,12 +37,6 @@ namespace Player.Control
 
         [Tooltip("The Transform that the player should aim at (e.g. moved by mouse).")]
         public Transform aimTarget;
-
-        [Tooltip("Name of the horizontal aim parameter.")]
-        public string aimHorizontalParameter = "Aim_Horizon";
-
-        [Tooltip("Name of the vertical aim parameter.")]
-        public string aimVerticalParameter = "Aim_Vertical";
 
         [Tooltip("Index of the spine aiming layer.")]
         public int aimLayerIndex = 1;
@@ -58,7 +56,36 @@ namespace Player.Control
         [Tooltip("Flip the vertical aim direction.")]
         public bool invertVertical = false;
 
-        // Private Hashes for Performance (Mobile Optimization)
+        [Header("Weapon System")]
+        [Tooltip("The central database containing all weapon data assets.")]
+        public WeaponDatabase weaponDatabase;
+
+        [Header("Weapon Parent & Sockets")]
+        [Tooltip("The Transform (hand bone or socket) where weapons will be parented.")]
+        public Transform weaponSocket;
+
+        [Header("Effects Settings")]
+        [Tooltip("How long muzzle flash particles stay in the scene before being destroyed.")]
+        public float muzzleFlashLifeTime = 0.5f;
+
+        [Tooltip("The volume of the weapon sounds.")]
+        [Range(0f, 1f)]
+        public float weaponVolume = 0.5f;
+
+        private WeaponEntry currentWeaponData;
+        private GameObject currentWeaponInstance;
+        private int lastWeaponLayerIndex = -1;
+
+        // Animator Parameter Names
+        private string strafeParameter = "Starf";
+        private string reloadParameter = "Reload";
+        private string fireParameter = "isFiring";
+        private string aimHorizontalParameter = "Aim_Horizontal";
+        private string aimVerticalParameter = "Aim_Vertical";
+        private string reloadStateName = "Reload";
+        private string reloadStateTag = "Reload";
+
+        // Private Hashes for Performance
         private int strafeParamHash;
         private int reloadParamHash;
         private int fireParamHash;
@@ -67,11 +94,7 @@ namespace Player.Control
         private int reloadStateHash;
         private int reloadTagHash;
 
-        // Private Settings (Hardcoded as requested)
-        private string reloadParameter = "Reload"; // Updated to Capital R
-        private string fireParameter = "isFiring";
-        private string reloadStateName = "Reload";
-        private string reloadStateTag = "Reload";
+        private AudioSource audioSource;
 
         [Header("Debug")]
         public bool debugMode = false;
@@ -79,55 +102,38 @@ namespace Player.Control
         [SerializeField] private float debugAimV;
 
         // Internal State
-        private float currentStrafe;
-        private float targetStrafe;
+        private int currentLane = 0;
+        private float currentStrafeAnim;
         private float currentAimH;
         private float currentAimV;
-        private float targetAimH; // Persistent target for horizontal aiming
-        private float targetAimV; // Persistent target for vertical aiming
-        private float targetLayerWeight = 1f; // Always active for persistent weapon layers
-        private float lastActionTime;
+        private float targetAimH;
+        private float targetAimV;
+        private float targetLayerWeight = 1f;
+        private float lastFireSoundTime;
+        private float fireCooldownTimer;
         private AnimatorStateInfo currentWeaponState;
 
         private void Awake()
         {
             animator = GetComponent<Animator>();
-            
-            // Pre-calculate hashes to avoid string comparisons in Update (Essential for mobile)
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+
             strafeParamHash = Animator.StringToHash(strafeParameter);
             reloadParamHash = Animator.StringToHash(reloadParameter);
             fireParamHash = Animator.StringToHash(fireParameter);
             aimHorizontalHash = Animator.StringToHash(aimHorizontalParameter);
             aimVerticalHash = Animator.StringToHash(aimVerticalParameter);
-            
-            // We use fullPathHash or shortNameHash for state checks. 
-            // Since we know the layer, shortNameHash is efficient if unique.
             reloadStateHash = Animator.StringToHash(reloadStateName);
             reloadTagHash = Animator.StringToHash(reloadStateTag);
 
             if (animator == null)
             {
-                Debug.LogWarning("[PlayerController] No Animator found on the same GameObject!");
-            }
-            else if (debugMode)
-            {
-                LogAnimatorParameters();
-            }
-        }
-
-        private void Start()
-        {
-            // Guaranteed log to prove the script is active
-            Debug.Log($"<color=green>[PlayerController]</color> Optimized Script is ACTIVE on <b>{gameObject.name}</b>.");
-        }
-
-        private void LogAnimatorParameters()
-        {
-            Debug.Log($"[PlayerController] Scanning Animator Parameters on {gameObject.name}:");
-            for (int i = 0; i < animator.parameterCount; i++)
-            {
-                var p = animator.parameters[i];
-                Debug.Log($" - Parameter {i}: '{p.name}' (Type: {p.type})");
+                Debug.LogWarning("[PlayerController] No Animator found!");
             }
         }
 
@@ -135,10 +141,10 @@ namespace Player.Control
         {
             if (animator == null) return;
 
-            // Cache the state once per frame for all check methods
             if (weaponLayerIndex >= 0 && weaponLayerIndex < animator.layerCount)
             {
                 currentWeaponState = animator.GetCurrentAnimatorStateInfo(weaponLayerIndex);
+                UpdateCurrentWeaponData();
             }
 
             HandleMovement();
@@ -147,32 +153,60 @@ namespace Player.Control
             UpdateLayerWeights();
         }
 
+        private void UpdateCurrentWeaponData()
+        {
+            if (weaponDatabase != null && weaponLayerIndex != lastWeaponLayerIndex)
+            {
+                lastWeaponLayerIndex = weaponLayerIndex;
+                currentWeaponData = weaponDatabase.GetEntryByLayer(weaponLayerIndex);
+                SpawnWeaponModel();
+            }
+        }
+
+        private void SpawnWeaponModel()
+        {
+            if (currentWeaponInstance != null)
+            {
+                Destroy(currentWeaponInstance);
+            }
+
+            if (currentWeaponData == null || currentWeaponData.weaponPrefab == null || weaponSocket == null) return;
+
+            // Use .gameObject to instantiate from the Transform slot
+            currentWeaponInstance = Instantiate(currentWeaponData.weaponPrefab.gameObject, weaponSocket);
+            currentWeaponInstance.transform.localPosition = currentWeaponData.holdPosition;
+            currentWeaponInstance.transform.localRotation = Quaternion.Euler(currentWeaponData.holdRotation);
+            currentWeaponInstance.transform.localScale = currentWeaponData.localScale;
+            
+            if (debugMode) Debug.Log($"[PlayerController] Spawned weapon: {currentWeaponData.weaponName}");
+        }
+
         private void HandleMovement()
         {
 #if ENABLE_INPUT_SYSTEM
             if (Keyboard.current != null)
             {
                 if (Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame) 
-                    targetStrafe = -1f;
+                    currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
                 else if (Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame) 
-                    targetStrafe = 1f;
+                    currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
             }
 #else
             if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-                targetStrafe = -1f;
+                currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
             else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-                targetStrafe = 1f;
+                currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
 #endif
 
-            // Smoothly interpolate the Starf parameter to the target value
-            currentStrafe = Mathf.MoveTowards(currentStrafe, targetStrafe, Time.deltaTime * strafeSmoothing);
-            animator.SetFloat(strafeParamHash, currentStrafe);
+            float targetX = currentLane * laneDistance;
+            Vector3 pos = transform.position;
+            pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * movementSpeed);
+            transform.position = pos;
 
-            // One-Shot Logic: Once we reach (or get very close to) our target lane, return to 0
-            if (Mathf.Abs(currentStrafe - targetStrafe) < 0.05f && targetStrafe != 0f)
-            {
-                targetStrafe = 0f;
-            }
+            float moveDelta = targetX - pos.x;
+            float animationTarget = (Mathf.Abs(moveDelta) > 0.01f) ? Mathf.Sign(moveDelta) : 0f;
+            currentStrafeAnim = Mathf.MoveTowards(currentStrafeAnim, animationTarget, Time.deltaTime * strafeAnimationSmoothing);
+            animator.SetFloat(strafeParamHash, currentStrafeAnim);
         }
 
         private void HandleAiming()
@@ -188,43 +222,26 @@ namespace Player.Control
 
             if (isAiming && aimTarget != null)
             {
-                // Determine origin point (fallback to 1.5m above feet if not assigned)
                 Vector3 origin = (aimOrigin != null) ? aimOrigin.position : transform.position + Vector3.up * 1.5f;
-
-                // Calculate direction from origin to target in world space
                 Vector3 directionToTarget = (aimTarget.position - origin).normalized;
-
-                // Convert direction to local space relative to player's rotation
                 Vector3 localDir = transform.InverseTransformDirection(directionToTarget);
 
-                // Calculate angles (assuming Z forward)
-                // Yaw is on the XZ plane
                 float yaw = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
-                
-                // Pitch is the angle away from the horizontal plane
                 float pitch = Mathf.Atan2(localDir.y, new Vector2(localDir.x, localDir.z).magnitude) * Mathf.Rad2Deg;
 
-                // Normalize to -1 to 1 range based on max angles
-                // Swapped the horizontal sign to fix inversion (-yaw)
                 targetAimH = Mathf.Clamp(-yaw / maxAimAngleHorizontal, -1f, 1f);
                 targetAimV = Mathf.Clamp(pitch / maxAimAngleVertical, -1f, 1f);
 
-                // Apply manual inversions if checked in inspector
                 if (invertHorizontal) targetAimH *= -1f;
                 if (invertVertical) targetAimV *= -1f;
             }
 
-            // MoveTowards ensures we reach the target exactly (preventing tiny e-38 residues)
             currentAimH = Mathf.MoveTowards(currentAimH, targetAimH, Time.deltaTime * aimSmoothing);
             currentAimV = Mathf.MoveTowards(currentAimV, targetAimV, Time.deltaTime * aimSmoothing);
             
-            // Note: We removed the reset/snap-to-zero logic to keep the aim "sticky"
-
-            // Update debug fields for Inspector visibility
             debugAimH = currentAimH;
             debugAimV = currentAimV;
 
-            // Set Animator parameters
             animator.SetFloat(aimHorizontalHash, currentAimH);
             animator.SetFloat(aimVerticalHash, currentAimV);
         }
@@ -243,18 +260,37 @@ namespace Player.Control
             if (Input.GetKeyDown(KeyCode.R)) reloadPressed = true;
 #endif
 
-            // Handle Firing State
             bool canFire = !isActuallyReloading;
-            animator.SetBool(fireParamHash, shootingInput && canFire);
+            
+            if (shootingInput && canFire)
+            {
+                if (fireCooldownTimer <= 0f) fireCooldownTimer = 0.15f;
+            }
+            
+            if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
+            
+            bool targetFireState = shootingInput && canFire && (fireCooldownTimer > 0.05f || shootingInput);
+            
+            if (targetFireState && !animator.GetBool(fireParamHash))
+            {
+                if (audioSource != null && currentWeaponData != null && currentWeaponData.audioFire != null)
+                {
+                    if (Time.time - lastFireSoundTime > 0.1f)
+                    {
+                        audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
+                        lastFireSoundTime = Time.time;
+                    }
+                }
+            }
 
-            // Handle Reload Input
+            animator.SetBool(fireParamHash, targetFireState);
+
             if (reloadPressed && !isActuallyReloading)
             {
                 animator.SetBool(reloadParamHash, true);
-                Invoke(nameof(ResetReloadParameter), 0.15f); // Slightly longer for safety
+                Invoke(nameof(ResetReloadParameter), 0.15f);
             }
 
-            // Keep weapon layer fully active
             targetLayerWeight = 1f;
         }
 
@@ -262,57 +298,66 @@ namespace Player.Control
         {
             if (animator == null || weaponLayerIndex < 0 || weaponLayerIndex >= animator.layerCount) return false;
 
-            // Use the cached state info from Update to avoid multiple API calls per frame
             bool isInReload = currentWeaponState.shortNameHash == reloadStateHash || currentWeaponState.tagHash == reloadTagHash;
             
-            // 2. Check next state (transitioning into)
-            bool isTransitioningToReload = false;
             if (animator.IsInTransition(weaponLayerIndex))
             {
                 AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(weaponLayerIndex);
-                isTransitioningToReload = nextState.shortNameHash == reloadStateHash || nextState.tagHash == reloadTagHash;
+                if (nextState.shortNameHash == reloadStateHash || nextState.tagHash == reloadTagHash) return true;
             }
 
-            if (isInReload)
-            {
-                return currentWeaponState.normalizedTime < 0.99f;
-            }
-            
-            return isTransitioningToReload;
+            if (isInReload) return currentWeaponState.normalizedTime < 0.95f;
+            return false;
         }
 
-        private void ResetReloadParameter()
-        {
-            animator.SetBool(reloadParamHash, false);
-        }
+        private void ResetReloadParameter() => animator.SetBool(reloadParamHash, false);
 
         private void UpdateLayerWeights()
         {
             if (animator == null) return;
 
-            // We iterate through all layers starting from index 1 (leaving Base Layer 0 alone)
             for (int i = 1; i < animator.layerCount; i++)
             {
-                // Determine target weight for this layer
-                // Both Aim and Weapon layers should be active (weight 1)
                 float target = (i == weaponLayerIndex || i == aimLayerIndex) ? targetLayerWeight : 0f;
-                
-                // Get current weight
                 float current = animator.GetLayerWeight(i);
-                
-                // If we are not at the target, move towards it
                 if (!Mathf.Approximately(current, target))
                 {
-                    float next = Mathf.MoveTowards(current, target, Time.deltaTime * layerBlendSpeed);
-                    animator.SetLayerWeight(i, next);
+                    animator.SetLayerWeight(i, Mathf.MoveTowards(current, target, Time.deltaTime * layerBlendSpeed));
                 }
             }
         }
 
-        public void SetWeaponLayer(int newIndex)
+        public void isFiring(AnimationEvent ae)
         {
-            // Now we just change the index and the Update loop handles the smooth fading
-            weaponLayerIndex = newIndex;
+            if (currentWeaponData == null) return;
+
+            if (audioSource != null && currentWeaponData.audioFire != null) 
+            {
+                if (Time.time - lastFireSoundTime > 0.1f)
+                {
+                    audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
+                    lastFireSoundTime = Time.time;
+                }
+            }
+
+            // 2. Handle Particles (Muzzle Flash)
+            if (currentWeaponData.muzzleFlash != null && currentWeaponInstance != null)
+            {
+                // Calculate muzzle world position and rotation based on the gun's current transform and offsets
+                Vector3 worldMuzzlePos = currentWeaponInstance.transform.TransformPoint(currentWeaponData.muzzlePosition);
+                Quaternion worldMuzzleRot = currentWeaponInstance.transform.rotation * Quaternion.Euler(currentWeaponData.muzzleRotation);
+
+                // Use .gameObject to instantiate from the Transform slot
+                GameObject flash = Instantiate(currentWeaponData.muzzleFlash.gameObject, worldMuzzlePos, worldMuzzleRot, currentWeaponInstance.transform);
+                Destroy(flash, muzzleFlashLifeTime);
+            }
+        }
+
+        public void Reload(AnimationEvent ae)
+        {
+            if (audioSource == null || currentWeaponData == null) return;
+            if (ae.stringParameter == "MagOut" && currentWeaponData.audioMagOut != null) audioSource.PlayOneShot(currentWeaponData.audioMagOut, weaponVolume);
+            else if (ae.stringParameter == "MagIn" && currentWeaponData.audioMagIn != null) audioSource.PlayOneShot(currentWeaponData.audioMagIn, weaponVolume);
         }
     }
 }
