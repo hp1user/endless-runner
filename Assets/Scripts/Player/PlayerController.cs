@@ -3,6 +3,8 @@ using System.Collections.Generic;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
+using Enemy.Control;
+using UI.Control;
 
 namespace Player.Control
 {
@@ -65,8 +67,11 @@ namespace Player.Control
         public Transform weaponSocket;
 
         [Header("Effects Settings")]
-        [Tooltip("How long muzzle flash particles stay in the scene before being destroyed.")]
-        public float muzzleFlashLifeTime = 0.5f;
+        [Tooltip("Prefab to spawn at the location of a bullet impact.")]
+        public Transform impactEffect;
+
+        [Tooltip("Which layers should the bullets collide with?")]
+        public LayerMask hitMask;
 
         [Tooltip("The volume of the weapon sounds.")]
         [Range(0f, 1f)]
@@ -80,6 +85,7 @@ namespace Player.Control
         private string strafeParameter = "Starf";
         private string reloadParameter = "Reload";
         private string fireParameter = "isFiring";
+        private string fireMultiplierParameter = "FireSpeedMultiplier";
         private string aimHorizontalParameter = "Aim_Horizontal";
         private string aimVerticalParameter = "Aim_Vertical";
         private string reloadStateName = "Reload";
@@ -89,6 +95,7 @@ namespace Player.Control
         private int strafeParamHash;
         private int reloadParamHash;
         private int fireParamHash;
+        private int fireMultiplierParamHash;
         private int aimHorizontalHash;
         private int aimVerticalHash;
         private int reloadStateHash;
@@ -112,6 +119,7 @@ namespace Player.Control
         private float lastFireSoundTime;
         private float fireCooldownTimer;
         private AnimatorStateInfo currentWeaponState;
+        private int currentAmmo;
 
         private void Awake()
         {
@@ -126,6 +134,7 @@ namespace Player.Control
             strafeParamHash = Animator.StringToHash(strafeParameter);
             reloadParamHash = Animator.StringToHash(reloadParameter);
             fireParamHash = Animator.StringToHash(fireParameter);
+            fireMultiplierParamHash = Animator.StringToHash(fireMultiplierParameter);
             aimHorizontalHash = Animator.StringToHash(aimHorizontalParameter);
             aimVerticalHash = Animator.StringToHash(aimVerticalParameter);
             reloadStateHash = Animator.StringToHash(reloadStateName);
@@ -172,12 +181,15 @@ namespace Player.Control
 
             if (currentWeaponData == null || currentWeaponData.weaponPrefab == null || weaponSocket == null) return;
 
-            // Use .gameObject to instantiate from the Transform slot
             currentWeaponInstance = Instantiate(currentWeaponData.weaponPrefab.gameObject, weaponSocket);
             currentWeaponInstance.transform.localPosition = currentWeaponData.holdPosition;
             currentWeaponInstance.transform.localRotation = Quaternion.Euler(currentWeaponData.holdRotation);
             currentWeaponInstance.transform.localScale = currentWeaponData.localScale;
             
+            // Initialize Ammo
+            currentAmmo = currentWeaponData.magSize;
+            UpdateAmmoUI();
+
             if (debugMode) Debug.Log($"[PlayerController] Spawned weapon: {currentWeaponData.weaponName}");
         }
 
@@ -260,32 +272,36 @@ namespace Player.Control
             if (Input.GetKeyDown(KeyCode.R)) reloadPressed = true;
 #endif
 
-            bool canFire = !isActuallyReloading;
+            bool canFire = !isActuallyReloading && currentAmmo > 0;
             
-            if (shootingInput && canFire)
-            {
-                if (fireCooldownTimer <= 0f) fireCooldownTimer = 0.15f;
-            }
-            
-            if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
-            
-            bool targetFireState = shootingInput && canFire && (fireCooldownTimer > 0.05f || shootingInput);
-            
-            if (targetFireState && !animator.GetBool(fireParamHash))
-            {
-                if (audioSource != null && currentWeaponData != null && currentWeaponData.audioFire != null)
-                {
-                    if (Time.time - lastFireSoundTime > 0.1f)
-                    {
-                        audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
-                        lastFireSoundTime = Time.time;
-                    }
-                }
-            }
-
+            // 1. STABLE ANIMATOR STATE (No Flicker)
+            // This stays true as long as trigger is held, preventing animation glitches
+            bool targetFireState = shootingInput && canFire;
             animator.SetBool(fireParamHash, targetFireState);
 
-            if (reloadPressed && !isActuallyReloading)
+            // 2. SPEED SYNC (Multiplier)
+            // Adjust animation speed to match the database fireRate
+            if (currentWeaponData != null)
+            {
+                // Assuming base animation is timed for ~5 shots per second (0.2s)
+                // We scale it so 1 loop = 1 database shot
+                float speedMult = currentWeaponData.fireRate / 5f; 
+                animator.SetFloat(fireMultiplierParamHash, speedMult);
+            }
+
+            // 3. ANIMATOR TRIGGERING (Timer-based)
+            if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
+
+            if (shootingInput && canFire && fireCooldownTimer <= 0f)
+            {
+                // We don't fire the bullet here anymore. 
+                // We just let the Animator play, and the Animation Event will trigger the shot.
+                fireCooldownTimer = (currentWeaponData != null) ? (1.0f / currentWeaponData.fireRate) : 0.2f;
+            }
+
+            // AUTO-RELOAD or MANUAL RELOAD
+            bool shouldReload = (reloadPressed || (shootingInput && currentAmmo <= 0)) && !isActuallyReloading;
+            if (shouldReload)
             {
                 animator.SetBool(reloadParamHash, true);
                 Invoke(nameof(ResetReloadParameter), 0.15f);
@@ -329,35 +345,93 @@ namespace Player.Control
 
         public void isFiring(AnimationEvent ae)
         {
-            if (currentWeaponData == null) return;
+            if (currentWeaponData == null || currentAmmo <= 0) return;
 
+            // 1. Ammo Consumption (Now synced with animation frame!)
+            currentAmmo--;
+            UpdateAmmoUI();
+
+            // 2. Audio
             if (audioSource != null && currentWeaponData.audioFire != null) 
             {
-                if (Time.time - lastFireSoundTime > 0.1f)
-                {
-                    audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
-                    lastFireSoundTime = Time.time;
-                }
+                audioSource.pitch = Random.Range(0.95f, 1.05f);
+                audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
             }
 
-            // 2. Handle Particles (Muzzle Flash)
-            if (currentWeaponData.muzzleFlash != null && currentWeaponInstance != null)
+            // 3. VFX & Shooting Logic
+            if (currentWeaponInstance != null)
             {
-                // Calculate muzzle world position and rotation based on the gun's current transform and offsets
                 Vector3 worldMuzzlePos = currentWeaponInstance.transform.TransformPoint(currentWeaponData.muzzlePosition);
                 Quaternion worldMuzzleRot = currentWeaponInstance.transform.rotation * Quaternion.Euler(currentWeaponData.muzzleRotation);
 
-                // Use .gameObject to instantiate from the Transform slot
-                GameObject flash = Instantiate(currentWeaponData.muzzleFlash.gameObject, worldMuzzlePos, worldMuzzleRot, currentWeaponInstance.transform);
-                Destroy(flash, muzzleFlashLifeTime);
+                if (currentWeaponData.muzzleFlash != null)
+                {
+                    GameObject flash = Instantiate(currentWeaponData.muzzleFlash.gameObject, worldMuzzlePos, worldMuzzleRot, currentWeaponInstance.transform);
+                    Destroy(flash, currentWeaponData.flashLifetime);
+                }
+
+                // 4. Hit Detection (Now synced with animation frame!)
+                PerformRaycastHit(worldMuzzlePos, worldMuzzleRot);
+            }
+        }
+
+        private void PerformRaycastHit(Vector3 origin, Quaternion rotation)
+        {
+            if (currentWeaponData == null) return;
+
+            // NEW: Tap-to-Shoot (Directly from Finger/Mouse)
+            Vector2 sPoint = Vector2.zero;
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null) sPoint = Mouse.current.position.ReadValue();
+#else
+            sPoint = Input.mousePosition;
+#endif
+
+            if (Camera.main == null) return;
+            Ray ray = Camera.main.ScreenPointToRay(sPoint);
+
+            // VISUAL DEBUG: Current tap path
+            Debug.DrawRay(ray.origin, ray.direction * currentWeaponData.raycastRange, Color.red, 1.0f);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.raycastRange, hitMask, QueryTriggerInteraction.Collide))
+            {
+                if (debugMode) Debug.Log($"<color=cyan>[Combat]</color> HIT: {hit.collider.name} | Damage: {currentWeaponData.baseDamage}");
+
+                if (impactEffect != null)
+                {
+                    GameObject impact = Instantiate(impactEffect.gameObject, hit.point, Quaternion.LookRotation(hit.normal));
+                    Destroy(impact, currentWeaponData.impactLifetime);
+                }
+
+                EnemyController enemy = hit.collider.GetComponent<EnemyController>();
+                if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
+                if (enemy != null) enemy.TakeDamage(currentWeaponData.baseDamage);
             }
         }
 
         public void Reload(AnimationEvent ae)
         {
             if (audioSource == null || currentWeaponData == null) return;
+            
+            // Audio Effects
             if (ae.stringParameter == "MagOut" && currentWeaponData.audioMagOut != null) audioSource.PlayOneShot(currentWeaponData.audioMagOut, weaponVolume);
             else if (ae.stringParameter == "MagIn" && currentWeaponData.audioMagIn != null) audioSource.PlayOneShot(currentWeaponData.audioMagIn, weaponVolume);
+
+            // Refill Ammo Logic
+            // Usually we refill on "MagIn" or at the end of the state
+            if (ae.stringParameter == "Refill" || ae.stringParameter == "MagIn")
+            {
+                currentAmmo = currentWeaponData.magSize;
+                UpdateAmmoUI();
+            }
+        }
+
+        private void UpdateAmmoUI()
+        {
+            if (UIManager.Instance != null && currentWeaponData != null)
+            {
+                UIManager.Instance.UpdateAmmo(currentAmmo, currentWeaponData.magSize);
+            }
         }
     }
 }
