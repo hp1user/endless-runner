@@ -72,16 +72,7 @@ namespace Animation.Tools
 
         private void Update()
         {
-            // Support both New Input System and Old for flexibility
-            isCurrentlyPressed = false;
-
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.isPressed)
-                isCurrentlyPressed = true;
-#else
-            if (Input.GetMouseButton(0))
-                isCurrentlyPressed = true;
-#endif
+            isCurrentlyPressed = TouchManager.IsShooting;
 
             if (isCurrentlyPressed)
             {
@@ -93,16 +84,12 @@ namespace Animation.Tools
         {
             if (mainCamera == null || targetTransform == null) return;
 
-            Vector2 mousePos;
-#if ENABLE_INPUT_SYSTEM
-            mousePos = Mouse.current.position.ReadValue();
-#else
-            mousePos = Input.mousePosition;
-#endif
+            // Fetch the coordinates from TouchManager
+            Vector2 mousePos = TouchManager.CurrentTouchPosition;
 
             // ALWAYS raycast from camera to determine WHERE the user clicked in the world
             Ray cameraRay = mainCamera.ScreenPointToRay(mousePos);
-            
+
             // The visual start point of our debug ray (e.g., Gun Nozzle)
             lastRayStart = (rayOriginOverride != null) ? rayOriginOverride.position : cameraRay.origin;
             

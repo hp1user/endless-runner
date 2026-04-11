@@ -124,6 +124,22 @@ namespace Player.Control
         private float iFrameDuration = 0.5f;
         private float lastDamageTime = -999f;
 
+        private void OnEnable()
+        {
+            TouchManager.OnSwipeLeft += MoveLeft;
+            TouchManager.OnSwipeRight += MoveRight;
+            TouchManager.OnSwipeUp += NextWeapon;
+            TouchManager.OnSwipeDown += PreviousWeapon;
+        }
+
+        private void OnDisable()
+        {
+            TouchManager.OnSwipeLeft -= MoveLeft;
+            TouchManager.OnSwipeRight -= MoveRight;
+            TouchManager.OnSwipeUp -= NextWeapon;
+            TouchManager.OnSwipeDown -= PreviousWeapon;
+        }
+
         private void Awake()
         {
             animator = GetComponent<Animator>();
@@ -236,20 +252,7 @@ namespace Player.Control
 
         private void HandleMovement()
         {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                if (Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame) 
-                    currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-                else if (Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame) 
-                    currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
-            }
-#else
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-                currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-                currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
-#endif
+            // Input is now handled by TouchManager events (MoveLeft / MoveRight)
 
             float targetX = currentLane * laneDistance;
             Vector3 pos = transform.position;
@@ -266,12 +269,7 @@ namespace Player.Control
         {
             if (animator == null) return;
 
-            bool isAiming = false;
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.isPressed) isAiming = true;
-#else
-            if (Input.GetMouseButton(0)) isAiming = true;
-#endif
+            bool isAiming = TouchManager.IsShooting;
 
             if (isAiming && aimTarget != null)
             {
@@ -299,17 +297,10 @@ namespace Player.Control
 
         private void HandleActions()
         {
-            bool shootingInput = false;
             bool reloadPressed = false;
             bool isActuallyReloading = IsReloadingAnimationPlaying();
 
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.isPressed) shootingInput = true;
-            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) reloadPressed = true;
-#else
-            if (Input.GetMouseButton(0)) shootingInput = true;
-            if (Input.GetKeyDown(KeyCode.R)) reloadPressed = true;
-#endif
+            bool shootingInput = TouchManager.IsShooting;
 
             bool canFire = !isActuallyReloading && currentAmmo > 0;
             
@@ -428,13 +419,8 @@ namespace Player.Control
         {
             if (currentWeaponData == null) return;
 
-            // NEW: Tap-to-Shoot (Directly from Finger/Mouse)
-            Vector2 sPoint = Vector2.zero;
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null) sPoint = Mouse.current.position.ReadValue();
-#else
-            sPoint = Input.mousePosition;
-#endif
+            // Fetch target position from our TouchManager
+            Vector2 sPoint = TouchManager.CurrentTouchPosition;
 
             if (Camera.main == null) return;
             Ray ray = Camera.main.ScreenPointToRay(sPoint);
@@ -517,6 +503,30 @@ namespace Player.Control
             {
                 // Handle death logic here
             }
+        }
+
+        private void MoveLeft()
+        {
+            currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
+        }
+
+        private void MoveRight()
+        {
+            currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
+        }
+
+        private void NextWeapon()
+        {
+            if (animator == null) return;
+            weaponLayerIndex++;
+            if (weaponLayerIndex >= animator.layerCount) weaponLayerIndex = 1; // Assuming 0 is base layer
+        }
+
+        private void PreviousWeapon()
+        {
+            if (animator == null) return;
+            weaponLayerIndex--;
+            if (weaponLayerIndex < 1) weaponLayerIndex = animator.layerCount - 1;
         }
     }
 }
