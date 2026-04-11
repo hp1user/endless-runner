@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-namespace AnimationRigging.Tools
+namespace Animation.Tools
 {
     /// <summary>
-    /// Controls a target mesh or rigging object by moving it to the clicked position in world space.
-    /// Locks the Z-axis to ensure movement is strictly on the X-Y plane.
+    /// Controls a target transform by moving it to the clicked position in world space.
+    /// Used for baked animation aiming (Blend Trees).
     /// </summary>
     public class AimTargetController : MonoBehaviour
     {
@@ -45,6 +45,8 @@ namespace AnimationRigging.Tools
         private bool hasHitSomething;
         private bool isCurrentlyPressed;
         private Transform myTransform;
+
+        public bool IsAiming => isCurrentlyPressed;
 
         private void Start()
         {
