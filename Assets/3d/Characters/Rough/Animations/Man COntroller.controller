@@ -115,13 +115,13 @@ AnimatorState:
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
   m_Mirror: 0
-  m_SpeedParameterActive: 0
+  m_SpeedParameterActive: 1
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -203655887218126122, guid: 0cfa1bc604c727a4294adcdf07e7232b, type: 3}
   m_Tag: 
-  m_SpeedParameter: 
+  m_SpeedParameter: FireSpeedMultiplier
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -164,13 +164,13 @@ AnimatorState:
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
   m_Mirror: 0
-  m_SpeedParameterActive: 0
+  m_SpeedParameterActive: 1
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -203655887218126122, guid: a9f3143e5d6591b40b00b3f320c41d4d, type: 3}
   m_Tag: Reload
-  m_SpeedParameter: 
+  m_SpeedParameter: FireSpeedMultiplier
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -312,7 +312,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Riffle idle
+  m_Name: idle
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -327,7 +327,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 24a88706d6481074eb66fffdfe9e8e98, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: d48addf1a7421484a9dd4a2e1d3b8493, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -403,6 +403,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
+  - m_Name: ReloadSpeedMultiplier
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -443,7 +449,7 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: Pistol
     m_StateMachine: {fileID: 6401794072320098522}
-    m_Mask: {fileID: 31900000, guid: 2b002c7f4c29fe44eb7879c3fb9130cb, type: 2}
+    m_Mask: {fileID: 31900000, guid: 7cae840c430049e44ade838a3d4f3b16, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
@@ -516,13 +522,13 @@ AnimatorState:
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
   m_Mirror: 0
-  m_SpeedParameterActive: 0
+  m_SpeedParameterActive: 1
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -203655887218126122, guid: a9f3143e5d6591b40b00b3f320c41d4d, type: 3}
   m_Tag: Reload
-  m_SpeedParameter: 
+  m_SpeedParameter: ReloadSpeedMultiplier
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
@@ -626,13 +632,13 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -1252472295042808355}
-    m_Position: {x: 270, y: 80, z: 0}
+    m_Position: {x: 300, y: 100, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6622824322261147790}
     m_Position: {x: 580, y: 70, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3958296117664728927}
-    m_Position: {x: 570, y: 290, z: 0}
+    m_Position: {x: 560, y: 320, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -650,7 +656,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Riffle Fire
+  m_Name: Pistol fire
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -665,7 +671,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 0cfa1bc604c727a4294adcdf07e7232b, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: d48addf1a7421484a9dd4a2e1d3b8493, type: 3}
   m_Tag: 
   m_SpeedParameter: FireSpeedMultiplier
   m_MirrorParameter: 

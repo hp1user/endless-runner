@@ -17,7 +17,11 @@ namespace Player.Control
     {
         private Animator animator;
 
-        [Header("Movement Settings")]
+        [Header("Stat Configuration")]
+        [Tooltip("The base stats for the player character.")]
+        public PlayerDatabase playerStats;
+
+        [Header("Movement Settings (Overrides)")]
         [Tooltip("How far apart the lanes are on the X-axis.")]
         public float laneDistance = 2.0f;
         
@@ -34,7 +38,8 @@ namespace Player.Control
         [Tooltip("How fast the layer weight blends to 1 when switching weapons.")]
         public float layerBlendSpeed = 10f;
 
-        [Tooltip("The Transform to calculate the aiming direction from (e.g., Chest or Head). If null, a point above the feet will be used.")]
+        [Header("Aiming Settings")]
+        [Tooltip("The Transform to calculate the aiming direction from (e.g., Chest or Head).")]
         public Transform aimOrigin;
 
         [Tooltip("The Transform that the player should aim at (e.g. moved by mouse).")]
@@ -42,21 +47,6 @@ namespace Player.Control
 
         [Tooltip("Index of the spine aiming layer.")]
         public int aimLayerIndex = 1;
-
-        [Tooltip("How fast the aim values follow the target.")]
-        public float aimSmoothing = 10f;
-
-        [Tooltip("Maximum angle for horizontal aiming (maps to 1.0).")]
-        public float maxAimAngleHorizontal = 45f;
-
-        [Tooltip("Maximum angle for vertical aiming (maps to 1.0).")]
-        public float maxAimAngleVertical = 30f;
-
-        [Tooltip("Flip the horizontal aim direction.")]
-        public bool invertHorizontal = false;
-
-        [Tooltip("Flip the vertical aim direction.")]
-        public bool invertVertical = false;
 
         [Header("Weapon System")]
         [Tooltip("The central database containing all weapon data assets.")]
@@ -70,12 +60,12 @@ namespace Player.Control
         [Tooltip("Prefab to spawn at the location of a bullet impact.")]
         public Transform impactEffect;
 
-        [Tooltip("Which layers should the bullets collide with?")]
-        public LayerMask hitMask;
-
         [Tooltip("The volume of the weapon sounds.")]
         [Range(0f, 1f)]
         public float weaponVolume = 0.5f;
+
+        // Hidden Layers (now hardcoded in Database)
+        private LayerMask hitMask => (playerStats != null) ? playerStats.EnemyLayer : (LayerMask)LayerMask.GetMask("Enemy");
 
         private WeaponEntry currentWeaponData;
         private GameObject currentWeaponInstance;
@@ -86,6 +76,7 @@ namespace Player.Control
         private string reloadParameter = "Reload";
         private string fireParameter = "isFiring";
         private string fireMultiplierParameter = "FireSpeedMultiplier";
+        private string reloadMultiplierParameter = "ReloadSpeedMultiplier";
         private string aimHorizontalParameter = "Aim_Horizontal";
         private string aimVerticalParameter = "Aim_Vertical";
         private string reloadStateName = "Reload";
@@ -96,6 +87,7 @@ namespace Player.Control
         private int reloadParamHash;
         private int fireParamHash;
         private int fireMultiplierParamHash;
+        private int reloadMultiplierParamHash;
         private int aimHorizontalHash;
         private int aimVerticalHash;
         private int reloadStateHash;
@@ -121,10 +113,34 @@ namespace Player.Control
         private AnimatorStateInfo currentWeaponState;
         private int currentAmmo;
 
+        // Player Stats (Modified by Database & Roguelike Multipliers)
+        private float currentHealth;
+        private float currentArmor;
+        private float runtimeMovementSpeed;
+        private float runtimeStrafeSmoothing;
+        private float runtimeAimSmoothing;
+
+        // Damage Cooldown (I-Frames)
+        private float iFrameDuration = 0.5f;
+        private float lastDamageTime = -999f;
+
         private void Awake()
         {
             animator = GetComponent<Animator>();
             audioSource = GetComponent<AudioSource>();
+
+            if (playerStats != null)
+            {
+                InitializeStats();
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerController] No PlayerDatabase assigned! Using default values.");
+                // Fallback to inspector defaults
+                laneDistance = 2.0f;
+                movementSpeed = 10f;
+                strafeAnimationSmoothing = 8f;
+            }
 
             if (audioSource == null)
             {
@@ -135,6 +151,7 @@ namespace Player.Control
             reloadParamHash = Animator.StringToHash(reloadParameter);
             fireParamHash = Animator.StringToHash(fireParameter);
             fireMultiplierParamHash = Animator.StringToHash(fireMultiplierParameter);
+            reloadMultiplierParamHash = Animator.StringToHash(reloadMultiplierParameter);
             aimHorizontalHash = Animator.StringToHash(aimHorizontalParameter);
             aimVerticalHash = Animator.StringToHash(aimVerticalParameter);
             reloadStateHash = Animator.StringToHash(reloadStateName);
@@ -143,6 +160,30 @@ namespace Player.Control
             if (animator == null)
             {
                 Debug.LogWarning("[PlayerController] No Animator found!");
+            }
+        }
+
+        private void InitializeStats()
+        {
+            currentHealth = playerStats.baseHealth;
+            currentArmor = playerStats.baseArmor;
+
+            // Movement & Input
+            laneDistance = playerStats.laneDistance;
+            runtimeMovementSpeed = playerStats.movementSpeed * playerStats.moveSpeedMultiplier;
+            runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
+
+            UpdatePlayerUI();
+
+            if (debugMode) Debug.Log($"[PlayerController] Initialized with {currentHealth} HP and {runtimeMovementSpeed} Speed.");
+        }
+
+        private void UpdatePlayerUI()
+        {
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.UpdateHealth(currentHealth, playerStats != null ? playerStats.baseHealth : 100f);
+                UIManager.Instance.UpdateArmor(currentArmor);
             }
         }
 
@@ -212,12 +253,12 @@ namespace Player.Control
 
             float targetX = currentLane * laneDistance;
             Vector3 pos = transform.position;
-            pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * movementSpeed);
+            pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * runtimeMovementSpeed);
             transform.position = pos;
 
             float moveDelta = targetX - pos.x;
             float animationTarget = (Mathf.Abs(moveDelta) > 0.01f) ? Mathf.Sign(moveDelta) : 0f;
-            currentStrafeAnim = Mathf.MoveTowards(currentStrafeAnim, animationTarget, Time.deltaTime * strafeAnimationSmoothing);
+            currentStrafeAnim = Mathf.MoveTowards(currentStrafeAnim, animationTarget, Time.deltaTime * runtimeStrafeSmoothing);
             animator.SetFloat(strafeParamHash, currentStrafeAnim);
         }
 
@@ -241,15 +282,13 @@ namespace Player.Control
                 float yaw = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
                 float pitch = Mathf.Atan2(localDir.y, new Vector2(localDir.x, localDir.z).magnitude) * Mathf.Rad2Deg;
 
-                targetAimH = Mathf.Clamp(-yaw / maxAimAngleHorizontal, -1f, 1f);
-                targetAimV = Mathf.Clamp(pitch / maxAimAngleVertical, -1f, 1f);
-
-                if (invertHorizontal) targetAimH *= -1f;
-                if (invertVertical) targetAimV *= -1f;
+                // Simple responsive aiming (using 45/30 degree defaults)
+                targetAimH = Mathf.Clamp(-yaw / 45f, -1f, 1f);
+                targetAimV = Mathf.Clamp(pitch / 30f, -1f, 1f);
             }
 
-            currentAimH = Mathf.MoveTowards(currentAimH, targetAimH, Time.deltaTime * aimSmoothing);
-            currentAimV = Mathf.MoveTowards(currentAimV, targetAimV, Time.deltaTime * aimSmoothing);
+            currentAimH = Mathf.MoveTowards(currentAimH, targetAimH, Time.deltaTime * 15f); // Constant high smooth speed
+            currentAimV = Mathf.MoveTowards(currentAimV, targetAimV, Time.deltaTime * 15f);
             
             debugAimH = currentAimH;
             debugAimV = currentAimV;
@@ -279,14 +318,16 @@ namespace Player.Control
             bool targetFireState = shootingInput && canFire;
             animator.SetBool(fireParamHash, targetFireState);
 
-            // 2. SPEED SYNC (Multiplier)
-            // Adjust animation speed to match the database fireRate
+            // 2. SPEED SYNC (Multipliers)
             if (currentWeaponData != null)
             {
+                // Sync Fire Speed
                 // Assuming base animation is timed for ~5 shots per second (0.2s)
-                // We scale it so 1 loop = 1 database shot
-                float speedMult = currentWeaponData.fireRate / 5f; 
-                animator.SetFloat(fireMultiplierParamHash, speedMult);
+                float fireSpeedMult = currentWeaponData.fireRate / 5f; 
+                animator.SetFloat(fireMultiplierParamHash, fireSpeedMult);
+
+                // Sync Reload Speed
+                animator.SetFloat(reloadMultiplierParamHash, currentWeaponData.reloadSpeedMult);
             }
 
             // 3. ANIMATOR TRIGGERING (Timer-based)
@@ -315,14 +356,21 @@ namespace Player.Control
             if (animator == null || weaponLayerIndex < 0 || weaponLayerIndex >= animator.layerCount) return false;
 
             bool isInReload = currentWeaponState.shortNameHash == reloadStateHash || currentWeaponState.tagHash == reloadTagHash;
-            
-            if (animator.IsInTransition(weaponLayerIndex))
+            bool isTransitioning = animator.IsInTransition(weaponLayerIndex);
+
+            // 1. If we are transitioning INTO reload, we are reloading
+            if (isTransitioning)
             {
                 AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(weaponLayerIndex);
                 if (nextState.shortNameHash == reloadStateHash || nextState.tagHash == reloadTagHash) return true;
+                
+                // 2. If we are transitioning OUT of reload, we are STiLL reloading until the transition finishes
+                if (isInReload) return true;
             }
 
-            if (isInReload) return currentWeaponState.normalizedTime < 0.95f;
+            // 3. If we are currently in the reload state, wait until it's almost finished
+            if (isInReload) return currentWeaponState.normalizedTime < 0.99f; 
+            
             return false;
         }
 
@@ -345,7 +393,8 @@ namespace Player.Control
 
         public void isFiring(AnimationEvent ae)
         {
-            if (currentWeaponData == null || currentAmmo <= 0) return;
+            // CRITICAL: Prevent shooting if reloading or no ammo
+            if (currentWeaponData == null || currentAmmo <= 0 || IsReloadingAnimationPlaying()) return;
 
             // 1. Ammo Consumption (Now synced with animation frame!)
             currentAmmo--;
@@ -413,6 +462,12 @@ namespace Player.Control
         {
             if (audioSource == null || currentWeaponData == null) return;
             
+            if (debugMode) 
+            {
+                Debug.Log($"<color=yellow>[Combat]</color> Reload Event Triggered. Speed Mult: {currentWeaponData.reloadSpeedMult}");
+                Debug.Log($"<color=cyan>[Animator]</color> Internal Mult Value: {animator.GetFloat(reloadMultiplierParamHash)}");
+            }
+
             // Audio Effects
             if (ae.stringParameter == "MagOut" && currentWeaponData.audioMagOut != null) audioSource.PlayOneShot(currentWeaponData.audioMagOut, weaponVolume);
             else if (ae.stringParameter == "MagIn" && currentWeaponData.audioMagIn != null) audioSource.PlayOneShot(currentWeaponData.audioMagIn, weaponVolume);
@@ -431,6 +486,36 @@ namespace Player.Control
             if (UIManager.Instance != null && currentWeaponData != null)
             {
                 UIManager.Instance.UpdateAmmo(currentAmmo, currentWeaponData.magSize);
+            }
+        }
+
+        public void TakeDamage(float damage)
+        {
+            // 1. Check for Damage Cooldown (I-Frames)
+            if (Time.time < lastDamageTime + iFrameDuration) return;
+            lastDamageTime = Time.time;
+
+            // 2. Simple damage logic (first armor, then health)
+            if (currentArmor > 0)
+            {
+                float armorDamage = Mathf.Min(currentArmor, damage);
+                currentArmor -= armorDamage;
+                damage -= armorDamage;
+            }
+
+            if (damage > 0)
+            {
+                currentHealth -= damage;
+            }
+
+            currentHealth = Mathf.Max(currentHealth, 0);
+            UpdatePlayerUI();
+
+            if (debugMode) Debug.Log($"<color=orange>[Player]</color> Received {damage} damage! Remaining HP: {currentHealth}, Armor: {currentArmor}");
+            
+            if (currentHealth <= 0)
+            {
+                // Handle death logic here
             }
         }
     }

@@ -88,10 +88,9 @@ public class EnemyManager : MonoBehaviour
                 );
             }
 
-            // 3. APPLY 2D SPREAD (X = Width, Y = Height)
-            // We randomize the screen width and height, but keep Z (Distance) fixed.
+            // 3. APPLY 2D SPREAD (X = Lane Width, Z = Fixed)
+            // We randomize the lane position, but keep height consistent with the marker.
             spawnPos.x += Random.Range(-spawnSpread, spawnSpread);
-            spawnPos.y += Random.Range(-spawnSpread, spawnSpread);
 
             // 4. APPLY BASE HEIGHT OFFSET (If you want a fixed boost to the starting Y)
             spawnPos.y += spawnOffsetY;

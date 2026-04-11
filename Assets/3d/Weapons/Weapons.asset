@@ -21,7 +21,33 @@ MonoBehaviour:
     localScale: {x: 21.4083, y: 21.4083, z: 21.4083}
     muzzlePosition: {x: 0, y: 0, z: 0}
     muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 10
+    fireRate: 10
+    magSize: 30
+    reloadSpeedMult: 1
+    range: 50
     audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
     audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
     audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
     muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - weaponName: Pistol
+    animatorLayer: 3
+    weaponPrefab: {fileID: 4405819341987174247, guid: 85305c3c84dbb4c4a88b743d6e1829cf, type: 3}
+    holdPosition: {x: -0.0302, y: 0.2029, z: 0.0292}
+    holdRotation: {x: -1.866, y: 6.551, z: -187.829}
+    localScale: {x: 21.4083, y: 21.4083, z: 21.4083}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 5
+    fireRate: 5
+    magSize: 15
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
