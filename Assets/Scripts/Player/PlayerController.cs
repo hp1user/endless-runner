@@ -391,9 +391,9 @@ namespace Player.Control
             Ray ray = Camera.main.ScreenPointToRay(sPoint);
 
             // VISUAL DEBUG: Current tap path
-            Debug.DrawRay(ray.origin, ray.direction * currentWeaponData.raycastRange, Color.red, 1.0f);
+            Debug.DrawRay(ray.origin, ray.direction * currentWeaponData.range, Color.red, 1.0f);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.raycastRange, hitMask, QueryTriggerInteraction.Collide))
+            if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide))
             {
                 if (debugMode) Debug.Log($"<color=cyan>[Combat]</color> HIT: {hit.collider.name} | Damage: {currentWeaponData.baseDamage}");
 

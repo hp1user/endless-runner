@@ -25,7 +25,7 @@ public class WeaponEntry
     public float fireRate = 5f; // Shots per second
     public int magSize = 30;
     public float reloadSpeedMult = 1.0f;
-    public float raycastRange = 50f;
+    public float range = 50f;
 
     [Header("Audio SFX")]
     public AudioClip audioFire;
