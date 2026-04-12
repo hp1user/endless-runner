@@ -124,24 +124,33 @@ namespace Player.Control
         private float iFrameDuration = 0.5f;
         private float lastDamageTime = -999f;
 
+        private bool touchReloadRequested = false;
+
+        public static PlayerController Instance { get; private set; }
+
         private void OnEnable()
         {
             TouchManager.OnSwipeLeft += MoveLeft;
             TouchManager.OnSwipeRight += MoveRight;
-            TouchManager.OnSwipeUp += NextWeapon;
-            TouchManager.OnSwipeDown += PreviousWeapon;
+            TouchManager.OnSwipeUp += RequestReload; // ADD THIS
         }
 
         private void OnDisable()
         {
             TouchManager.OnSwipeLeft -= MoveLeft;
             TouchManager.OnSwipeRight -= MoveRight;
-            TouchManager.OnSwipeUp -= NextWeapon;
-            TouchManager.OnSwipeDown -= PreviousWeapon;
+            TouchManager.OnSwipeUp -= RequestReload; // ADD THIS
+        }
+
+        private void RequestReload()
+        {
+            touchReloadRequested = true;
         }
 
         private void Awake()
         {
+            Instance = this;
+
             animator = GetComponent<Animator>();
             audioSource = GetComponent<AudioSource>();
 
@@ -176,6 +185,17 @@ namespace Player.Control
             if (animator == null)
             {
                 Debug.LogWarning("[PlayerController] No Animator found!");
+            }
+
+            if (WeaponWheelManager.Instance != null && weaponDatabase != null)
+            {
+                // Fetch the weapons directly from your database
+                WeaponEntry myPistol = weaponDatabase.GetWeaponByCategory(WeaponCategory.Pistol);
+                WeaponEntry myAR = weaponDatabase.GetWeaponByCategory(WeaponCategory.AssaultRifle);
+
+                // Add them to the wheel
+                if (myPistol != null) WeaponWheelManager.Instance.AddWeaponToWheel(myPistol);
+                if (myAR != null) WeaponWheelManager.Instance.AddWeaponToWheel(myAR);
             }
         }
 
@@ -297,13 +317,20 @@ namespace Player.Control
 
         private void HandleActions()
         {
-            bool reloadPressed = false;
-            bool isActuallyReloading = IsReloadingAnimationPlaying();
-
             bool shootingInput = TouchManager.IsShooting;
 
+            // Grab the swipe flag, then reset it
+            bool reloadPressed = touchReloadRequested;
+            touchReloadRequested = false;
+
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) reloadPressed = true;
+#endif
+
+            // Your existing logic will handle the rest beautifully!
+            bool isActuallyReloading = IsReloadingAnimationPlaying();
             bool canFire = !isActuallyReloading && currentAmmo > 0;
-            
+
             // 1. STABLE ANIMATOR STATE (No Flicker)
             // This stays true as long as trigger is held, preventing animation glitches
             bool targetFireState = shootingInput && canFire;
@@ -527,6 +554,18 @@ namespace Player.Control
             if (animator == null) return;
             weaponLayerIndex--;
             if (weaponLayerIndex < 1) weaponLayerIndex = animator.layerCount - 1;
+        }
+
+        public void EquipWeaponFromWheel(WeaponEntry selectedWeapon)
+        {
+            if (selectedWeapon == null) return;
+
+            // We change the layer index. 
+            // IMPORTANT: This assumes your WeaponEntry ScriptableObject knows its own layer!
+            weaponLayerIndex = selectedWeapon.animatorLayer;
+
+            // The Update() loop will instantly catch this change, swap the 3D model, 
+            // update the ammo UI, and change the animation layer weights automatically!
         }
     }
 }
