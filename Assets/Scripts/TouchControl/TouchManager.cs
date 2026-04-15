@@ -28,6 +28,7 @@ public class TouchManager : MonoBehaviour
 
     public static bool IsShooting { get; private set; }
     public static Vector2 CurrentTouchPosition { get; private set; }
+    public static float TouchHoldTime { get; private set; }
 
     void Start()
     {
@@ -54,6 +55,7 @@ public class TouchManager : MonoBehaviour
             startTouchPos = position;
             isSwiping = false;
             touchStartTime = Time.unscaledTime;
+            TouchHoldTime = 0f;
 
             if (!isWheelOpen && DidTouchPlayer(position))
             {
@@ -69,6 +71,7 @@ public class TouchManager : MonoBehaviour
         // --- 2. TOUCH HELD / MOVED ---
         else if (isPressed)
         {
+            TouchHoldTime = Time.unscaledTime - touchStartTime;
             Vector2 currentDelta = position - startTouchPos;
 
             if (isWheelOpen)
@@ -83,7 +86,6 @@ public class TouchManager : MonoBehaviour
                 {
                     isSwiping = true;
                     isHoldingOnPlayer = false; // Cancel the wheel timer
-                    IsShooting = false;
                     DetectSwipeDirection(currentDelta);
                 }
                 // If they haven't swiped, and are holding the player, check the timer

@@ -10,8 +10,7 @@ namespace Player.Control
 {
     /// <summary>
     /// Player Controller for an endless runner.
-    /// Handles discrete horizontal movement (Starf), weapon layers, and reloading.
-    /// Uses GetComponent for Animator and discrete input for strafing.
+    /// Handles discrete horizontal movement (Starf), weapon layers, and strict input prioritization.
     /// </summary>
     public class PlayerController : MonoBehaviour
     {
@@ -24,11 +23,11 @@ namespace Player.Control
         [Header("Movement Settings (Overrides)")]
         [Tooltip("How far apart the lanes are on the X-axis.")]
         public float laneDistance = 2.0f;
-        
+
         [Tooltip("How fast the player physically moves between lanes.")]
         public float movementSpeed = 10f;
 
-        [Tooltip("How fast the animaor's Starf value reach the target.")]
+        [Tooltip("How fast the animator's Starf value reaches the target.")]
         public float strafeAnimationSmoothing = 8f;
 
         [Header("Weapon Layer Settings")]
@@ -42,7 +41,7 @@ namespace Player.Control
         [Tooltip("The Transform to calculate the aiming direction from (e.g., Chest or Head).")]
         public Transform aimOrigin;
 
-        [Tooltip("The Transform that the player should aim at (e.g. moved by mouse).")]
+        [Tooltip("The Transform that the player should aim at (e.g. moved by touch).")]
         public Transform aimTarget;
 
         [Tooltip("Index of the spine aiming layer.")]
@@ -64,7 +63,7 @@ namespace Player.Control
         [Range(0f, 1f)]
         public float weaponVolume = 0.5f;
 
-        // Hidden Layers (now hardcoded in Database)
+        // Hidden Layers
         private LayerMask hitMask => (playerStats != null) ? playerStats.EnemyLayer : (LayerMask)LayerMask.GetMask("Enemy");
 
         private WeaponEntry currentWeaponData;
@@ -108,17 +107,15 @@ namespace Player.Control
         private float targetAimH;
         private float targetAimV;
         private float targetLayerWeight = 1f;
-        private float lastFireSoundTime;
         private float fireCooldownTimer;
         private AnimatorStateInfo currentWeaponState;
         private int currentAmmo;
 
-        // Player Stats (Modified by Database & Roguelike Multipliers)
+        // Player Stats
         private float currentHealth;
         private float currentArmor;
         private float runtimeMovementSpeed;
         private float runtimeStrafeSmoothing;
-        private float runtimeAimSmoothing;
 
         // Damage Cooldown (I-Frames)
         private float iFrameDuration = 0.5f;
@@ -132,14 +129,14 @@ namespace Player.Control
         {
             TouchManager.OnSwipeLeft += MoveLeft;
             TouchManager.OnSwipeRight += MoveRight;
-            TouchManager.OnSwipeUp += RequestReload; // ADD THIS
+            TouchManager.OnSwipeUp += RequestReload;
         }
 
         private void OnDisable()
         {
             TouchManager.OnSwipeLeft -= MoveLeft;
             TouchManager.OnSwipeRight -= MoveRight;
-            TouchManager.OnSwipeUp -= RequestReload; // ADD THIS
+            TouchManager.OnSwipeUp -= RequestReload;
         }
 
         private void RequestReload()
@@ -161,17 +158,14 @@ namespace Player.Control
             else
             {
                 Debug.LogWarning("[PlayerController] No PlayerDatabase assigned! Using default values.");
-                // Fallback to inspector defaults
                 laneDistance = 2.0f;
                 movementSpeed = 10f;
                 strafeAnimationSmoothing = 8f;
             }
 
-            if (audioSource == null)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-            }
+            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
+            // Cache Hashes
             strafeParamHash = Animator.StringToHash(strafeParameter);
             reloadParamHash = Animator.StringToHash(reloadParameter);
             fireParamHash = Animator.StringToHash(fireParameter);
@@ -182,18 +176,13 @@ namespace Player.Control
             reloadStateHash = Animator.StringToHash(reloadStateName);
             reloadTagHash = Animator.StringToHash(reloadStateTag);
 
-            if (animator == null)
-            {
-                Debug.LogWarning("[PlayerController] No Animator found!");
-            }
+            if (animator == null) Debug.LogWarning("[PlayerController] No Animator found!");
 
             if (WeaponWheelManager.Instance != null && weaponDatabase != null)
             {
-                // Fetch the weapons directly from your database
                 WeaponEntry myPistol = weaponDatabase.GetWeaponByCategory(WeaponCategory.Pistol);
                 WeaponEntry myAR = weaponDatabase.GetWeaponByCategory(WeaponCategory.AssaultRifle);
 
-                // Add them to the wheel
                 if (myPistol != null) WeaponWheelManager.Instance.AddWeaponToWheel(myPistol);
                 if (myAR != null) WeaponWheelManager.Instance.AddWeaponToWheel(myAR);
             }
@@ -204,7 +193,6 @@ namespace Player.Control
             currentHealth = playerStats.baseHealth;
             currentArmor = playerStats.baseArmor;
 
-            // Movement & Input
             laneDistance = playerStats.laneDistance;
             runtimeMovementSpeed = playerStats.movementSpeed * playerStats.moveSpeedMultiplier;
             runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
@@ -235,7 +223,7 @@ namespace Player.Control
 
             HandleMovement();
             HandleAiming();
-            HandleActions();
+            HandleActions(); // The bulletproof state machine
             UpdateLayerWeights();
         }
 
@@ -251,10 +239,7 @@ namespace Player.Control
 
         private void SpawnWeaponModel()
         {
-            if (currentWeaponInstance != null)
-            {
-                Destroy(currentWeaponInstance);
-            }
+            if (currentWeaponInstance != null) Destroy(currentWeaponInstance);
 
             if (currentWeaponData == null || currentWeaponData.weaponPrefab == null || weaponSocket == null) return;
 
@@ -262,8 +247,7 @@ namespace Player.Control
             currentWeaponInstance.transform.localPosition = currentWeaponData.holdPosition;
             currentWeaponInstance.transform.localRotation = Quaternion.Euler(currentWeaponData.holdRotation);
             currentWeaponInstance.transform.localScale = currentWeaponData.localScale;
-            
-            // Initialize Ammo
+
             currentAmmo = currentWeaponData.magSize;
             UpdateAmmoUI();
 
@@ -272,8 +256,6 @@ namespace Player.Control
 
         private void HandleMovement()
         {
-            // Input is now handled by TouchManager events (MoveLeft / MoveRight)
-
             float targetX = currentLane * laneDistance;
             Vector3 pos = transform.position;
             pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * runtimeMovementSpeed);
@@ -300,14 +282,13 @@ namespace Player.Control
                 float yaw = Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg;
                 float pitch = Mathf.Atan2(localDir.y, new Vector2(localDir.x, localDir.z).magnitude) * Mathf.Rad2Deg;
 
-                // Simple responsive aiming (using 45/30 degree defaults)
                 targetAimH = Mathf.Clamp(-yaw / 45f, -1f, 1f);
                 targetAimV = Mathf.Clamp(pitch / 30f, -1f, 1f);
             }
 
-            currentAimH = Mathf.MoveTowards(currentAimH, targetAimH, Time.deltaTime * 15f); // Constant high smooth speed
+            currentAimH = Mathf.MoveTowards(currentAimH, targetAimH, Time.deltaTime * 15f);
             currentAimV = Mathf.MoveTowards(currentAimV, targetAimV, Time.deltaTime * 15f);
-            
+
             debugAimH = currentAimH;
             debugAimV = currentAimV;
 
@@ -319,53 +300,78 @@ namespace Player.Control
         {
             bool shootingInput = TouchManager.IsShooting;
 
-            // Grab the swipe flag, then reset it
-            bool reloadPressed = touchReloadRequested;
-            touchReloadRequested = false;
-
 #if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) reloadPressed = true;
+            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) touchReloadRequested = true;
 #endif
 
-            // Your existing logic will handle the rest beautifully!
-            bool isActuallyReloading = IsReloadingAnimationPlaying();
-            bool canFire = !isActuallyReloading && currentAmmo > 0;
-
-            // 1. STABLE ANIMATOR STATE (No Flicker)
-            // This stays true as long as trigger is held, preventing animation glitches
-            bool targetFireState = shootingInput && canFire;
-            animator.SetBool(fireParamHash, targetFireState);
-
-            // 2. SPEED SYNC (Multipliers)
+            // 1. SPEED SYNC
             if (currentWeaponData != null)
             {
-                // Sync Fire Speed
-                // Assuming base animation is timed for ~5 shots per second (0.2s)
-                float fireSpeedMult = currentWeaponData.fireRate / 5f; 
-                animator.SetFloat(fireMultiplierParamHash, fireSpeedMult);
-
-                // Sync Reload Speed
+                animator.SetFloat(fireMultiplierParamHash, currentWeaponData.fireRate / 5f);
                 animator.SetFloat(reloadMultiplierParamHash, currentWeaponData.reloadSpeedMult);
             }
 
-            // 3. ANIMATOR TRIGGERING (Timer-based)
-            if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
-
-            if (shootingInput && canFire && fireCooldownTimer <= 0f)
+            // 2. HARD LOCKOUT: If already reloading, do absolutely nothing else
+            if (IsReloadingAnimationPlaying())
             {
-                // We don't fire the bullet here anymore. 
-                // We just let the Animator play, and the Animation Event will trigger the shot.
-                fireCooldownTimer = (currentWeaponData != null) ? (1.0f / currentWeaponData.fireRate) : 0.2f;
+                animator.SetBool(fireParamHash, false);
+                touchReloadRequested = false; // Destroy any queued swipes
+                targetLayerWeight = 1f;
+                return;
             }
 
-            // AUTO-RELOAD or MANUAL RELOAD
-            bool shouldReload = (reloadPressed || (shootingInput && currentAmmo <= 0)) && !isActuallyReloading;
-            if (shouldReload)
+            // 3. AUTO-RELOAD: Gun is completely empty
+            if (currentAmmo <= 0 && currentWeaponData != null)
             {
+                animator.SetBool(fireParamHash, false);
                 animator.SetBool(reloadParamHash, true);
+                touchReloadRequested = false; // Destroy any queued swipes
                 Invoke(nameof(ResetReloadParameter), 0.15f);
+                targetLayerWeight = 1f;
+                return;
             }
 
+            // 4. MANUAL RELOAD (The Quick Swipe Override)
+            int maxAmmo = currentWeaponData != null ? currentWeaponData.magSize : 0;
+
+            if (touchReloadRequested)
+            {
+                // Is this a quick swipe (under 0.4 seconds)? 
+                // If yes, it's a reload intent. If no, they are in "Hold Fire Mode" so ignore it.
+                if (TouchManager.TouchHoldTime < 0.4f)
+                {
+                    if (currentAmmo < maxAmmo)
+                    {
+                        animator.SetBool(fireParamHash, false); // Cancel the shooting animation instantly
+                        animator.SetBool(reloadParamHash, true);
+                        Invoke(nameof(ResetReloadParameter), 0.15f);
+                        touchReloadRequested = false;
+                        targetLayerWeight = 1f;
+                        return; // Stop reading the code, DO NOT fire the gun!
+                    }
+                }
+            }
+
+            // 5. THE FIRING OVERRIDE: Player is holding the screen
+            if (shootingInput)
+            {
+                animator.SetBool(fireParamHash, true);
+
+                // If a swipe comes in late (after 0.4s), destroy it here so it doesn't trigger later
+                touchReloadRequested = false;
+
+                if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
+                if (fireCooldownTimer <= 0f)
+                {
+                    fireCooldownTimer = (currentWeaponData != null) ? (1.0f / currentWeaponData.fireRate) : 0.2f;
+                }
+
+                targetLayerWeight = 1f;
+                return;
+            }
+
+            // If no input, make sure we aren't firing
+            animator.SetBool(fireParamHash, false);
             targetLayerWeight = 1f;
         }
 
@@ -376,19 +382,15 @@ namespace Player.Control
             bool isInReload = currentWeaponState.shortNameHash == reloadStateHash || currentWeaponState.tagHash == reloadTagHash;
             bool isTransitioning = animator.IsInTransition(weaponLayerIndex);
 
-            // 1. If we are transitioning INTO reload, we are reloading
             if (isTransitioning)
             {
                 AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(weaponLayerIndex);
                 if (nextState.shortNameHash == reloadStateHash || nextState.tagHash == reloadTagHash) return true;
-                
-                // 2. If we are transitioning OUT of reload, we are STiLL reloading until the transition finishes
                 if (isInReload) return true;
             }
 
-            // 3. If we are currently in the reload state, wait until it's almost finished
-            if (isInReload) return currentWeaponState.normalizedTime < 0.99f; 
-            
+            if (isInReload) return currentWeaponState.normalizedTime < 0.99f;
+
             return false;
         }
 
@@ -411,21 +413,17 @@ namespace Player.Control
 
         public void isFiring(AnimationEvent ae)
         {
-            // CRITICAL: Prevent shooting if reloading or no ammo
             if (currentWeaponData == null || currentAmmo <= 0 || IsReloadingAnimationPlaying()) return;
 
-            // 1. Ammo Consumption (Now synced with animation frame!)
             currentAmmo--;
             UpdateAmmoUI();
 
-            // 2. Audio
-            if (audioSource != null && currentWeaponData.audioFire != null) 
+            if (audioSource != null && currentWeaponData.audioFire != null)
             {
                 audioSource.pitch = Random.Range(0.95f, 1.05f);
                 audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
             }
 
-            // 3. VFX & Shooting Logic
             if (currentWeaponInstance != null)
             {
                 Vector3 worldMuzzlePos = currentWeaponInstance.transform.TransformPoint(currentWeaponData.muzzlePosition);
@@ -437,7 +435,6 @@ namespace Player.Control
                     Destroy(flash, currentWeaponData.flashLifetime);
                 }
 
-                // 4. Hit Detection (Now synced with animation frame!)
                 PerformRaycastHit(worldMuzzlePos, worldMuzzleRot);
             }
         }
@@ -446,14 +443,12 @@ namespace Player.Control
         {
             if (currentWeaponData == null) return;
 
-            // Fetch target position from our TouchManager
             Vector2 sPoint = TouchManager.CurrentTouchPosition;
 
             if (Camera.main == null) return;
             Ray ray = Camera.main.ScreenPointToRay(sPoint);
 
-            // VISUAL DEBUG: Current tap path
-            Debug.DrawRay(ray.origin, ray.direction * currentWeaponData.range, Color.red, 1.0f);
+            if (debugMode) Debug.DrawRay(ray.origin, ray.direction * currentWeaponData.range, Color.red, 1.0f);
 
             if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide))
             {
@@ -474,19 +469,10 @@ namespace Player.Control
         public void Reload(AnimationEvent ae)
         {
             if (audioSource == null || currentWeaponData == null) return;
-            
-            if (debugMode) 
-            {
-                Debug.Log($"<color=yellow>[Combat]</color> Reload Event Triggered. Speed Mult: {currentWeaponData.reloadSpeedMult}");
-                Debug.Log($"<color=cyan>[Animator]</color> Internal Mult Value: {animator.GetFloat(reloadMultiplierParamHash)}");
-            }
 
-            // Audio Effects
             if (ae.stringParameter == "MagOut" && currentWeaponData.audioMagOut != null) audioSource.PlayOneShot(currentWeaponData.audioMagOut, weaponVolume);
             else if (ae.stringParameter == "MagIn" && currentWeaponData.audioMagIn != null) audioSource.PlayOneShot(currentWeaponData.audioMagIn, weaponVolume);
 
-            // Refill Ammo Logic
-            // Usually we refill on "MagIn" or at the end of the state
             if (ae.stringParameter == "Refill" || ae.stringParameter == "MagIn")
             {
                 currentAmmo = currentWeaponData.magSize;
@@ -504,11 +490,9 @@ namespace Player.Control
 
         public void TakeDamage(float damage)
         {
-            // 1. Check for Damage Cooldown (I-Frames)
             if (Time.time < lastDamageTime + iFrameDuration) return;
             lastDamageTime = Time.time;
 
-            // 2. Simple damage logic (first armor, then health)
             if (currentArmor > 0)
             {
                 float armorDamage = Mathf.Min(currentArmor, damage);
@@ -516,56 +500,26 @@ namespace Player.Control
                 damage -= armorDamage;
             }
 
-            if (damage > 0)
-            {
-                currentHealth -= damage;
-            }
+            if (damage > 0) currentHealth -= damage;
 
             currentHealth = Mathf.Max(currentHealth, 0);
             UpdatePlayerUI();
 
             if (debugMode) Debug.Log($"<color=orange>[Player]</color> Received {damage} damage! Remaining HP: {currentHealth}, Armor: {currentArmor}");
-            
+
             if (currentHealth <= 0)
             {
                 // Handle death logic here
             }
         }
 
-        private void MoveLeft()
-        {
-            currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-        }
-
-        private void MoveRight()
-        {
-            currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
-        }
-
-        private void NextWeapon()
-        {
-            if (animator == null) return;
-            weaponLayerIndex++;
-            if (weaponLayerIndex >= animator.layerCount) weaponLayerIndex = 1; // Assuming 0 is base layer
-        }
-
-        private void PreviousWeapon()
-        {
-            if (animator == null) return;
-            weaponLayerIndex--;
-            if (weaponLayerIndex < 1) weaponLayerIndex = animator.layerCount - 1;
-        }
+        private void MoveLeft() => currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
+        private void MoveRight() => currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
 
         public void EquipWeaponFromWheel(WeaponEntry selectedWeapon)
         {
             if (selectedWeapon == null) return;
-
-            // We change the layer index. 
-            // IMPORTANT: This assumes your WeaponEntry ScriptableObject knows its own layer!
             weaponLayerIndex = selectedWeapon.animatorLayer;
-
-            // The Update() loop will instantly catch this change, swap the 3D model, 
-            // update the ammo UI, and change the animation layer weights automatically!
         }
     }
 }
