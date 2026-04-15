@@ -16,6 +16,8 @@ MonoBehaviour:
   - category: 3
     weaponName: Assault
     animatorLayer: 2
+    fireMode: 1
+    burstCount: 3
     weaponPrefab: {fileID: 5629203797975206733, guid: 8466a521c46f98a42bbaaaaf8a8447d7, type: 3}
     icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
     holdPosition: {x: -0.0302, y: 0.2029, z: 0.0292}
@@ -37,6 +39,8 @@ MonoBehaviour:
   - category: 0
     weaponName: Pistol
     animatorLayer: 3
+    fireMode: 0
+    burstCount: 3
     weaponPrefab: {fileID: 4405819341987174247, guid: 85305c3c84dbb4c4a88b743d6e1829cf, type: 3}
     icon: {fileID: 21300000, guid: b7723ef7dabd23b45b9e149b739ce88b, type: 3}
     holdPosition: {x: -0.0302, y: 0.2029, z: 0.0292}

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+public enum WeaponFireMode { Single, Burst, Auto }
 public enum WeaponCategory { Pistol, SMG, Shotgun, AssaultRifle, Sniper, RocketLauncher, Minigun, Grenade }
 
 [System.Serializable]
@@ -9,6 +10,10 @@ public class WeaponEntry
     public WeaponCategory category;
     public string weaponName = "New Weapon";
     public int animatorLayer = 1;
+
+    [Header("Fire Mode Settings")]
+    public WeaponFireMode fireMode = WeaponFireMode.Auto;
+    public int burstCount = 3;
 
     [Header("3D Model")]
     [Tooltip("Drag your Gun Prefab here. (Using Transform slot to fix Unity Type Mismatch)")]

@@ -110,6 +110,7 @@ namespace Player.Control
         private float fireCooldownTimer;
         private AnimatorStateInfo currentWeaponState;
         private int currentAmmo;
+        private int shotsFiredThisTriggerPull = 0;
 
         // Player Stats
         private float currentHealth;
@@ -300,78 +301,104 @@ namespace Player.Control
         {
             bool shootingInput = TouchManager.IsShooting;
 
+            // We capture the swipe request here, then immediately clear the original flag
+            bool reloadPressed = touchReloadRequested;
+            touchReloadRequested = false;
+
 #if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) touchReloadRequested = true;
+            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) reloadPressed = true;
 #endif
 
-            // 1. SPEED SYNC
+            // 1. DYNAMIC SPEED SYNC (The "Spin-Up" Fix)
             if (currentWeaponData != null)
             {
-                animator.SetFloat(fireMultiplierParamHash, currentWeaponData.fireRate / 5f);
+                float targetFireSpeedMult = currentWeaponData.fireRate / 5f;
+                float currentDynamicFireRate = 1f; // Default speed for quick taps
+
+                if (shootingInput)
+                {
+                    if (currentWeaponData.fireMode == WeaponFireMode.Auto)
+                    {
+                        // Ramp up from 1x to Max Speed over 0.3 seconds
+                        float rampProgress = Mathf.Clamp01(TouchManager.TouchHoldTime / 0.3f);
+                        currentDynamicFireRate = Mathf.Lerp(1f, targetFireSpeedMult, rampProgress);
+                    }
+                    else
+                    {
+                        // Single and Burst fire modes stay at a readable speed
+                        currentDynamicFireRate = Mathf.Min(targetFireSpeedMult, 1.5f);
+                    }
+                }
+
+                animator.SetFloat(fireMultiplierParamHash, currentDynamicFireRate);
                 animator.SetFloat(reloadMultiplierParamHash, currentWeaponData.reloadSpeedMult);
             }
 
-            // 2. HARD LOCKOUT: If already reloading, do absolutely nothing else
+            // 2. HARD LOCKOUT: Reloading
             if (IsReloadingAnimationPlaying())
             {
                 animator.SetBool(fireParamHash, false);
-                touchReloadRequested = false; // Destroy any queued swipes
                 targetLayerWeight = 1f;
                 return;
             }
 
-            // 3. AUTO-RELOAD: Gun is completely empty
+            // 3. AUTO-RELOAD
             if (currentAmmo <= 0 && currentWeaponData != null)
             {
                 animator.SetBool(fireParamHash, false);
                 animator.SetBool(reloadParamHash, true);
-                touchReloadRequested = false; // Destroy any queued swipes
                 Invoke(nameof(ResetReloadParameter), 0.15f);
                 targetLayerWeight = 1f;
                 return;
             }
 
-            // 4. MANUAL RELOAD (The Quick Swipe Override)
+            // 4. MANUAL RELOAD (Quick Swipe Logic)
             int maxAmmo = currentWeaponData != null ? currentWeaponData.magSize : 0;
 
-            if (touchReloadRequested)
+            // FIX: Use the 'reloadPressed' variable we captured at the top!
+            if (reloadPressed && currentAmmo < maxAmmo)
             {
-                // Is this a quick swipe (under 0.4 seconds)? 
-                // If yes, it's a reload intent. If no, they are in "Hold Fire Mode" so ignore it.
-                if (TouchManager.TouchHoldTime < 0.4f)
+                // Allow reload if they are NOT holding the screen, OR if it's a very quick swipe (< 0.4s)
+                if (!shootingInput || TouchManager.TouchHoldTime < 0.4f)
                 {
-                    if (currentAmmo < maxAmmo)
-                    {
-                        animator.SetBool(fireParamHash, false); // Cancel the shooting animation instantly
-                        animator.SetBool(reloadParamHash, true);
-                        Invoke(nameof(ResetReloadParameter), 0.15f);
-                        touchReloadRequested = false;
-                        targetLayerWeight = 1f;
-                        return; // Stop reading the code, DO NOT fire the gun!
-                    }
+                    animator.SetBool(fireParamHash, false);
+                    animator.SetBool(reloadParamHash, true);
+                    Invoke(nameof(ResetReloadParameter), 0.15f);
+                    targetLayerWeight = 1f;
+                    return;
                 }
             }
 
-            // 5. THE FIRING OVERRIDE: Player is holding the screen
-            if (shootingInput)
+            // 5. THE FIRING OVERRIDE (With Fire Modes!)
+            if (shootingInput && currentWeaponData != null)
             {
-                animator.SetBool(fireParamHash, true);
+                bool canShoot = true;
 
-                // If a swipe comes in late (after 0.4s), destroy it here so it doesn't trigger later
-                touchReloadRequested = false;
+                if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1)
+                    canShoot = false;
+
+                if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount)
+                    canShoot = false;
+
+                // THE "TAP CAP": Auto mode single-shot
+                if (currentWeaponData.fireMode == WeaponFireMode.Auto && TouchManager.TouchHoldTime < 0.2f && shotsFiredThisTriggerPull >= 1)
+                    canShoot = false;
+
+                animator.SetBool(fireParamHash, canShoot);
 
                 if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
                 if (fireCooldownTimer <= 0f)
                 {
-                    fireCooldownTimer = (currentWeaponData != null) ? (1.0f / currentWeaponData.fireRate) : 0.2f;
+                    fireCooldownTimer = 1.0f / currentWeaponData.fireRate;
                 }
 
                 targetLayerWeight = 1f;
                 return;
             }
 
-            // If no input, make sure we aren't firing
+            // 6. TRIGGER RELEASED
             animator.SetBool(fireParamHash, false);
+            shotsFiredThisTriggerPull = 0;
             targetLayerWeight = 1f;
         }
 
@@ -414,6 +441,14 @@ namespace Player.Control
         public void isFiring(AnimationEvent ae)
         {
             if (currentWeaponData == null || currentAmmo <= 0 || IsReloadingAnimationPlaying()) return;
+
+            // THE HARD BLOCKER: If the animator glitches and tries to loop too fast, 
+            // this physically stops the bullet from spawning!
+            if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) return;
+            if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) return;
+
+            // Log that a successful shot happened
+            shotsFiredThisTriggerPull++;
 
             currentAmmo--;
             UpdateAmmoUI();
