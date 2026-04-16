@@ -18,11 +18,11 @@ MonoBehaviour:
     animatorLayer: 2
     fireMode: 1
     burstCount: 3
-    weaponPrefab: {fileID: 5629203797975206733, guid: 8466a521c46f98a42bbaaaaf8a8447d7, type: 3}
+    weaponPrefab: {fileID: 7017394775139600436, guid: bf87facab44f5644da21c583e1bec1a3, type: 3}
     icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
-    holdPosition: {x: -0.0302, y: 0.2029, z: 0.0292}
-    holdRotation: {x: -1.866, y: 6.551, z: -187.829}
-    localScale: {x: 21.4083, y: 21.4083, z: 21.4083}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
     muzzlePosition: {x: 0, y: 0, z: 0}
     muzzleRotation: {x: 0, y: 0, z: 0}
     baseDamage: 10
@@ -37,20 +37,158 @@ MonoBehaviour:
     flashLifetime: 0.2
     impactLifetime: 1
   - category: 0
-    weaponName: Pistol
+    weaponName: Pistal
     animatorLayer: 3
     fireMode: 0
     burstCount: 3
-    weaponPrefab: {fileID: 4405819341987174247, guid: 85305c3c84dbb4c4a88b743d6e1829cf, type: 3}
-    icon: {fileID: 21300000, guid: b7723ef7dabd23b45b9e149b739ce88b, type: 3}
-    holdPosition: {x: -0.0302, y: 0.2029, z: 0.0292}
-    holdRotation: {x: -1.866, y: 6.551, z: -187.829}
-    localScale: {x: 21.4083, y: 21.4083, z: 21.4083}
+    weaponPrefab: {fileID: 61322759460745446, guid: 49578d7d6a7145249ae3822bd48a8615, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
     muzzlePosition: {x: 0, y: 0, z: 0}
     muzzleRotation: {x: 0, y: 0, z: 0}
-    baseDamage: 5
-    fireRate: 5
+    baseDamage: 10
+    fireRate: 20
     magSize: 15
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 1
+    weaponName: SMG
+    animatorLayer: 4
+    fireMode: 2
+    burstCount: 3
+    weaponPrefab: {fileID: 5362248947838166883, guid: 7f064425a56835540bfa14c91b7b8548, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 10
+    fireRate: 20
+    magSize: 15
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 2
+    weaponName: Shotgun
+    animatorLayer: 5
+    fireMode: 0
+    burstCount: 3
+    weaponPrefab: {fileID: 2729258035159530547, guid: da0117ef4ce52cc47b5d1a27406037bb, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 50
+    fireRate: 2
+    magSize: 10
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 4
+    weaponName: Sniper
+    animatorLayer: 6
+    fireMode: 0
+    burstCount: 6
+    weaponPrefab: {fileID: 6247548036433482295, guid: bea1e4071a820a44198a074f342f2d57, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 100
+    fireRate: 2
+    magSize: 10
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 5
+    weaponName: Rocket L
+    animatorLayer: 7
+    fireMode: 0
+    burstCount: 6
+    weaponPrefab: {fileID: 3583418919164241657, guid: bc54e0f1796bacd47981aa794e5846f2, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 100
+    fireRate: 2
+    magSize: 10
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 6
+    weaponName: LMG
+    animatorLayer: 8
+    fireMode: 0
+    burstCount: 6
+    weaponPrefab: {fileID: 6092413802664006198, guid: a76295709cdfef1438a1c118d2bb6b3d, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 100
+    fireRate: 2
+    magSize: 10
+    reloadSpeedMult: 1
+    range: 50
+    audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+    audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+    audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+    muzzleFlash: {fileID: 0}
+    flashLifetime: 0.2
+    impactLifetime: 1
+  - category: 7
+    weaponName: Grenate
+    animatorLayer: 9
+    fireMode: 0
+    burstCount: 6
+    weaponPrefab: {fileID: 6092413802664006198, guid: a76295709cdfef1438a1c118d2bb6b3d, type: 3}
+    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+    holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+    localScale: {x: 1, y: 1, z: 1}
+    muzzlePosition: {x: 0, y: 0, z: 0}
+    muzzleRotation: {x: 0, y: 0, z: 0}
+    baseDamage: 100
+    fireRate: 2
+    magSize: 10
     reloadSpeedMult: 1
     range: 50
     audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
