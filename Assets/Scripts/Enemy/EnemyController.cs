@@ -26,12 +26,21 @@ namespace Enemy.Control
         private float nextRethinkTime;
         private bool isDead = false;
 
-        public void Initialize(EnemyEntry data, Transform target)
+        // POOLING TRACKERS
+        private EnemyManager myManager;
+        private GameObject myOriginalPrefab;
+
+        // UPDATED: Now accepts the Manager and the Prefab for the recycling bin
+        public void Initialize(EnemyEntry data, Transform target, EnemyManager manager, GameObject prefab)
         {
+            myManager = manager;
+            myOriginalPrefab = prefab;
+            isDead = false; // CRITICAL: Reset the dead flag when pulled from the pool!
+
             enemyName = data.enemyName;
             currentHealth = data.maxHealth;
             moveSpeed = data.moveSpeed;
-            damage = data.damage; // RESTORED: This was missing!
+            damage = data.damage;
             playerTransform = target;
 
             if (debugMode)
@@ -64,9 +73,15 @@ namespace Enemy.Control
             if (targetDirection != Vector3.zero)
             {
                 transform.Translate(targetDirection * moveSpeed * Time.deltaTime, Space.World);
-                
-                // Rotation is also smoothed (optional: could also put this on the interval)
+
+                // Rotation is also smoothed
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), Time.deltaTime * 5f);
+            }
+
+            // Safety net: Despawn if it falls off the bridge
+            if (transform.position.z < -20f)
+            {
+                Die();
             }
         }
 
@@ -75,7 +90,7 @@ namespace Enemy.Control
             if (isDead) return;
 
             currentHealth -= damage;
-            Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {damage} damage! Remaining HP: {currentHealth}");
+            if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {damage} damage! Remaining HP: {currentHealth}");
 
             if (currentHealth <= 0)
             {
@@ -85,12 +100,26 @@ namespace Enemy.Control
 
         private void Die()
         {
+            if (isDead) return; // Prevent double-triggering
             isDead = true;
-            Debug.Log($"<color=black><b>[Enemy]</b></color> {enemyName} has been defeated!");
-            
-            // Future: Play death animation/particles here
-            
-            Destroy(gameObject, 0.1f);
+
+            if (debugMode) Debug.Log($"<color=black><b>[Enemy]</b></color> {enemyName} has been defeated!");
+
+            // Tell the Spawner to subtract 1 from the active bug count!
+            if (myManager != null)
+            {
+                myManager.OnEnemyDied();
+            }
+
+            // Return to the recycling bin instead of destroying (using your 0.1f delay!)
+            if (myOriginalPrefab != null && PoolManager.Instance != null)
+            {
+                PoolManager.Instance.ReturnToPoolAfterDelay(this.gameObject, myOriginalPrefab, 0.1f);
+            }
+            else
+            {
+                Destroy(gameObject, 0.1f);
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -107,10 +136,8 @@ namespace Enemy.Control
         {
             if (isDead) return;
 
-            // NEW: Forced log to confirm physics is firing at all
             if (debugMode) Debug.Log($"[Enemy] Physics Contact with '{other.name}' (Layer: {LayerMask.LayerToName(other.layer)})");
 
-            // PERFORMANCE: Bitwise layer check
             if (((1 << other.layer) & playerLayer) != 0)
             {
                 PlayerController player = other.GetComponent<PlayerController>();
@@ -120,14 +147,12 @@ namespace Enemy.Control
                 {
                     player.TakeDamage(damage);
                     if (debugMode) Debug.Log($"<color=orange>[Combat]</color> {enemyName} dealt {damage} damage to player via contact!");
-                    
-                    // NEW: Destroy enemy when it hits the player
+
                     Die();
                 }
             }
             else if (debugMode)
             {
-                // This helps you see if the hit object is on the wrong layer
                 Debug.Log($"[Enemy] Contact with {other.name} on layer '{LayerMask.LayerToName(other.layer)}'. (Expected 'Player' layer)");
             }
         }

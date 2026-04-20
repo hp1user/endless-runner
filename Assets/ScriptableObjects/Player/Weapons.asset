@@ -16,7 +16,7 @@ MonoBehaviour:
   - category: 3
     weaponName: Assault
     animatorLayer: 2
-    fireMode: 1
+    fireMode: 2
     burstCount: 3
     weaponPrefab: {fileID: 7017394775139600436, guid: bf87facab44f5644da21c583e1bec1a3, type: 3}
     icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
@@ -33,7 +33,7 @@ MonoBehaviour:
     audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
     audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
     audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
-    muzzleFlash: {fileID: 0}
+    muzzleFlash: {fileID: 4944057758763303613, guid: 253d6fbcf41910b4281fe8c2c8849a12, type: 3}
     flashLifetime: 0.2
     impactLifetime: 1
   - category: 0
@@ -42,7 +42,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 3
     weaponPrefab: {fileID: 61322759460745446, guid: 49578d7d6a7145249ae3822bd48a8615, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: b7723ef7dabd23b45b9e149b739ce88b, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -65,7 +65,7 @@ MonoBehaviour:
     fireMode: 2
     burstCount: 3
     weaponPrefab: {fileID: 5362248947838166883, guid: 7f064425a56835540bfa14c91b7b8548, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: 387fd3c3ea9e7ae468753076ac628157, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -88,7 +88,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 3
     weaponPrefab: {fileID: 2729258035159530547, guid: da0117ef4ce52cc47b5d1a27406037bb, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: 95ae075fc538baf43bc1aeae55c0cfed, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -111,7 +111,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 6
     weaponPrefab: {fileID: 6247548036433482295, guid: bea1e4071a820a44198a074f342f2d57, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: c3942d40174d2fc47bd015881e7d78d8, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -134,7 +134,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 6
     weaponPrefab: {fileID: 3583418919164241657, guid: bc54e0f1796bacd47981aa794e5846f2, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: a061a22b4e917d641962dfd26b720abe, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -157,7 +157,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 6
     weaponPrefab: {fileID: 6092413802664006198, guid: a76295709cdfef1438a1c118d2bb6b3d, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: df3572a53ef103542ae27d865ccf75e2, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
@@ -180,7 +180,7 @@ MonoBehaviour:
     fireMode: 0
     burstCount: 6
     weaponPrefab: {fileID: 6092413802664006198, guid: a76295709cdfef1438a1c118d2bb6b3d, type: 3}
-    icon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+    icon: {fileID: 21300000, guid: 1e84ca69475a4fe41a7a31e3d27115e7, type: 3}
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}

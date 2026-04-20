@@ -9,7 +9,7 @@ public class EnemyManager : MonoBehaviour
     public PlayerController player;
     public EnemyDatabase enemyDatabase;
     public List<Transform> spawnPoints = new List<Transform>();
-    
+
     [Tooltip("How much random distance to add around the spawn point?")]
     public float spawnSpread = 3f;
 
@@ -18,7 +18,7 @@ public class EnemyManager : MonoBehaviour
 
     [Tooltip("Time between spawns in seconds.")]
     public float spawnInterval = 3f;
-    
+
     [Tooltip("Maximum number of enemies allowed in the scene at once.")]
     public int maxEnemies = 5;
 
@@ -32,7 +32,7 @@ public class EnemyManager : MonoBehaviour
             Debug.LogError("[EnemyManager] Please assign an Enemy Database!");
             return;
         }
-        
+
         if (spawnPoints.Count == 0)
         {
             Debug.LogWarning("[EnemyManager] No spawn points assigned. Enemies will spawn at (0,0,0).");
@@ -72,7 +72,7 @@ public class EnemyManager : MonoBehaviour
         if (spawnOrigin != null)
         {
             spawnRot = spawnOrigin.rotation;
-            
+
             // 1. Initial Position (Center of marker)
             spawnPos = spawnOrigin.position;
 
@@ -89,31 +89,34 @@ public class EnemyManager : MonoBehaviour
             }
 
             // 3. APPLY 2D SPREAD (X = Lane Width, Z = Fixed)
-            // We randomize the lane position, but keep height consistent with the marker.
             spawnPos.x += Random.Range(-spawnSpread, spawnSpread);
 
-            // 4. APPLY BASE HEIGHT OFFSET (If you want a fixed boost to the starting Y)
+            // 4. APPLY BASE HEIGHT OFFSET
             spawnPos.y += spawnOffsetY;
         }
 
-        // 3. Instantiate and setup
-        GameObject enemyObj = Instantiate(data.prefab.gameObject, spawnPos, spawnRot);
-        
+        // 3. POOL MANAGER INTEGRATION
+        GameObject prefabObj = data.prefab.gameObject;
+        GameObject enemyObj = PoolManager.Instance.SpawnFromPool(prefabObj, spawnPos, spawnRot);
+
         EnemyController controller = enemyObj.GetComponent<EnemyController>();
         if (controller == null)
         {
             controller = enemyObj.AddComponent<EnemyController>();
         }
-        
-        // Final link to the player
+
+        // Final link: Pass the data, the player, the manager, and the prefab for recycling
         Transform target = (player != null) ? player.transform : null;
-        controller.Initialize(data, target);
-        
+        controller.Initialize(data, target, this, prefabObj);
+
         activeEnemyCount++;
     }
 
+    // The enemy will call this when its health hits 0!
     public void OnEnemyDied()
     {
         activeEnemyCount--;
+        // Prevent going below 0 just in case
+        activeEnemyCount = Mathf.Max(0, activeEnemyCount);
     }
 }

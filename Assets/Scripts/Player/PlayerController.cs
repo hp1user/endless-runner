@@ -181,11 +181,17 @@ namespace Player.Control
 
             if (WeaponWheelManager.Instance != null && weaponDatabase != null)
             {
-                WeaponEntry myPistol = weaponDatabase.GetWeaponByCategory(WeaponCategory.Pistol);
-                WeaponEntry myAR = weaponDatabase.GetWeaponByCategory(WeaponCategory.AssaultRifle);
+                // Loop through every category in the WeaponCategory enum automatically
+                foreach (WeaponCategory category in System.Enum.GetValues(typeof(WeaponCategory)))
+                {
+                    WeaponEntry weapon = weaponDatabase.GetWeaponByCategory(category);
 
-                if (myPistol != null) WeaponWheelManager.Instance.AddWeaponToWheel(myPistol);
-                if (myAR != null) WeaponWheelManager.Instance.AddWeaponToWheel(myAR);
+                    // If a weapon exists for this category in the database, add it to the wheel!
+                    if (weapon != null)
+                    {
+                        WeaponWheelManager.Instance.AddWeaponToWheel(weapon);
+                    }
+                }
             }
         }
 
@@ -466,8 +472,9 @@ namespace Player.Control
 
                 if (currentWeaponData.muzzleFlash != null)
                 {
-                    GameObject flash = Instantiate(currentWeaponData.muzzleFlash.gameObject, worldMuzzlePos, worldMuzzleRot, currentWeaponInstance.transform);
-                    Destroy(flash, currentWeaponData.flashLifetime);
+                    GameObject flashPrefab = currentWeaponData.muzzleFlash.gameObject;
+                    GameObject flash = PoolManager.Instance.SpawnFromPool(flashPrefab, worldMuzzlePos, worldMuzzleRot, currentWeaponInstance.transform);
+                    PoolManager.Instance.ReturnToPoolAfterDelay(flash, flashPrefab, currentWeaponData.flashLifetime);
                 }
 
                 PerformRaycastHit(worldMuzzlePos, worldMuzzleRot);
@@ -491,8 +498,9 @@ namespace Player.Control
 
                 if (impactEffect != null)
                 {
-                    GameObject impact = Instantiate(impactEffect.gameObject, hit.point, Quaternion.LookRotation(hit.normal));
-                    Destroy(impact, currentWeaponData.impactLifetime);
+                    GameObject impactPrefab = impactEffect.gameObject;
+                    GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
                 }
 
                 EnemyController enemy = hit.collider.GetComponent<EnemyController>();
