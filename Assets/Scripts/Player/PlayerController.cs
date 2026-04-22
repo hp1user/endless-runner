@@ -127,6 +127,9 @@ namespace Player.Control
                 reserveAmmo[cat] = 0; // Start with 0 ammo for everything
             }
 
+            // Give the player unlimited pistol ammo so they are never completely defenseless
+            reserveAmmo[WeaponCategory.Pistol] = 9999;
+
             if (weaponDatabase != null)
             {
                 WeaponEntry starterPistol = weaponDatabase.GetWeaponByID("D Eagle");
@@ -136,7 +139,9 @@ namespace Player.Control
                     if (WeaponWheelManager.Instance != null) WeaponWheelManager.Instance.AddWeaponToWheel(starterPistol);
                     weaponLayerIndex = starterPistol.animatorLayer;
 
-                    reserveAmmo[starterPistol.category] += starterPistol.magSize * startingReserveMags;
+                    //reserveAmmo[starterPistol.category] += starterPistol.magSize * startingReserveMags;
+                    // Give the player unlimited pistol ammo so they are never completely defenseless
+                    reserveAmmo[starterPistol.category] = 999;
                 }
             }
         }
