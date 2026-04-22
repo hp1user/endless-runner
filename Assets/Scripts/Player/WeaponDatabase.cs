@@ -9,6 +9,7 @@ public class WeaponEntry
 {
     public WeaponCategory category;
     public string weaponName = "New Weapon";
+    public string weaponID = "new_weapon";
     public int animatorLayer = 1;
 
     [Header("Fire Mode Settings")]
@@ -54,6 +55,19 @@ public class WeaponEntry
 public class WeaponDatabase : ScriptableObject
 {
     public List<WeaponEntry> weaponEntries = new List<WeaponEntry>();
+
+    public WeaponEntry GetWeaponByID(string searchID)
+    {
+        foreach (WeaponEntry weapon in weaponEntries)
+        {
+            if (weapon.weaponID == searchID)
+            {
+                return weapon;
+            }
+        }
+        Debug.LogWarning($"WeaponDatabase: Could not find weapon with ID: {searchID}");
+        return null;
+    }
 
     public WeaponEntry GetEntryByLayer(int layer)
     {

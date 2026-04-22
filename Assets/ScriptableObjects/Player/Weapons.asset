@@ -15,6 +15,7 @@ MonoBehaviour:
   weaponEntries:
   - category: 3
     weaponName: Assault
+    weaponID: M4
     animatorLayer: 2
     fireMode: 2
     burstCount: 3
@@ -38,6 +39,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 0
     weaponName: Pistal
+    weaponID: D Eagle
     animatorLayer: 3
     fireMode: 0
     burstCount: 3
@@ -61,6 +63,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 1
     weaponName: SMG
+    weaponID: smg1
     animatorLayer: 4
     fireMode: 2
     burstCount: 3
@@ -84,6 +87,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 2
     weaponName: Shotgun
+    weaponID: shotgun1
     animatorLayer: 5
     fireMode: 0
     burstCount: 3
@@ -107,6 +111,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 4
     weaponName: Sniper
+    weaponID: AWM
     animatorLayer: 6
     fireMode: 0
     burstCount: 6
@@ -130,6 +135,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 5
     weaponName: Rocket L
+    weaponID: GrandeLauncher
     animatorLayer: 7
     fireMode: 0
     burstCount: 6
@@ -153,6 +159,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 6
     weaponName: LMG
+    weaponID: machineGun
     animatorLayer: 8
     fireMode: 0
     burstCount: 6
@@ -176,6 +183,7 @@ MonoBehaviour:
     impactLifetime: 1
   - category: 7
     weaponName: Grenate
+    weaponID: Grenade
     animatorLayer: 9
     fireMode: 0
     burstCount: 6
