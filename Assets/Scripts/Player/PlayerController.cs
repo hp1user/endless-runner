@@ -89,6 +89,8 @@ namespace Player.Control
         private bool touchReloadRequested = false;
 
         public static PlayerController Instance { get; private set; }
+        public bool isDead { get; private set; } = false;
+        public static event System.Action OnPlayerDeath;
 
         private void OnEnable()
         {
@@ -167,6 +169,8 @@ namespace Player.Control
 
         private void Update()
         {
+            if (isDead) return;
+
             if (animator == null) return;
 
             if (weaponLayerIndex >= 0 && weaponLayerIndex < animator.layerCount)
@@ -488,6 +492,29 @@ namespace Player.Control
             if (damage > 0) currentHealth -= damage;
             currentHealth = Mathf.Max(currentHealth, 0);
             UpdatePlayerUI();
+
+            if (currentHealth <= 0 && !isDead)
+            {
+                Die();
+            }
+        }
+
+        private void Die()
+        {
+            isDead = true;
+
+            // Stop aiming and running animations
+            animator.SetFloat(strafeParamHash, 0);
+            animator.SetFloat(aimHorizontalHash, 0);
+            animator.SetFloat(aimVerticalHash, 0);
+
+            // Trigger the death animation
+            animator.SetTrigger("Death");
+
+            // Shout to the rest of the game that the player is dead!
+            OnPlayerDeath?.Invoke();
+
+            if (debugMode) Debug.Log("<color=red>GAME OVER!</color> Player has died.");
         }
 
         private void MoveLeft() => currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
@@ -499,9 +526,18 @@ namespace Player.Control
             weaponLayerIndex = selectedWeapon.animatorLayer;
         }
 
-        // ==========================================
-        // LOOT RECEIVER METHODS
-        // ==========================================
+        public List<WeaponCategory> GetOwnedWeaponCategories()
+        {
+            List<WeaponCategory> categories = new List<WeaponCategory>();
+            foreach (WeaponEntry weapon in unlockedWeapons)
+            {
+                if (!categories.Contains(weapon.category))
+                {
+                    categories.Add(weapon.category);
+                }
+            }
+            return categories;
+        }
 
         public void RestoreHealth(float amount)
         {

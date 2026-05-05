@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Enemy.Control;
 using Player.Control;
+using UnityEngine.Analytics;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -25,6 +26,25 @@ public class EnemyManager : MonoBehaviour
     private int activeEnemyCount = 0;
     private float timer;
 
+    private bool isGameOver = false;
+
+    // Listen for the death shout when this script turns on
+    private void OnEnable()
+    {
+        PlayerController.OnPlayerDeath += HandleGameOver;
+    }
+
+    // Stop listening if this script gets destroyed
+    private void OnDisable()
+    {
+        PlayerController.OnPlayerDeath -= HandleGameOver;
+    }
+
+    private void HandleGameOver()
+    {
+        isGameOver = true;
+    }
+
     private void Start()
     {
         if (enemyDatabase == null)
@@ -41,6 +61,8 @@ public class EnemyManager : MonoBehaviour
 
     private void Update()
     {
+        if (isGameOver) return;
+
         timer += Time.deltaTime;
 
         if (timer >= spawnInterval)

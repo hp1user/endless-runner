@@ -1,66 +1,139 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Player.Control; // Needed to talk to the PlayerController!
 
 public class LootManager : MonoBehaviour
 {
     [Header("Drop Settings")]
     [Tooltip("X = Minimum time, Y = Maximum time between drops")]
-    public Vector2 dropIntervalRange = new Vector2(6f, 14f); // NEW: Vector2 for randomness!
+    public Vector2 dropIntervalRange = new Vector2(6f, 14f);
     public float[] lanePositions = new float[] { -2f, 0f, 2f };
 
     [Header("Movement Overrides")]
-    [Tooltip("Which way should the dropped items travel?")]
     public LootItem.MoveDirection itemDirection = LootItem.MoveDirection.Forward;
-    [Tooltip("How far past 0 should the item travel before despawning?")]
     public float itemDespawnThreshold = 20f;
 
-    [Header("Loot Pool")]
-    public List<GameObject> possibleLootPrefabs;
+    [Header("Loot Pools")]
+    [Tooltip("Standard consumables: Health and Armor.")]
+    public List<GameObject> itemLootPool;
+
+    [Tooltip("Ammo prefabs. Will ONLY drop if the player owns this weapon type.")]
+    public List<GameObject> ammoLootPool; // NEW: The dedicated Ammo Pool!
+
+    [Tooltip("Rare drops: Specific Weapon Prefabs.")]
+    public List<GameObject> weaponLootPool;
+
+    [Header("Drop Chances")]
+    [Range(0f, 100f)]
+    public float weaponDropChance = 15f;
 
     private float timer;
-    private float currentTargetInterval; // NEW: Holds the current random target time
+    private float currentTargetInterval;
+    private bool isGameOver = false;
+
+    private void OnEnable()
+    {
+        PlayerController.OnPlayerDeath += HandleGameOver;
+    }
+
+    private void OnDisable()
+    {
+        PlayerController.OnPlayerDeath -= HandleGameOver;
+    }
+
+    private void HandleGameOver()
+    {
+        isGameOver = true;
+    }
 
     private void Start()
     {
-        // Pick the very first random drop time when the game starts
         PickNewDropInterval();
     }
 
     private void Update()
     {
-        if (possibleLootPrefabs == null || possibleLootPrefabs.Count == 0) return;
+        if (isGameOver) return;
 
         timer += Time.deltaTime;
 
-        // Check against our randomized target interval
         if (timer >= currentTargetInterval)
         {
             timer = 0f;
             DropSupplyCrate();
-
-            // Pick a brand new random time for the next drop!
             PickNewDropInterval();
         }
     }
 
     private void PickNewDropInterval()
     {
-        // Random.Range with floats gives you any decimal between X and Y
         currentTargetInterval = Random.Range(dropIntervalRange.x, dropIntervalRange.y);
     }
 
     private void DropSupplyCrate()
     {
+        // 1. Check if we have any prefabs loaded
+        bool hasItems = itemLootPool != null && itemLootPool.Count > 0;
+        bool hasWeapons = weaponLootPool != null && weaponLootPool.Count > 0;
+        bool hasAmmo = ammoLootPool != null && ammoLootPool.Count > 0;
+
+        if (!hasItems && !hasWeapons && !hasAmmo) return;
+
+        // 2. Create an empty temporary list to hold whatever is legally allowed to drop this frame
+        List<GameObject> dynamicDropPool = new List<GameObject>();
+        float roll = Random.Range(0f, 100f);
+
+        // 3. Did we roll a weapon?
+        if (roll <= weaponDropChance && hasWeapons)
+        {
+            dynamicDropPool.AddRange(weaponLootPool);
+        }
+        else
+        {
+            // 4. We rolled a standard item! 
+            // Always add Health/Armor to the legal drop list
+            if (hasItems) dynamicDropPool.AddRange(itemLootPool);
+
+            // 5. SMART LOOT AMMO CHECK
+            if (hasAmmo && PlayerController.Instance != null)
+            {
+                // Ask the player what guns they have
+                List<WeaponCategory> ownedCategories = PlayerController.Instance.GetOwnedWeaponCategories();
+
+                // Loop through all our ammo prefabs
+                foreach (GameObject ammoPrefab in ammoLootPool)
+                {
+                    LootItem lootScript = ammoPrefab.GetComponent<LootItem>();
+
+                    // If the player owns the category for this ammo, add it to the legal drop list!
+                    if (lootScript != null && ownedCategories.Contains(lootScript.ammoCategory))
+                    {
+                        dynamicDropPool.Add(ammoPrefab);
+                    }
+                }
+            }
+        }
+
+        // 6. Safety Net: If the dynamic pool is somehow completely empty, force a weapon drop
+        if (dynamicDropPool.Count == 0)
+        {
+            if (hasWeapons) dynamicDropPool.AddRange(weaponLootPool);
+            else return;
+        }
+
+        // 7. Pick a random prefab from our legally approved list!
+        GameObject prefabToDrop = dynamicDropPool[Random.Range(0, dynamicDropPool.Count)];
+
+        // 8. Spawn it
         float randomLaneX = lanePositions[Random.Range(0, lanePositions.Length)];
         Vector3 dropPos = new Vector3(randomLaneX, 1f, transform.position.z);
 
-        GameObject prefabToDrop = possibleLootPrefabs[Random.Range(0, possibleLootPrefabs.Count)];
         GameObject droppedItem = PoolManager.Instance.SpawnFromPool(prefabToDrop, dropPos, Quaternion.identity);
 
-        LootItem lootScript = droppedItem.GetComponent<LootItem>();
-        if (lootScript != null)
+        LootItem droppedScript = droppedItem.GetComponent<LootItem>();
+        if (droppedScript != null)
         {
-            lootScript.Initialize(prefabToDrop, itemDirection, itemDespawnThreshold);
+            droppedScript.Initialize(prefabToDrop, itemDirection, itemDespawnThreshold);
         }
     }
 }

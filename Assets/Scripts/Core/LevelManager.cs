@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Player.Control;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -32,6 +33,25 @@ public class LevelManager : MonoBehaviour
     private Queue<ChunkTracker> activeChunks = new Queue<ChunkTracker>();
     private Transform lastSpawnedChunk;
 
+    private bool isGameOver = false;
+
+    // Listen for the death shout when this script turns on
+    private void OnEnable()
+    {
+        PlayerController.OnPlayerDeath += HandleGameOver;
+    }
+
+    // Stop listening if this script gets destroyed
+    private void OnDisable()
+    {
+        PlayerController.OnPlayerDeath -= HandleGameOver;
+    }
+
+    private void HandleGameOver()
+    {
+        isGameOver = true;
+    }
+
     private void Start()
     {
         if (levelDatabase == null || levelDatabase.allThemes.Count == 0)
@@ -50,6 +70,8 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
+        if (isGameOver) return;
+
         Vector3 moveDir = (chunkDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
 
         // 1. Move all active chunks

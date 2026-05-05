@@ -1,11 +1,13 @@
 using UnityEngine;
 using TMPro;
+using Player.Control;
 
 namespace UI.Control
 {
     public class UIManager : MonoBehaviour
     {
         public static UIManager Instance { get; private set; }
+        public GameObject gameOverPanel;
 
         [Header("Player Status UI")]
         [SerializeField] private TextMeshProUGUI healthText;
@@ -13,6 +15,16 @@ namespace UI.Control
 
         [Header("Weapon UI")]
         [SerializeField] private TextMeshProUGUI ammoText;
+
+        private void OnEnable()
+        {
+            PlayerController.OnPlayerDeath += ShowGameOverScreen;
+        }
+
+        private void OnDisable()
+        {
+            PlayerController.OnPlayerDeath -= ShowGameOverScreen;
+        }
 
         private void Awake()
         {
@@ -61,6 +73,21 @@ namespace UI.Control
             {
                 ammoText.text = $"{current} / {max}";
             }
+        }
+
+
+        private void ShowGameOverScreen()
+        {
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.SetActive(true);
+            }
+        }
+
+        public void RestartGame()
+        {
+            // Reloads the current scene
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
