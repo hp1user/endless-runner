@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using Enemy.Control;
 using Player.Control;
-using UnityEngine.Analytics;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -23,21 +22,25 @@ public class EnemyManager : MonoBehaviour
     [Tooltip("Maximum number of enemies allowed in the scene at once.")]
     public int maxEnemies = 5;
 
+    [Header("Boss Settings")]
+    [Tooltip("How far behind the player should the boss spawn? (Negative number)")]
+    public float bossSpawnZOffset = -25f;
+
     private int activeEnemyCount = 0;
     private float timer;
 
     private bool isGameOver = false;
 
-    // Listen for the death shout when this script turns on
     private void OnEnable()
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
+        GameManager.OnBossFightStarted += SpawnBoss; // NEW: Listen for the Boss!
     }
 
-    // Stop listening if this script gets destroyed
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
+        GameManager.OnBossFightStarted -= SpawnBoss; // NEW: Stop listening
     }
 
     private void HandleGameOver()
@@ -63,9 +66,14 @@ public class EnemyManager : MonoBehaviour
     {
         if (isGameOver) return;
 
+        if (GameManager.Instance != null && GameManager.Instance.isBossFightActive) return;
+
         timer += Time.deltaTime;
 
-        if (timer >= spawnInterval)
+        float currentSpawnRate = spawnInterval / (GameManager.Instance != null ? GameManager.Instance.currentLevel : 1);
+
+        // FIXED: Using currentSpawnRate here instead of spawnInterval!
+        if (timer >= currentSpawnRate)
         {
             timer = 0f;
             TrySpawnEnemy();
@@ -78,8 +86,10 @@ public class EnemyManager : MonoBehaviour
         if (activeEnemyCount >= maxEnemies) return;
         if (enemyDatabase == null) return;
 
-        // 2. Randomly select enemy and spawn location
-        EnemyEntry data = enemyDatabase.GetRandomEnemy();
+        // 2. NEW: Ask the database for a valid enemy for the CURRENT level
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 1;
+        EnemyEntry data = enemyDatabase.GetRandomEnemyForLevel(currentLevel);
+
         if (data == null || data.prefab == null) return;
 
         Transform spawnOrigin = null;
@@ -91,14 +101,12 @@ public class EnemyManager : MonoBehaviour
         Vector3 spawnPos = Vector3.zero;
         Quaternion spawnRot = Quaternion.identity;
 
+        // ALL OF YOUR CUSTOM POSITIONING LOGIC IS UNTOUCHED HERE
         if (spawnOrigin != null)
         {
             spawnRot = spawnOrigin.rotation;
-
-            // 1. Initial Position (Center of marker)
             spawnPos = spawnOrigin.position;
 
-            // 2. Add Box Logic if available
             BoxCollider box = spawnOrigin.GetComponentInChildren<BoxCollider>();
             if (box != null)
             {
@@ -110,10 +118,7 @@ public class EnemyManager : MonoBehaviour
                 );
             }
 
-            // 3. APPLY 2D SPREAD (X = Lane Width, Z = Fixed)
             spawnPos.x += Random.Range(-spawnSpread, spawnSpread);
-
-            // 4. APPLY BASE HEIGHT OFFSET
             spawnPos.y += spawnOffsetY;
         }
 
@@ -127,18 +132,55 @@ public class EnemyManager : MonoBehaviour
             controller = enemyObj.AddComponent<EnemyController>();
         }
 
-        // Final link: Pass the data, the player, the manager, and the prefab for recycling
         Transform target = (player != null) ? player.transform : null;
         controller.Initialize(data, target, this, prefabObj);
 
         activeEnemyCount++;
     }
 
-    // The enemy will call this when its health hits 0!
+    // --- NEW: THE BOSS SPAWNER ---
+    private void SpawnBoss()
+    {
+        if (enemyDatabase == null || player == null) return;
+
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 5;
+
+        // Ask the database for a valid Boss!
+        EnemyEntry bossData = enemyDatabase.GetBossForLevel(currentLevel);
+
+        if (bossData == null || bossData.prefab == null)
+        {
+            Debug.LogWarning($"<color=yellow>[EnemyManager]</color> No Boss designed for Level {currentLevel} yet. Skipping!");
+
+            // Tell the GameManager to instantly cancel the boss fight and go to the next level
+            if (GameManager.Instance != null) GameManager.Instance.SkipBossPhase();
+
+            return; // Stop the rest of the spawn code!
+        }
+
+        // Calculate boss spawn position relative to the player
+        Vector3 spawnPos = player.transform.position;
+        spawnPos.z += bossSpawnZOffset; // Spawns way behind the player
+        spawnPos.y += spawnOffsetY;
+
+        // Bosses use Instantiate instead of the Object Pool
+        GameObject bossObj = Instantiate(bossData.prefab.gameObject, spawnPos, Quaternion.identity);
+
+        EnemyController controller = bossObj.GetComponent<EnemyController>();
+        if (controller == null)
+        {
+            controller = bossObj.AddComponent<EnemyController>();
+        }
+
+        // Initialize the Boss!
+        controller.Initialize(bossData, player.transform, this, bossData.prefab.gameObject);
+
+        Debug.Log($"<color=magenta>[EnemyManager]</color> The {bossData.enemyName} has arrived!");
+    }
+
     public void OnEnemyDied()
     {
         activeEnemyCount--;
-        // Prevent going below 0 just in case
         activeEnemyCount = Mathf.Max(0, activeEnemyCount);
     }
 }

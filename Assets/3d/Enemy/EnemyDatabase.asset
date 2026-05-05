@@ -15,11 +15,11 @@ MonoBehaviour:
   enemyTypes:
   - enemyName: Box
     prefab: {fileID: 5424026289042268862, guid: a5b88fa9e94434b4f907ef0d3668313f, type: 3}
-    maxHealth: 20
+    maxHealth: 10
     moveSpeed: 0.5
     damage: 10
   - enemyName: Capsule
     prefab: {fileID: 4101872628352663781, guid: 9e725e0bb1c42ff43a84d194ecafdc3f, type: 3}
-    maxHealth: 40
+    maxHealth: 20
     moveSpeed: 1
-    damage: 30
+    damage: 15

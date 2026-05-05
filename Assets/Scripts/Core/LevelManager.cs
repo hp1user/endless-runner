@@ -15,13 +15,12 @@ public class LevelManager : MonoBehaviour
     public LevelDatabase levelDatabase;
     public float chunkLength = 40f;
     public int chunksOnScreen = 5;
-    public int chunksPerLevel = 10;
 
     [Tooltip("Distance from 0 where the chunk is destroyed (use a positive number)")]
     public float despawnDistance = 40f;
 
     private LevelThemeData currentTheme;
-    private int chunksSpawnedThisLevel = 0;
+    private int currentThemeIndex = 0; // NEW: Tracks which theme we are currently using
 
     // THE FIX: We now track both the spawned chunk AND the prefab it came from!
     private struct ChunkTracker
@@ -34,22 +33,47 @@ public class LevelManager : MonoBehaviour
     private Transform lastSpawnedChunk;
 
     private bool isGameOver = false;
+    private bool isBossPhase = false; // NEW: Tells the spawner to use the bridge!
 
-    // Listen for the death shout when this script turns on
     private void OnEnable()
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
+        GameManager.OnBossFightStarted += HandleBossFight; // Listen for the Boss
+        GameManager.OnLevelCompleted += HandleLevelComplete; // Listen for Theme changes
     }
 
-    // Stop listening if this script gets destroyed
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
+        GameManager.OnBossFightStarted -= HandleBossFight;
+        GameManager.OnLevelCompleted -= HandleLevelComplete;
     }
 
     private void HandleGameOver()
     {
         isGameOver = true;
+    }
+
+    private void HandleBossFight()
+    {
+        isBossPhase = true; // Switch to Bridge chunks!
+    }
+
+    private void HandleLevelComplete(int newLevel)
+    {
+        isBossPhase = false; // Turn off the Bridge chunks
+
+        // Move to the next theme in the database!
+        currentThemeIndex++;
+
+        // If we run out of themes, loop back to the beginning
+        if (currentThemeIndex >= levelDatabase.allThemes.Count)
+        {
+            currentThemeIndex = 0;
+        }
+
+        currentTheme = levelDatabase.allThemes[currentThemeIndex];
+        Debug.Log($"<color=cyan>[LevelManager]</color> Advancing to Theme: {currentTheme.themeName}");
     }
 
     private void Start()
@@ -60,7 +84,9 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        currentTheme = levelDatabase.allThemes[0];
+        // Start with the first theme in the database
+        currentThemeIndex = 0;
+        currentTheme = levelDatabase.allThemes[currentThemeIndex];
 
         for (int i = 0; i < chunksOnScreen; i++)
         {
@@ -108,10 +134,7 @@ public class LevelManager : MonoBehaviour
 
         if (shouldDespawn)
         {
-            // Grab the oldest chunk from the queue
             ChunkTracker oldChunk = activeChunks.Dequeue();
-
-            // INSTEAD OF DESTROYING, RETURN IT TO THE POOL!
             PoolManager.Instance.ReturnToPool(oldChunk.instance, oldChunk.originalPrefab);
         }
     }
@@ -120,17 +143,15 @@ public class LevelManager : MonoBehaviour
     {
         GameObject prefabToSpawn;
 
-        if (chunksSpawnedThisLevel >= chunksPerLevel)
+        // NEW: Let the GameManager dictate what spawns, not a chunk counter!
+        if (isBossPhase)
         {
             prefabToSpawn = currentTheme.transitionBridge;
-            currentTheme = levelDatabase.allThemes[Random.Range(0, levelDatabase.allThemes.Count)];
-            chunksSpawnedThisLevel = 0;
         }
         else
         {
             int randomVariantIndex = Random.Range(0, currentTheme.chunkVariants.Length);
             prefabToSpawn = currentTheme.chunkVariants[randomVariantIndex];
-            chunksSpawnedThisLevel++;
         }
 
         float spawnZ = 0f;
@@ -144,10 +165,8 @@ public class LevelManager : MonoBehaviour
 
         Vector3 spawnPos = new Vector3(0, 0, spawnZ);
 
-        // INSTEAD OF INSTANTIATING, SPAWN FROM THE POOL!
         GameObject newChunk = PoolManager.Instance.SpawnFromPool(prefabToSpawn, spawnPos, Quaternion.identity, this.transform);
 
-        // Add to our tracking queue
         ChunkTracker newTracker = new ChunkTracker { instance = newChunk, originalPrefab = prefabToSpawn };
         activeChunks.Enqueue(newTracker);
 

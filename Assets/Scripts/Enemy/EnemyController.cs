@@ -25,41 +25,69 @@ namespace Enemy.Control
         private Vector3 targetDirection;
         private float nextRethinkTime;
         private bool isDead = false;
+        private bool isGameOver = false; // NEW: Tracks if the player is dead
 
         // POOLING TRACKERS
         private EnemyManager myManager;
         private GameObject myOriginalPrefab;
 
-        // UPDATED: Now accepts the Manager and the Prefab for the recycling bin
+        // --- TIME FREEZE LOGIC ---
+        private void OnEnable()
+        {
+            PlayerController.OnPlayerDeath += HandleGameOver;
+            isGameOver = false;
+        }
+
+        private void OnDisable()
+        {
+            PlayerController.OnPlayerDeath -= HandleGameOver;
+        }
+
+        private void HandleGameOver()
+        {
+            isGameOver = true;
+        }
+
+        // --- INITIALIZATION & LEVEL SCALING ---
         public void Initialize(EnemyEntry data, Transform target, EnemyManager manager, GameObject prefab)
         {
             myManager = manager;
             myOriginalPrefab = prefab;
-            isDead = false; // CRITICAL: Reset the dead flag when pulled from the pool!
+            isDead = false;
 
+            // 1. Find out what level we are on
+            int currentLevel = 1;
+            if (GameManager.Instance != null)
+            {
+                currentLevel = GameManager.Instance.currentLevel;
+            }
+
+            // 2. Calculate the difficulty multipliers
+            // +20% health/damage per level, +5% speed per level
+            float statMultiplier = 1f + ((currentLevel - 1) * 0.2f);
+            float speedMultiplier = 1f + ((currentLevel - 1) * 0.05f);
+
+            // 3. Apply the Base Stats * Multiplier
             enemyName = data.enemyName;
-            currentHealth = data.maxHealth;
-            moveSpeed = data.moveSpeed;
-            damage = data.damage;
+            currentHealth = data.maxHealth * statMultiplier;
+            moveSpeed = data.moveSpeed * speedMultiplier;
+            damage = data.damage * statMultiplier;
+
             playerTransform = target;
 
             if (debugMode)
             {
-                // Physics Check
                 if (GetComponent<Rigidbody>() == null && GetComponent<Rigidbody2D>() == null)
-                {
-                    Debug.LogWarning($"<color=red>[Enemy]</color> {enemyName} has NO Rigidbody! Physics collisions might not work.");
-                }
+                    Debug.LogWarning($"<color=red>[Enemy]</color> {enemyName} has NO Rigidbody!");
 
-                int mask = playerLayer.value;
-                if (mask == 0) Debug.LogError($"<color=red>[Enemy]</color> {enemyName} CANNOT find the 'Player' layer! Check Layer settings.");
-                else Debug.Log($"<color=green>[Enemy]</color> {enemyName} initialized. Damage: {damage}, LayerMask: {mask}");
+                Debug.Log($"<color=green>[Enemy Level {currentLevel}]</color> {enemyName} spawned. HP: {currentHealth}, DMG: {damage}, SPD: {moveSpeed}");
             }
         }
 
         private void Update()
         {
-            if (isDead || playerTransform == null) return;
+            // NEW: Stop moving and thinking if the player is dead!
+            if (isDead || playerTransform == null || isGameOver) return;
 
             // 1. PERFORMANCE: Only recalculate direction on an interval
             if (Time.time >= nextRethinkTime)
@@ -73,8 +101,6 @@ namespace Enemy.Control
             if (targetDirection != Vector3.zero)
             {
                 transform.Translate(targetDirection * moveSpeed * Time.deltaTime, Space.World);
-
-                // Rotation is also smoothed
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), Time.deltaTime * 5f);
             }
 
@@ -100,18 +126,15 @@ namespace Enemy.Control
 
         private void Die()
         {
-            if (isDead) return; // Prevent double-triggering
+            if (isDead) return;
             isDead = true;
 
             if (debugMode) Debug.Log($"<color=black><b>[Enemy]</b></color> {enemyName} has been defeated!");
 
-            // Tell the Spawner to subtract 1 from the active bug count!
-            if (myManager != null)
-            {
-                myManager.OnEnemyDied();
-            }
+            if (myManager != null) myManager.OnEnemyDied();
 
-            // Return to the recycling bin instead of destroying (using your 0.1f delay!)
+            if (GameManager.Instance != null) GameManager.Instance.RegisterEnemyKill();
+
             if (myOriginalPrefab != null && PoolManager.Instance != null)
             {
                 PoolManager.Instance.ReturnToPoolAfterDelay(this.gameObject, myOriginalPrefab, 0.1f);
@@ -122,21 +145,12 @@ namespace Enemy.Control
             }
         }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            HandleContact(other.gameObject);
-        }
-
-        private void OnCollisionEnter(Collision collision)
-        {
-            HandleContact(collision.gameObject);
-        }
+        private void OnTriggerEnter(Collider other) => HandleContact(other.gameObject);
+        private void OnCollisionEnter(Collision collision) => HandleContact(collision.gameObject);
 
         private void HandleContact(GameObject other)
         {
             if (isDead) return;
-
-            if (debugMode) Debug.Log($"[Enemy] Physics Contact with '{other.name}' (Layer: {LayerMask.LayerToName(other.layer)})");
 
             if (((1 << other.layer) & playerLayer) != 0)
             {
@@ -146,14 +160,8 @@ namespace Enemy.Control
                 if (player != null)
                 {
                     player.TakeDamage(damage);
-                    if (debugMode) Debug.Log($"<color=orange>[Combat]</color> {enemyName} dealt {damage} damage to player via contact!");
-
-                    Die();
+                    Die(); // Bugs explode/die when they hit the player!
                 }
-            }
-            else if (debugMode)
-            {
-                Debug.Log($"[Enemy] Contact with {other.name} on layer '{LayerMask.LayerToName(other.layer)}'. (Expected 'Player' layer)");
             }
         }
     }
