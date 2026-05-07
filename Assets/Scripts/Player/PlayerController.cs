@@ -40,6 +40,9 @@ namespace Player.Control
         [Range(0f, 1f)]
         public float weaponVolume = 0.5f;
 
+        [Header("Roguelike Upgrades")]
+        public float damageMultiplier = 1.0f;
+
         private LayerMask hitMask => (playerStats != null) ? playerStats.EnemyLayer : (LayerMask)LayerMask.GetMask("Enemy");
 
         private WeaponEntry currentWeaponData;
@@ -80,6 +83,7 @@ namespace Player.Control
         private int currentAmmo;
         private int shotsFiredThisTriggerPull = 0;
         private float currentHealth;
+        private float runtimeMaxHealth;
         private float currentArmor;
         private float runtimeMovementSpeed;
         private float runtimeStrafeSmoothing;
@@ -151,6 +155,7 @@ namespace Player.Control
         private void InitializeStats()
         {
             currentHealth = playerStats.baseHealth;
+            runtimeMaxHealth = playerStats.baseHealth;
             currentArmor = playerStats.baseArmor;
             laneDistance = playerStats.laneDistance;
             runtimeMovementSpeed = playerStats.movementSpeed * playerStats.moveSpeedMultiplier;
@@ -438,7 +443,7 @@ namespace Player.Control
 
                 EnemyController enemy = hit.collider.GetComponent<EnemyController>();
                 if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
-                if (enemy != null) enemy.TakeDamage(currentWeaponData.baseDamage);
+                if (enemy != null) enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
             }
         }
 
@@ -541,7 +546,7 @@ namespace Player.Control
 
         public void RestoreHealth(float amount)
         {
-            float maxHealth = (playerStats != null) ? playerStats.baseHealth : 100f;
+            float maxHealth = (playerStats != null) ? runtimeMaxHealth : 100f;
             currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
             UpdatePlayerUI();
         }
@@ -592,6 +597,26 @@ namespace Player.Control
             }
 
             EquipWeaponFromWheel(newGun);
+        }
+
+        public void ApplyUpgrade(UpgradeCard card)
+        {
+            switch (card.upgradeType)
+            {
+                case UpgradeType.MaxHealth:
+                    runtimeMaxHealth += card.upgradeValue; // Increase the cap
+                    currentHealth += card.upgradeValue;    // Heal the player
+                    UpdatePlayerUI();                      // Update the health bar!
+                    break;
+
+                case UpgradeType.SpeedBoost:
+                    runtimeMovementSpeed += card.upgradeValue; // Make them run faster!
+                    break;
+
+                case UpgradeType.DamageBoost:
+                    damageMultiplier += (card.upgradeValue / 100f);
+                    break;
+            }
         }
     }
 }

@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     public int baseEnemiesPerLevel = 15;
     [Tooltip("How much harder does each level get? (1.2 = 20% more enemies)")]
     public float difficultyMultiplier = 1.2f;
+    [Header("Speed Tracking")]
+    public float levelClearTimer = 0f;
 
     [Header("Boss Settings")]
     [Tooltip("A boss spawns every X levels.")]
