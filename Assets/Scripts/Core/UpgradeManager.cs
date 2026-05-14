@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class UpgradeManager : MonoBehaviour
 {
@@ -9,12 +12,23 @@ public class UpgradeManager : MonoBehaviour
     public List<UpgradeCard> allAvailableCards = new List<UpgradeCard>();
 
     [Header("Dynamic UI References")]
-    public GameObject cardSelectionPanel;   // The dark background panel
-    public Transform cardContainer;         // The Horizontal Layout Group (usually the panel itself)
-    public GameObject cardUIPrefab;         // The Card Prefab from your project folder
+    public GameObject cardSelectionPanel;
+    public Transform cardContainer;
+    public GameObject cardUIPrefab;
+
+    [Header("New UX Features")]
+    [Tooltip("The panel that flashes 'Level 2 Reached!'")]
+    public GameObject levelUpBannerPanel;
+    public TextMeshProUGUI levelUpBannerText;
+
+    [Tooltip("The button the player presses after picking a card")]
+    public Button confirmButton;
 
     private List<GameObject> activeUICards = new List<GameObject>();
     private Dictionary<CardRarity, List<UpgradeCard>> deckByRarity = new Dictionary<CardRarity, List<UpgradeCard>>();
+
+    // Remembers what card we tapped on
+    private UpgradeCard pendingCard;
 
     private void Awake()
     {
@@ -28,6 +42,8 @@ public class UpgradeManager : MonoBehaviour
             deckByRarity[card.rarity].Add(card);
 
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
+        if (levelUpBannerPanel != null) levelUpBannerPanel.SetActive(false);
+        if (confirmButton != null) confirmButton.gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -44,23 +60,42 @@ public class UpgradeManager : MonoBehaviour
 
     private void HandleLevelUp(int currentLevel)
     {
-        Time.timeScale = 0f;
-        float timeTaken = GameManager.Instance != null ? GameManager.Instance.levelClearTimer : 60f;
-
-        List<UpgradeCard> drawnCards = DrawCards(3, currentLevel, timeTaken, false);
-        DisplayCardsOnScreen(drawnCards);
+        StartCoroutine(LevelUpSequence(currentLevel, false));
     }
 
     private void HandleBossDefeated()
     {
-        Time.timeScale = 0f;
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 5;
+        StartCoroutine(LevelUpSequence(currentLevel, true));
+    }
 
-        List<UpgradeCard> drawnCards = DrawCards(3, currentLevel, 0f, true);
+    private IEnumerator LevelUpSequence(int level, bool isBoss)
+    {
+        Time.timeScale = 0f; // Freeze the game
+
+        // 1. Show the Banner
+        if (levelUpBannerPanel != null)
+        {
+            levelUpBannerPanel.SetActive(true);
+            if (levelUpBannerText != null)
+            {
+                levelUpBannerText.text = isBoss ? "BOSS DEFEATED!" : $"LEVEL {level} REACHED!";
+            }
+        }
+
+        // 2. Wait for 1.5 seconds in REAL TIME
+        yield return new WaitForSecondsRealtime(1.5f);
+
+        // 3. Hide banner, show cards
+        if (levelUpBannerPanel != null) levelUpBannerPanel.SetActive(false);
+
+        float timeTaken = GameManager.Instance != null ? GameManager.Instance.levelClearTimer : 60f;
+        List<UpgradeCard> drawnCards = DrawCards(3, level, timeTaken, isBoss);
+
         DisplayCardsOnScreen(drawnCards);
     }
 
-    // --- THE MATH BRAIN ---
+    // --- THE FULL MATH BRAIN ---
     private List<UpgradeCard> DrawCards(int amountToDraw, int level, float clearTime, bool isBossDrop)
     {
         List<UpgradeCard> hand = new List<UpgradeCard>();
@@ -144,19 +179,19 @@ public class UpgradeManager : MonoBehaviour
         return specificPile[Random.Range(0, specificPile.Count)];
     }
 
-    // --- THE DYNAMIC UI GENERATOR ---
+    // --- UI DISPLAY LOGIC ---
     private void DisplayCardsOnScreen(List<UpgradeCard> cardsToShow)
     {
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(true);
+        if (confirmButton != null) confirmButton.gameObject.SetActive(false);
+        pendingCard = null;
 
-        // 1. Destroy any old cards sitting in the menu
         foreach (GameObject oldCard in activeUICards)
         {
             if (oldCard != null) Destroy(oldCard);
         }
         activeUICards.Clear();
 
-        // 2. Spawn fresh new cards!
         foreach (UpgradeCard cardData in cardsToShow)
         {
             if (cardData == null || cardUIPrefab == null || cardContainer == null) continue;
@@ -164,23 +199,35 @@ public class UpgradeManager : MonoBehaviour
             GameObject newCardObj = Instantiate(cardUIPrefab, cardContainer);
 
             UpgradeCardUI uiScript = newCardObj.GetComponent<UpgradeCardUI>();
-            if (uiScript != null)
-            {
-                uiScript.Initialize(cardData);
-            }
+            if (uiScript != null) uiScript.Initialize(cardData);
 
             activeUICards.Add(newCardObj);
         }
     }
 
-    public void SelectUpgrade(UpgradeCard chosenCard)
+    // Called when you tap a card
+    public void PreviewUpgrade(UpgradeCard chosenCard)
     {
+        pendingCard = chosenCard;
+
+        if (confirmButton != null) confirmButton.gameObject.SetActive(true);
+
+        Debug.Log($"<color=cyan>[UI]</color> Card Selected: {chosenCard.cardName}. Waiting for confirmation...");
+    }
+
+    // Called when you press Confirm
+    public void ConfirmSelection()
+    {
+        if (pendingCard == null) return;
+
         if (Player.Control.PlayerController.Instance != null)
         {
-            Player.Control.PlayerController.Instance.ApplyUpgrade(chosenCard);
+            Player.Control.PlayerController.Instance.ApplyUpgrade(pendingCard);
         }
 
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
+        if (confirmButton != null) confirmButton.gameObject.SetActive(false);
+
         Time.timeScale = 1f;
     }
 }

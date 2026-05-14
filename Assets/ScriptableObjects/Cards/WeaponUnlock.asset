@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7bed7a25e43127540a118a5cc490e605, type: 3}
-  m_Name: Health
+  m_Name: WeaponUnlock
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
-  cardName: Health
+  cardName: Weapon Unlock
   description: What does this card do?
   cardIcon: {fileID: 0}
-  rarity: 0
-  upgradeType: 0
-  upgradeValue: 5
+  rarity: 4
+  upgradeType: 3
+  upgradeValue: 2
   rarityBackgroundImage: {fileID: 0}
-  rarityColor: {r: 0.4901961, g: 0.4901961, b: 0.4901961, a: 1}
+  rarityColor: {r: 0.8867924, g: 0.6793192, b: 0.04601282, a: 1}

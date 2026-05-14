@@ -167,7 +167,9 @@ namespace Player.Control
         {
             if (UIManager.Instance != null)
             {
-                UIManager.Instance.UpdateHealth(currentHealth, playerStats != null ? playerStats.baseHealth : 100f);
+                float maxHP = (playerStats != null) ? runtimeMaxHealth : 100f;
+                UIManager.Instance.UpdateHealth(currentHealth, maxHP);
+
                 UIManager.Instance.UpdateArmor(currentArmor);
             }
         }
