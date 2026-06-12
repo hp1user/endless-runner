@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 5672454327132671219}
   - component: {fileID: 4682016845768929522}
   - component: {fileID: 5050808487630759659}
-  m_Layer: 0
+  - component: {fileID: 3926301283373675969}
+  - component: {fileID: 9210389768168585655}
+  m_Layer: 3
   m_Name: Bug_Ground1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,3 +110,51 @@ MonoBehaviour:
   totalAnimations: 2
   animationSpeed: 200
   totalVertices: 272
+--- !u!65 &3926301283373675969
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570921291028269951}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.47449705, y: 0.3482066, z: 0.471022}
+  m_Center: {x: 0, y: 0.17212869, z: 0.04237991}
+--- !u!54 &9210389768168585655
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570921291028269951}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
