@@ -24,8 +24,8 @@ MonoBehaviour:
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
-    muzzlePosition: {x: 0, y: 0, z: 0}
-    muzzleRotation: {x: 0, y: 0, z: 0}
+    muzzlePosition: {x: 0.395, y: 0, z: -0.0588}
+    muzzleRotation: {x: 0, y: 0, z: -90}
     baseDamage: 20
     fireRate: 20
     magSize: 30
@@ -34,7 +34,7 @@ MonoBehaviour:
     audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
     audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
     audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
-    muzzleFlash: {fileID: 4944057758763303613, guid: 253d6fbcf41910b4281fe8c2c8849a12, type: 3}
+    muzzleFlash: {fileID: 7489526809454488802, guid: 5fa3e358b61b3417caf24c0a19ff2986, type: 3}
     flashLifetime: 0.2
     impactLifetime: 1
   - category: 0
@@ -48,8 +48,8 @@ MonoBehaviour:
     holdPosition: {x: -0.025, y: 0.205, z: 0.026}
     holdRotation: {x: 5.105, y: 91.212, z: 87.671}
     localScale: {x: 1, y: 1, z: 1}
-    muzzlePosition: {x: 0, y: 0, z: 0}
-    muzzleRotation: {x: 0, y: 0, z: 0}
+    muzzlePosition: {x: 0.1321, y: 0, z: -0.069}
+    muzzleRotation: {x: 0, y: 0, z: -90}
     baseDamage: 14
     fireRate: 20
     magSize: 15
@@ -58,7 +58,7 @@ MonoBehaviour:
     audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
     audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
     audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
-    muzzleFlash: {fileID: 0}
+    muzzleFlash: {fileID: 7489526809454488802, guid: 5fa3e358b61b3417caf24c0a19ff2986, type: 3}
     flashLifetime: 0.2
     impactLifetime: 1
   - category: 1
