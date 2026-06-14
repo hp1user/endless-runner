@@ -8,7 +8,8 @@ public class EnemyManager : MonoBehaviour
     [Header("Settings")]
     public PlayerController player;
     public EnemyDatabase enemyDatabase;
-    public List<Transform> spawnPoints = new List<Transform>();
+    public List<Transform> airSpawnPoints = new List<Transform>();
+    public List<Transform> groundSpawnPoints = new List<Transform>();
 
     [Tooltip("How much random distance to add around the spawn point?")]
     public float spawnSpread = 3f;
@@ -26,7 +27,18 @@ public class EnemyManager : MonoBehaviour
     [Tooltip("How far behind the player should the boss spawn? (Negative number)")]
     public float bossSpawnZOffset = -25f;
 
+    [Header("Difficulty Scaling")]
+    [Tooltip("Health multiplier added per level (e.g., 0.15 = +15% per level)")]
+    public float healthIncreasePerLevel = 0.15f;
+    
+    [Tooltip("Damage multiplier added per level (e.g., 0.20 = +20% per level)")]
+    public float damageIncreasePerLevel = 0.20f;
+    
+    [Tooltip("Speed multiplier added per level (e.g., 0.05 = +5% per level)")]
+    public float speedIncreasePerLevel = 0.05f;
+
     private int activeEnemyCount = 0;
+    public int enemiesSpawnedThisLevel = 0;
     private float timer;
 
     private bool isGameOver = false;
@@ -35,17 +47,24 @@ public class EnemyManager : MonoBehaviour
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
         GameManager.OnBossFightStarted += SpawnBoss; // NEW: Listen for the Boss!
+        GameManager.OnLevelCompleted += HandleLevelCompleted;
     }
 
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
         GameManager.OnBossFightStarted -= SpawnBoss; // NEW: Stop listening
+        GameManager.OnLevelCompleted -= HandleLevelCompleted;
     }
 
     private void HandleGameOver()
     {
         isGameOver = true;
+    }
+
+    private void HandleLevelCompleted(int newLevel)
+    {
+        enemiesSpawnedThisLevel = 0;
     }
 
     private void Start()
@@ -56,7 +75,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        if (spawnPoints.Count == 0)
+        if (airSpawnPoints.Count == 0 && groundSpawnPoints.Count == 0)
         {
             Debug.LogWarning("[EnemyManager] No spawn points assigned. Enemies will spawn at (0,0,0).");
         }
@@ -85,6 +104,9 @@ public class EnemyManager : MonoBehaviour
         // 1. Check constraints
         if (activeEnemyCount >= maxEnemies) return;
         if (enemyDatabase == null) return;
+        
+        // Don't spawn if we have already spawned the quota for this level
+        if (GameManager.Instance != null && enemiesSpawnedThisLevel >= GameManager.Instance.GetRequiredKillsForCurrentLevel()) return;
 
         // 2. NEW: Ask the database for a valid enemy for the CURRENT level
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 1;
@@ -93,9 +115,11 @@ public class EnemyManager : MonoBehaviour
         if (data == null || data.prefab == null) return;
 
         Transform spawnOrigin = null;
-        if (spawnPoints.Count > 0)
+        List<Transform> validSpawnPoints = data.isGroundEnemy ? groundSpawnPoints : airSpawnPoints;
+
+        if (validSpawnPoints.Count > 0)
         {
-            spawnOrigin = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            spawnOrigin = validSpawnPoints[Random.Range(0, validSpawnPoints.Count)];
         }
 
         Vector3 spawnPos = Vector3.zero;
@@ -136,6 +160,7 @@ public class EnemyManager : MonoBehaviour
         controller.Initialize(data, target, this, prefabObj);
 
         activeEnemyCount++;
+        enemiesSpawnedThisLevel++;
     }
 
     // --- NEW: THE BOSS SPAWNER ---

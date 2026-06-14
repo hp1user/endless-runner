@@ -8,6 +8,7 @@ public class LootManager : MonoBehaviour
     [Tooltip("X = Minimum time, Y = Maximum time between drops")]
     public Vector2 dropIntervalRange = new Vector2(6f, 14f);
     public float[] lanePositions = new float[] { -2f, 0f, 2f };
+    public float spawnYPosition = 0f;
 
     [Header("Movement Overrides")]
     public LootItem.MoveDirection itemDirection = LootItem.MoveDirection.Forward;
@@ -124,9 +125,24 @@ public class LootManager : MonoBehaviour
         // 7. Pick a random prefab from our legally approved list!
         GameObject prefabToDrop = dynamicDropPool[Random.Range(0, dynamicDropPool.Count)];
 
-        // 8. Spawn it
-        float randomLaneX = lanePositions[Random.Range(0, lanePositions.Length)];
-        Vector3 dropPos = new Vector3(randomLaneX, 1f, transform.position.z);
+        // 8. Find a safe lane to spawn in
+        List<int> availableLanes = new List<int>();
+        for (int i = 0; i < lanePositions.Length; i++)
+        {
+            if (SpawnTracker.IsLaneSafe(i, 2.0f)) // 2 seconds cooldown
+            {
+                availableLanes.Add(i);
+            }
+        }
+
+        // If no lanes are safe, skip spawning this frame
+        if (availableLanes.Count == 0) return;
+
+        int chosenLaneIndex = availableLanes[Random.Range(0, availableLanes.Count)];
+        SpawnTracker.RegisterSpawn(chosenLaneIndex);
+        float chosenLaneX = lanePositions[chosenLaneIndex];
+
+        Vector3 dropPos = new Vector3(chosenLaneX, spawnYPosition, transform.position.z);
 
         GameObject droppedItem = PoolManager.Instance.SpawnFromPool(prefabToDrop, dropPos, Quaternion.identity);
 

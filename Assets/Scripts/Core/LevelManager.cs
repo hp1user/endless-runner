@@ -98,12 +98,15 @@ public class LevelManager : MonoBehaviour
     {
         if (isGameOver) return;
 
+        // Clamp deltaTime to prevent the world from teleporting when unpausing
+        float dt = Mathf.Min(Time.deltaTime, 0.1f);
+
         Vector3 moveDir = (chunkDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
 
         // 1. Move all active chunks
         foreach (ChunkTracker tracker in activeChunks)
         {
-            tracker.instance.transform.position += moveDir * worldMoveSpeed * Time.deltaTime;
+            tracker.instance.transform.position += moveDir * worldMoveSpeed * dt;
         }
 
         // 2. Check if we need to spawn a new chunk

@@ -14,6 +14,8 @@ public class EnemyEntry
 
     [Header("Spawn Rules")]
     public EnemyCategory category = EnemyCategory.Standard;
+    [Tooltip("If true, this enemy will spawn on the ground (ignoring Y offsets).")]
+    public bool isGroundEnemy = false;
     [Tooltip("The earliest level this enemy can start spawning.")]
     public int minSpawnLevel = 1;
     [Tooltip("The last level this enemy can spawn (Use 999 for infinite).")]

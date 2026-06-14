@@ -55,6 +55,8 @@ public class PoolManager : MonoBehaviour
     /// </summary>
     public void ReturnToPool(GameObject objToReturn, GameObject originalPrefabKey)
     {
+        if (objToReturn == null) return; // Prevent MissingReferenceException if object was destroyed
+
         objToReturn.SetActive(false);
         objToReturn.transform.SetParent(this.transform); // Keep the hierarchy clean
         poolDictionary[originalPrefabKey].Enqueue(objToReturn);

@@ -9,10 +9,10 @@ public class GameManager : MonoBehaviour
     [Header("Progression Settings")]
     public int currentLevel = 1;
     public int enemiesKilledThisLevel = 0;
-    [Tooltip("How many enemies must die on Level 1 to advance?")]
-    public int baseEnemiesPerLevel = 15;
-    [Tooltip("How much harder does each level get? (1.2 = 20% more enemies)")]
-    public float difficultyMultiplier = 1.2f;
+    [Tooltip("How many enemies must die on Wave 1 to advance?")]
+    public int baseEnemiesPerWave = 10;
+    [Tooltip("How many extra enemies are added per Wave Phase?")]
+    public int additionalEnemiesPerWave = 2;
     [Header("Speed Tracking")]
     public float levelClearTimer = 0f;
 
@@ -52,7 +52,8 @@ public class GameManager : MonoBehaviour
 
     public int GetRequiredKillsForCurrentLevel()
     {
-        return Mathf.RoundToInt(baseEnemiesPerLevel * Mathf.Pow(difficultyMultiplier, currentLevel - 1));
+        int wavePhase = (currentLevel - 1) / levelsBetweenBosses;
+        return baseEnemiesPerWave + (wavePhase * additionalEnemiesPerWave);
     }
 
     private void TriggerNextPhase()

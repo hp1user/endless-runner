@@ -34,9 +34,12 @@ public class LootItem : MonoBehaviour
     {
         if (isCollected) return;
 
+        // Clamp deltaTime to prevent huge jumps when unpausing from the Level Up screen
+        float dt = Mathf.Min(Time.deltaTime, 0.1f);
+
         // Move based on the Manager's direction
         Vector3 dir = (currentDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
-        transform.position += dir * worldMoveSpeed * Time.deltaTime;
+        transform.position += dir * worldMoveSpeed * dt;
 
         // Despawn based on the Manager's direction
         if (currentDirection == MoveDirection.Backward && transform.position.z < -currentDespawnThreshold)

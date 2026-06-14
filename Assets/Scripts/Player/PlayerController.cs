@@ -162,7 +162,6 @@ namespace Player.Control
             runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
             UpdatePlayerUI();
         }
-
         private void UpdatePlayerUI()
         {
             if (UIManager.Instance != null)
@@ -311,6 +310,11 @@ namespace Player.Control
                     animator.SetBool(reloadParamHash, true);
                     Invoke(nameof(ResetReloadParameter), 0.15f);
                 }
+                else if (currentWeaponData.category != WeaponCategory.Pistol)
+                {
+                    // Auto-switch when completely out of ammo
+                    AutoSwitchWeapon();
+                }
                 else if (shootingInput && debugMode)
                 {
                     Debug.Log("<color=red>OUT OF AMMO!</color> Need to pick up a supply crate!");
@@ -356,6 +360,45 @@ namespace Player.Control
             targetLayerWeight = 1f;
         }
 
+        private void AutoSwitchWeapon()
+        {
+            if (unlockedWeapons.Count <= 1) return;
+
+            WeaponEntry bestChoice = null;
+            WeaponEntry fallbackPistol = null;
+
+            foreach (var weapon in unlockedWeapons)
+            {
+                if (weapon == currentWeaponData) continue;
+
+                if (weapon.category == WeaponCategory.Pistol)
+                {
+                    fallbackPistol = weapon;
+                    continue;
+                }
+
+                int ammoInMag = loadedAmmo.ContainsKey(weapon.weaponID) ? loadedAmmo[weapon.weaponID] : weapon.magSize;
+                int reserve = reserveAmmo.ContainsKey(weapon.category) ? reserveAmmo[weapon.category] : 0;
+
+                if (ammoInMag > 0 || reserve > 0)
+                {
+                    bestChoice = weapon;
+                    break;
+                }
+            }
+
+            if (bestChoice == null && fallbackPistol != null)
+            {
+                bestChoice = fallbackPistol;
+            }
+
+            if (bestChoice != null)
+            {
+                if (debugMode) Debug.Log($"<color=cyan>[Auto-Switch]</color> Out of ammo! Switching to {bestChoice.weaponName}");
+                EquipWeaponFromWheel(bestChoice);
+            }
+        }
+
         private bool IsReloadingAnimationPlaying()
         {
             if (animator == null || weaponLayerIndex < 0 || weaponLayerIndex >= animator.layerCount) return false;
@@ -392,6 +435,13 @@ namespace Player.Control
 
         public void isFiring(AnimationEvent ae)
         {
+            // Prevent initialization bugs where default states trigger animation events on start
+            if (Time.timeSinceLevelLoad < 0.5f) return;
+            
+            // Ignore animation events from background layers with 0 weight
+            // AnimationEventTrigger passes weight via floatParameter
+            if (ae.floatParameter < 0.1f) return;
+
             if (currentWeaponData == null || currentAmmo <= 0 || IsReloadingAnimationPlaying()) return;
 
             if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) return;
@@ -451,6 +501,9 @@ namespace Player.Control
 
         public void Reload(AnimationEvent ae)
         {
+            if (Time.timeSinceLevelLoad < 0.5f) return;
+            if (ae.floatParameter < 0.1f) return;
+
             if (audioSource == null || currentWeaponData == null) return;
 
             if (ae.stringParameter == "MagOut" && currentWeaponData.audioMagOut != null) audioSource.PlayOneShot(currentWeaponData.audioMagOut, weaponVolume);
@@ -514,6 +567,13 @@ namespace Player.Control
             animator.SetFloat(strafeParamHash, 0);
             animator.SetFloat(aimHorizontalHash, 0);
             animator.SetFloat(aimVerticalHash, 0);
+
+            // Turn off upper body layers so the full body death animation plays cleanly
+            if (aimLayerIndex >= 0 && aimLayerIndex < animator.layerCount)
+                animator.SetLayerWeight(aimLayerIndex, 0f);
+            
+            if (weaponLayerIndex >= 0 && weaponLayerIndex < animator.layerCount)
+                animator.SetLayerWeight(weaponLayerIndex, 0f);
 
             // Trigger the death animation
             animator.SetTrigger("Death");

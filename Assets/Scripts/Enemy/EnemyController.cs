@@ -26,6 +26,7 @@ namespace Enemy.Control
         private float nextRethinkTime;
         private bool isDead = false;
         private bool isGameOver = false; // NEW: Tracks if the player is dead
+        private bool isGroundEnemy = false;
 
         // POOLING TRACKERS
         private EnemyManager myManager;
@@ -63,15 +64,20 @@ namespace Enemy.Control
             }
 
             // 2. Calculate the difficulty multipliers
-            // +20% health/damage per level, +5% speed per level
-            float statMultiplier = 1f + ((currentLevel - 1) * 0.2f);
-            float speedMultiplier = 1f + ((currentLevel - 1) * 0.05f);
+            float healthIncrease = myManager != null ? myManager.healthIncreasePerLevel : 0.15f;
+            float damageIncrease = myManager != null ? myManager.damageIncreasePerLevel : 0.20f;
+            float speedIncrease = myManager != null ? myManager.speedIncreasePerLevel : 0.05f;
+
+            float healthMultiplier = 1f + ((currentLevel - 1) * healthIncrease);
+            float damageMultiplier = 1f + ((currentLevel - 1) * damageIncrease);
+            float speedMultiplier = 1f + ((currentLevel - 1) * speedIncrease);
 
             // 3. Apply the Base Stats * Multiplier
             enemyName = data.enemyName;
-            currentHealth = data.maxHealth * statMultiplier;
+            currentHealth = data.maxHealth * healthMultiplier;
             moveSpeed = data.moveSpeed * speedMultiplier;
-            damage = data.damage * statMultiplier;
+            damage = data.damage * damageMultiplier;
+            isGroundEnemy = data.isGroundEnemy;
 
             playerTransform = target;
 
@@ -94,6 +100,12 @@ namespace Enemy.Control
             {
                 nextRethinkTime = Time.time + rethinkInterval;
                 Vector3 targetPos = playerTransform.position + Vector3.up * targetHeightOffset;
+                
+                if (isGroundEnemy)
+                {
+                    targetPos.y = transform.position.y; // Keep it on the ground!
+                }
+
                 targetDirection = (targetPos - transform.position).normalized;
             }
 

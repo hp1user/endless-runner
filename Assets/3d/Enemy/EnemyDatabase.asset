@@ -16,6 +16,7 @@ MonoBehaviour:
   - enemyName: Box
     prefab: {fileID: 6496899720755277723, guid: ac838dd9c16a9774a80cc0e6f6c78cb6, type: 3}
     category: 0
+    isGroundEnemy: 0
     minSpawnLevel: 1
     maxSpawnLevel: 999
     bossTargetLevel: 5
@@ -25,6 +26,7 @@ MonoBehaviour:
   - enemyName: Capsule
     prefab: {fileID: 899366677854948109, guid: c7d4d5b6a59d73a4383db496f802396b, type: 3}
     category: 0
+    isGroundEnemy: 1
     minSpawnLevel: 1
     maxSpawnLevel: 999
     bossTargetLevel: 5

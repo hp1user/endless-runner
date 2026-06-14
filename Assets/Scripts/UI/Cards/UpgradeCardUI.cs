@@ -30,6 +30,8 @@ public class UpgradeCardUI : MonoBehaviour
     {
         myCardData = cardData;
 
+        SetSelected(false);
+
         // Set the standard text and icon
         titleText.text = cardData.cardName;
         descriptionText.text = cardData.description;
@@ -48,24 +50,53 @@ public class UpgradeCardUI : MonoBehaviour
             valueText.text = "+" + cardData.upgradeValue.ToString() + suffix;
         }
 
-        // RARITY BACKGROUND LOGIC
-        if (cardData.rarityBackgroundImage != null)
-        {
-            backgroundImage.sprite = cardData.rarityBackgroundImage;
-            backgroundImage.color = Color.white;
-        }
-        else
-        {
-            backgroundImage.sprite = null;
-            backgroundImage.color = cardData.rarityColor;
-        }
     }
 
     private void OnCardClicked()
     {
         if (UpgradeManager.Instance != null && myCardData != null)
         {
-            UpgradeManager.Instance.PreviewUpgrade(myCardData);
+            UpgradeManager.Instance.PreviewUpgrade(this, myCardData);
+        }
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        UpdateBackgroundVisuals(isSelected);
+
+        // Fallback visual if you still want the scaling
+        transform.localScale = isSelected ? new Vector3(1.05f, 1.05f, 1.05f) : Vector3.one;
+    }
+
+    private void UpdateBackgroundVisuals(bool isSelected)
+    {
+        if (myCardData == null || backgroundImage == null) return;
+
+        if (isSelected)
+        {
+            if (myCardData.selectedCardSprite != null)
+            {
+                backgroundImage.sprite = myCardData.selectedCardSprite;
+                backgroundImage.color = Color.white;
+            }
+            else
+            {
+                backgroundImage.sprite = myCardData.rarityBackgroundImage;
+                backgroundImage.color = myCardData.selectedCardColor;
+            }
+        }
+        else
+        {
+            if (myCardData.rarityBackgroundImage != null)
+            {
+                backgroundImage.sprite = myCardData.rarityBackgroundImage;
+                backgroundImage.color = Color.white;
+            }
+            else
+            {
+                backgroundImage.sprite = null;
+                backgroundImage.color = myCardData.rarityColor;
+            }
         }
     }
 }

@@ -206,9 +206,22 @@ public class UpgradeManager : MonoBehaviour
     }
 
     // Called when you tap a card
-    public void PreviewUpgrade(UpgradeCard chosenCard)
+    public void PreviewUpgrade(UpgradeCardUI clickedUI, UpgradeCard chosenCard)
     {
         pendingCard = chosenCard;
+
+        // Update visuals for all active cards
+        foreach (GameObject cardObj in activeUICards)
+        {
+            if (cardObj != null)
+            {
+                UpgradeCardUI uiScript = cardObj.GetComponent<UpgradeCardUI>();
+                if (uiScript != null)
+                {
+                    uiScript.SetSelected(uiScript == clickedUI);
+                }
+            }
+        }
 
         if (confirmButton != null) confirmButton.gameObject.SetActive(true);
 

@@ -25,4 +25,10 @@ public class UpgradeCard : ScriptableObject
     public Sprite rarityBackgroundImage;
     [Tooltip("The color to tint the background if no Sprite is provided.")]
     public Color rarityColor = Color.white;
+
+    [Header("Selection Visuals")]
+    [Tooltip("The specific background frame when this card is selected.")]
+    public Sprite selectedCardSprite;
+    [Tooltip("The color to tint the background when selected, if no Selected Card Sprite is provided.")]
+    public Color selectedCardColor = Color.yellow;
 }
