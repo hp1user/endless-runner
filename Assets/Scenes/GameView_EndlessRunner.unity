@@ -4524,6 +4524,22 @@ PrefabInstance:
       propertyPath: laneDistance
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: hitMarkerSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 43460a598fd4d4f518c9107b85eaf6fd, type: 3}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: hitMarkerSounds.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: 'hitMarkerSounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: af867471166754e429b68e1cbae199de, type: 3}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: 'hitMarkerSounds.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 43460a598fd4d4f518c9107b85eaf6fd, type: 3}
     - target: {fileID: 3037209467355244299, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
       propertyPath: m_IsActive
       value: 0

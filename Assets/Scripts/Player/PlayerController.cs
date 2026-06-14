@@ -37,6 +37,7 @@ namespace Player.Control
 
         [Header("Effects Settings")]
         public Transform impactEffect;
+        public AudioClip[] hitMarkerSounds;
         [Range(0f, 1f)]
         public float weaponVolume = 0.5f;
 
@@ -499,7 +500,20 @@ namespace Player.Control
 
                 EnemyController enemy = hit.collider.GetComponent<EnemyController>();
                 if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
-                if (enemy != null) enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
+                    
+                    if (hitMarkerSounds != null && hitMarkerSounds.Length > 0 && audioSource != null)
+                    {
+                        AudioClip clip = hitMarkerSounds[Random.Range(0, hitMarkerSounds.Length)];
+                        if (clip != null)
+                        {
+                            audioSource.pitch = 1.0f; // Reset pitch in case gun shots randomized it
+                            audioSource.PlayOneShot(clip, weaponVolume);
+                        }
+                    }
+                }
             }
 
             SpawnBulletTrail(origin, endPoint);
