@@ -18,6 +18,10 @@ namespace Enemy.Control
         [Tooltip("How often (in seconds) the enemy recalculates the path to the player. Higher = Better Performance.")]
         public float rethinkInterval = 0.2f;
 
+        // Death Settings populated from EnemyDatabase
+        private float deathDuration = 3.0f;
+        private float groundYPosition = 0f;
+
         // Hardcoded Layer Mask
         private LayerMask playerLayer => LayerMask.GetMask("Player");
 
@@ -56,6 +60,20 @@ namespace Enemy.Control
             myOriginalPrefab = prefab;
             isDead = false;
 
+            // 0. Reset Death State
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = true;
+            
+            // Reset rotation in case it was flipped from dying previously
+            transform.rotation = Quaternion.identity; 
+
+            VATInstanceController vat = GetComponentInChildren<VATInstanceController>();
+            if (vat != null)
+            {
+                vat.animationIndex = 0;
+                vat.UpdateProperties();
+            }
+
             // 1. Find out what level we are on
             int currentLevel = 1;
             if (GameManager.Instance != null)
@@ -78,6 +96,8 @@ namespace Enemy.Control
             moveSpeed = data.moveSpeed * speedMultiplier;
             damage = data.damage * damageMultiplier;
             isGroundEnemy = data.isGroundEnemy;
+            deathDuration = data.deathDuration;
+            groundYPosition = data.groundYPosition;
 
             playerTransform = target;
 
@@ -92,8 +112,18 @@ namespace Enemy.Control
 
         private void Update()
         {
-            // NEW: Stop moving and thinking if the player is dead!
-            if (isDead || playerTransform == null || isGameOver) return;
+            if (isGameOver) return;
+
+            if (isDead)
+            {
+                // Slide the corpse backward on the X/Z plane only (prevent floating up)
+                Vector3 slideDir = -targetDirection;
+                slideDir.y = 0f;
+                transform.Translate(slideDir.normalized * moveSpeed * Time.deltaTime, Space.World);
+                return;
+            }
+
+            if (playerTransform == null) return;
 
             // 1. PERFORMANCE: Only recalculate direction on an interval
             if (Time.time >= nextRethinkTime)
@@ -147,13 +177,64 @@ namespace Enemy.Control
 
             if (GameManager.Instance != null) GameManager.Instance.RegisterEnemyKill();
 
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            VATInstanceController vat = GetComponentInChildren<VATInstanceController>();
+            if (vat != null)
+            {
+                vat.animationIndex = 1;
+                vat.UpdateProperties();
+            }
+
+            StartCoroutine(DeathAnimationRoutine());
+        }
+
+        private System.Collections.IEnumerator DeathAnimationRoutine()
+        {
+            float animTime = 0.5f; // time to fall over
+            float timer = 0f;
+
+            Quaternion startRot = transform.rotation;
+            // Pitch backwards 180 degrees
+            Quaternion endRot = startRot * Quaternion.Euler(180f, 0f, 0f); 
+
+            Vector3 startPos = transform.position;
+            Vector3 endPos = startPos;
+            endPos.y = groundYPosition; // ALL enemies should end up at the ground height
+
+            while (timer < animTime)
+            {
+                timer += Time.deltaTime;
+                float t = timer / animTime;
+                
+                transform.rotation = Quaternion.Slerp(startRot, endRot, t);
+                
+                // Move the Y position down to the ground, keep X and Z handled by Update
+                Vector3 currentPos = transform.position;
+                currentPos.y = Mathf.Lerp(startPos.y, endPos.y, t);
+                transform.position = currentPos;
+                
+                yield return null;
+            }
+
+            // Ensure final state
+            transform.rotation = endRot;
+            
+            Vector3 finalPos = transform.position;
+            finalPos.y = endPos.y;
+            transform.position = finalPos;
+
+            // Wait the remaining duration so it stays visible
+            yield return new WaitForSeconds(Mathf.Max(0f, deathDuration - animTime));
+
             if (myOriginalPrefab != null && PoolManager.Instance != null)
             {
-                PoolManager.Instance.ReturnToPoolAfterDelay(this.gameObject, myOriginalPrefab, 0.1f);
+                PoolManager.Instance.ReturnToPoolAfterDelay(this.gameObject, myOriginalPrefab, 0f);
             }
             else
             {
-                Destroy(gameObject, 0.1f);
+                Destroy(gameObject);
             }
         }
 

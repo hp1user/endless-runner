@@ -484,8 +484,12 @@ namespace Player.Control
             if (Camera.main == null) return;
             Ray ray = Camera.main.ScreenPointToRay(sPoint);
 
+            // Default endpoint is straight forward along the global Z axis
+            Vector3 endPoint = origin + Vector3.forward * currentWeaponData.range;
+
             if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide))
             {
+                endPoint = hit.point;
                 if (impactEffect != null)
                 {
                     GameObject impactPrefab = impactEffect.gameObject;
@@ -496,6 +500,39 @@ namespace Player.Control
                 EnemyController enemy = hit.collider.GetComponent<EnemyController>();
                 if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
                 if (enemy != null) enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
+            }
+
+            SpawnBulletTrail(origin, endPoint);
+        }
+
+        private void SpawnBulletTrail(Vector3 startPos, Vector3 endPos)
+        {
+            if (currentWeaponData.bulletTrailPrefab == null)
+            {
+                // Dynamically generate a trail prefab if empty
+                GameObject generatedTrail = new GameObject("GeneratedBulletTrail");
+                generatedTrail.SetActive(false); 
+                
+                LineRenderer lr = generatedTrail.AddComponent<LineRenderer>();
+                lr.startWidth = 0.05f;
+                lr.endWidth = 0.01f;
+                Material trailMat = new Material(Shader.Find("Sprites/Default"));
+                lr.material = trailMat;
+                lr.startColor = new Color(1f, 0.8f, 0.2f, 1f); // Glowing Orange
+                lr.endColor = new Color(1f, 0.8f, 0.2f, 1f);
+
+                generatedTrail.AddComponent<BulletTrail>();
+
+                // Save it to the WeaponData so it acts as a prefab key for the PoolManager
+                currentWeaponData.bulletTrailPrefab = generatedTrail;
+                DontDestroyOnLoad(generatedTrail); 
+            }
+
+            GameObject trailInstance = PoolManager.Instance.SpawnFromPool(currentWeaponData.bulletTrailPrefab, startPos, Quaternion.identity);
+            BulletTrail trailScript = trailInstance.GetComponent<BulletTrail>();
+            if (trailScript != null)
+            {
+                trailScript.Initialize(startPos, endPos, currentWeaponData.trailDuration, currentWeaponData.bulletTrailPrefab);
             }
         }
 

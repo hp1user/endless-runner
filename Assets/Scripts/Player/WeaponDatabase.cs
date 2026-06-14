@@ -49,6 +49,10 @@ public class WeaponEntry
     public Transform muzzleFlash;
     public float flashLifetime = 0.2f;
     public float impactLifetime = 1.0f;
+    
+    [Tooltip("Optional: Visual bullet trail. If empty, a default one will be generated.")]
+    public GameObject bulletTrailPrefab;
+    public float trailDuration = 0.05f;
 }
 
 [CreateAssetMenu(fileName = "WeaponDatabase", menuName = "Player/Weapon Database")]

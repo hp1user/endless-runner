@@ -28,6 +28,10 @@ public class EnemyEntry
     public float maxHealth = 30f;
     public float moveSpeed = 5f;
     public float damage = 10f;
+
+    [Header("Death Settings")]
+    public float deathDuration = 3.0f;
+    public float groundYPosition = 0f;
 }
 
 [CreateAssetMenu(fileName = "EnemyDatabase", menuName = "Enemy/Enemy Database")]

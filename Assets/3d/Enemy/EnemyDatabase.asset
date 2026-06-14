@@ -23,6 +23,8 @@ MonoBehaviour:
     maxHealth: 10
     moveSpeed: 0.5
     damage: 10
+    deathDuration: 2
+    groundYPosition: 0.45
   - enemyName: Capsule
     prefab: {fileID: 899366677854948109, guid: c7d4d5b6a59d73a4383db496f802396b, type: 3}
     category: 0
@@ -33,3 +35,5 @@ MonoBehaviour:
     maxHealth: 10
     moveSpeed: 1
     damage: 15
+    deathDuration: 2
+    groundYPosition: 0.45
