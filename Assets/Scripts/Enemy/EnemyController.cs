@@ -103,7 +103,7 @@ namespace Enemy.Control
 
             if (debugMode)
             {
-                if (GetComponent<Rigidbody>() == null && GetComponent<Rigidbody2D>() == null)
+                if (GetComponent<Rigidbody>() == null)
                     Debug.LogWarning($"<color=red>[Enemy]</color> {enemyName} has NO Rigidbody!");
 
                 Debug.Log($"<color=green>[Enemy Level {currentLevel}]</color> {enemyName} spawned. HP: {currentHealth}, DMG: {damage}, SPD: {moveSpeed}");
