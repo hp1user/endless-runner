@@ -27,6 +27,7 @@ public class TouchManager : MonoBehaviour
     public static event Action OnSwipeUp; // Reload Event
 
     public static bool IsShooting { get; private set; }
+    private static float shootBufferTimer = 0f;
     public static Vector2 CurrentTouchPosition { get; private set; }
     public static float TouchHoldTime { get; private set; }
 
@@ -48,6 +49,7 @@ public class TouchManager : MonoBehaviour
 
         // Check if the wheel is currently open
         bool isWheelOpen = WeaponWheelManager.Instance != null && WeaponWheelManager.Instance.wheelUI.activeSelf;
+        bool shouldShoot = false;
 
         // --- 1. TOUCH BEGAN ---
         if (pressedThisFrame)
@@ -60,13 +62,13 @@ public class TouchManager : MonoBehaviour
             if (!isWheelOpen && DidTouchPlayer(position))
             {
                 isHoldingOnPlayer = true;
-                IsShooting = false;
             }
             else
             {
                 isHoldingOnPlayer = false;
-                IsShooting = true;
             }
+            
+            // DON'T set IsShooting to true on frame 1. We must wait 0.1s to see if they are swiping!
         }
         // --- 2. TOUCH HELD / MOVED ---
         else if (isPressed)
@@ -91,18 +93,29 @@ public class TouchManager : MonoBehaviour
                 // If they haven't swiped, and are holding the player, check the timer
                 else if (isHoldingOnPlayer && !isSwiping)
                 {
-                    if (Time.unscaledTime - touchStartTime >= holdTimeToOpenWheel)
+                    if (TouchHoldTime >= holdTimeToOpenWheel)
                     {
                         WeaponWheelManager.Instance.OpenWheel();
                         isSwiping = true; // Lock out swiping just in case
                     }
+                }
+                // If they hold without swiping for > 0.1s, it is an automatic weapon hold, so start shooting!
+                else if (!isHoldingOnPlayer && !isSwiping && TouchHoldTime > 0.1f)
+                {
+                    shouldShoot = true;
                 }
             }
         }
         // --- 3. TOUCH ENDED ---
         else if (releasedThisFrame)
         {
-            IsShooting = false;
+            // If they released quickly without swiping, it was a fast tap! 
+            // We use a short buffer to guarantee the PlayerController registers the shot.
+            if (!isWheelOpen && !isHoldingOnPlayer && !isSwiping && TouchHoldTime <= 0.1f)
+            {
+                shootBufferTimer = 0.1f;
+            }
+
             isHoldingOnPlayer = false;
 
             if (isWheelOpen)
@@ -110,10 +123,15 @@ public class TouchManager : MonoBehaviour
                 WeaponWheelManager.Instance.CloseWheel();
             }
         }
-        else if (!isPressed)
+
+        // Apply the shot buffer
+        if (shootBufferTimer > 0f)
         {
-            IsShooting = false;
+            shootBufferTimer -= Time.unscaledDeltaTime;
+            shouldShoot = true;
         }
+
+        IsShooting = shouldShoot;
     }
 
     private bool DidTouchPlayer(Vector2 screenPos)

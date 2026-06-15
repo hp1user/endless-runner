@@ -485,8 +485,18 @@ namespace Player.Control
             if (Camera.main == null) return;
             Ray ray = Camera.main.ScreenPointToRay(sPoint);
 
-            // Default endpoint is straight forward along the global Z axis
-            Vector3 endPoint = origin + Vector3.forward * currentWeaponData.range;
+            // Aim exactly at where the player's IK is pointing (the AimTarget).
+            // This prevents steep camera rays from calculating a point behind the player's muzzle.
+            Vector3 targetPos = (aimTarget != null) ? aimTarget.position : ray.GetPoint(100f);
+            
+            // Absolute failsafe: Never shoot backwards
+            if (targetPos.z <= origin.z)
+            {
+                targetPos.z = origin.z + 50f;
+            }
+
+            Vector3 shootDir = (targetPos - origin).normalized;
+            Vector3 endPoint = origin + shootDir * currentWeaponData.range;
 
             if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide))
             {

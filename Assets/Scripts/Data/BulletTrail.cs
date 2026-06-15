@@ -4,6 +4,10 @@ using System.Collections;
 [RequireComponent(typeof(LineRenderer))]
 public class BulletTrail : MonoBehaviour
 {
+    [Header("Tracer Settings")]
+    public float bulletSpeed = 150f;
+    public float bulletLength = 2f;
+
     private LineRenderer lineRenderer;
     private GameObject originalPrefab;
 
@@ -26,36 +30,37 @@ public class BulletTrail : MonoBehaviour
         // Ensure LineRenderer has exactly 2 points
         lineRenderer.positionCount = 2;
         lineRenderer.SetPosition(0, startPoint);
-        lineRenderer.SetPosition(1, endPoint);
+        lineRenderer.SetPosition(1, startPoint);
 
-        StartCoroutine(FadeOutRoutine(duration));
+        StartCoroutine(TravelRoutine(startPoint, endPoint));
     }
 
-    private IEnumerator FadeOutRoutine(float duration)
+    private IEnumerator TravelRoutine(Vector3 startPoint, Vector3 endPoint)
     {
+        float distance = Vector3.Distance(startPoint, endPoint);
+        // Guarantee at least 0.05s of travel time so it doesn't vanish in 1 frame on 30fps mobile screens
+        float travelTime = Mathf.Max(0.05f, distance / bulletSpeed);
         float timer = 0f;
 
-        // Capture initial colors
-        Color startColor = lineRenderer.startColor;
-        Color endColor = lineRenderer.endColor;
+        // Ensure trail is visible and alpha is 1
+        lineRenderer.startColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g, lineRenderer.startColor.b, 1f);
+        lineRenderer.endColor = new Color(lineRenderer.endColor.r, lineRenderer.endColor.g, lineRenderer.endColor.b, 1f);
 
-        while (timer < duration)
+        while (timer < travelTime)
         {
             timer += Time.deltaTime;
-            float normalizedTime = timer / duration;
+            float t = timer / travelTime;
 
-            // Fade alpha from 1 to 0 over duration
-            float alpha = Mathf.Lerp(1f, 0f, normalizedTime);
+            Vector3 currentHead = Vector3.Lerp(startPoint, endPoint, t);
+            
+            float tailDist = Mathf.Max(0f, Vector3.Distance(startPoint, currentHead) - bulletLength);
+            Vector3 currentTail = startPoint + (endPoint - startPoint).normalized * tailDist;
 
-            lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, alpha);
-            lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, alpha);
+            lineRenderer.SetPosition(0, currentTail);
+            lineRenderer.SetPosition(1, currentHead);
 
             yield return null;
         }
-
-        // Restore alpha for the next time it spawns from the pool
-        lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, 1f);
-        lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, 1f);
 
         Recycle();
     }

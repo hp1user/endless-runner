@@ -21,7 +21,7 @@ namespace AnimationTools
         public class EventTriggerEvent : UnityEvent<string> { }
 
         private Animator _animator;
-        private Dictionary<AnimationClip, float> _lastNormalizedTimes = new();
+        private Dictionary<string, float> _lastNormalizedTimes = new();
         private int[] _lastStateHashes;
 
         private void Start()
@@ -97,11 +97,13 @@ namespace AnimationTools
 
                     if (weight < 0.05f) continue;
 
-                    if (!_lastNormalizedTimes.TryGetValue(clip, out float lastTime))
+                    string clipKey = clip.name + "_" + i;
+
+                    if (!_lastNormalizedTimes.TryGetValue(clipKey, out float lastTime))
                     {
                         if (library.debugMode) Debug.Log($"<color=orange>[AnimTool]</color> Tracking Clip: <b>{clip.name}</b> (Layer {i})", this);
                         lastTime = currentNormalizedTime;
-                        _lastNormalizedTimes[clip] = currentNormalizedTime;
+                        _lastNormalizedTimes[clipKey] = currentNormalizedTime;
                     }
 
                     var markers = library.GetAllMarkersForClip(clip);
@@ -122,7 +124,7 @@ namespace AnimationTools
                             }
                         }
                     }
-                    _lastNormalizedTimes[clip] = currentNormalizedTime;
+                    _lastNormalizedTimes[clipKey] = currentNormalizedTime;
                 }
             }
 
@@ -145,17 +147,17 @@ namespace AnimationTools
         private void CleanUpDictionary()
         {
             // Simple cleanup logic: if a clip is no longer being played in any layer, remove it
-            var activeClips = new HashSet<AnimationClip>();
+            var activeKeys = new HashSet<string>();
             for (int i = 0; i < _animator.layerCount; i++)
             {
                 var clips = _animator.GetCurrentAnimatorClipInfo(i);
-                foreach (var c in clips) activeClips.Add(c.clip);
+                foreach (var c in clips) activeKeys.Add(c.clip.name + "_" + i);
             }
 
-            var keysToRemove = new List<AnimationClip>();
+            var keysToRemove = new List<string>();
             foreach (var key in _lastNormalizedTimes.Keys)
             {
-                if (!activeClips.Contains(key)) keysToRemove.Add(key);
+                if (!activeKeys.Contains(key)) keysToRemove.Add(key);
             }
             foreach (var key in keysToRemove) _lastNormalizedTimes.Remove(key);
         }
