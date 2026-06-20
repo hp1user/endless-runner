@@ -31,6 +31,9 @@ namespace Enemy.Control
         private bool isDead = false;
         private bool isGameOver = false; // NEW: Tracks if the player is dead
         private bool isGroundEnemy = false;
+        private bool alwaysChasePlayer = true;
+        private bool spawnedInFront = true;
+        private bool hasPassedPlayer = false;
 
         // POOLING TRACKERS
         private EnemyManager myManager;
@@ -99,7 +102,14 @@ namespace Enemy.Control
             deathDuration = data.deathDuration;
             groundYPosition = data.groundYPosition;
 
+            // Roll dice for chasing based on database config
+            alwaysChasePlayer = data.alwaysChasePlayer ? true : (Random.Range(0f, 100f) < data.chaseChance);
+
             playerTransform = target;
+
+            // Cache where the enemy spawned so it doesn't suddenly change its mind and turn around after passing the player
+            spawnedInFront = (transform.position.z > (playerTransform != null ? playerTransform.position.z - 5f : -5f));
+            hasPassedPlayer = false;
 
             if (debugMode)
             {
@@ -131,12 +141,39 @@ namespace Enemy.Control
                 nextRethinkTime = Time.time + rethinkInterval;
                 Vector3 targetPos = playerTransform.position + Vector3.up * targetHeightOffset;
                 
+                if (!alwaysChasePlayer)
+                {
+                    targetPos.x = transform.position.x; // Keep the same lane (don't chase X)
+                }
+
                 if (isGroundEnemy)
                 {
                     targetPos.y = transform.position.y; // Keep it on the ground!
                 }
 
-                targetDirection = (targetPos - transform.position).normalized;
+                Vector3 dir = targetPos - transform.position;
+
+                // --- ENDLESS RUNNER FLOW LOGIC ---
+                if (spawnedInFront) 
+                {
+                    // Do not artificially inflate Z distance from afar (which dilutes steering), 
+                    // but ensure a minimum forward speed so it doesn't hover at the player.
+                    if (dir.z > -2f) dir.z = -2f; 
+
+                    // If it is passing the player, stop steering sideways and just run straight away
+                    if (transform.position.z <= playerTransform.position.z - 5f)
+                    {
+                        dir.x = 0;
+                        dir.y = 0;
+                    }
+                }
+                else 
+                {
+                    // Boss spawned behind the player. Force strong positive Z momentum.
+                    dir.z = Mathf.Max(dir.z, 10f);
+                }
+
+                targetDirection = dir.normalized;
             }
 
             // 2. MOVEMENT: Apply the cached direction every frame for smooth motion
@@ -146,10 +183,37 @@ namespace Enemy.Control
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), Time.deltaTime * 5f);
             }
 
-            // Safety net: Despawn if it falls off the bridge
-            if (transform.position.z < -20f)
+            // Immediately notify manager to spawn a replacement if it crosses Z=-5 behind the player
+            if (spawnedInFront && !hasPassedPlayer && playerTransform != null && transform.position.z < playerTransform.position.z - 5f)
             {
-                Die();
+                hasPassedPlayer = true;
+                if (myManager != null) myManager.OnEnemyPassedPlayer();
+            }
+
+            // Safety net: Despawn if it falls off the bridge
+            if (transform.position.z < -40f)
+            {
+                Despawn();
+            }
+        }
+
+        private void Despawn()
+        {
+            if (isDead) return;
+            isDead = true;
+
+            if (myManager != null) myManager.OnEnemyDespawned();
+
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            if (myOriginalPrefab != null && PoolManager.Instance != null)
+            {
+                PoolManager.Instance.ReturnToPoolAfterDelay(this.gameObject, myOriginalPrefab, 0f);
+            }
+            else
+            {
+                Destroy(gameObject);
             }
         }
 

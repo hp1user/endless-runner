@@ -94,27 +94,49 @@ namespace Animation.Tools
             lastRayStart = (rayOriginOverride != null) ? rayOriginOverride.position : cameraRay.origin;
             
             // Try to hit something in the world through the camera view first
-            if (Physics.Raycast(cameraRay, out RaycastHit hit, Mathf.Infinity, raycastLayers))
+            RaycastHit[] hits = Physics.RaycastAll(cameraRay, Mathf.Infinity, raycastLayers);
+            hasHitSomething = false;
+            Transform hitTransform = null;
+
+            if (hits.Length > 0)
             {
-                lastHitPoint = hit.point;
-                hasHitSomething = true;
+                // Sort by distance (RaycastAll is not guaranteed to be ordered)
+                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+                Transform player = (rayOriginOverride != null) ? rayOriginOverride : myTransform;
                 
-                Vector3 targetPos = hit.point;
-                targetPos.z = lockedZ; // Lock Z strictly to X and Y
-                targetTransform.position = targetPos;
+                foreach (RaycastHit hit in hits)
+                {
+                    // Ignore enemies that have already run past Z=0, AND ignore the player's own body
+                    if (hit.point.z >= 0f && hit.transform.root != player.root)
+                    {
+                        lastHitPoint = hit.point;
+                        hitTransform = hit.transform;
+                        hasHitSomething = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasHitSomething)
+            {
+                // We HIT an object in 3D space! Use its exact coordinate so bullet trajectories are perfectly aligned.
+                targetTransform.position = lastHitPoint;
+                if (hitTransform != null) {
+                    targetTransform.SetParent(hitTransform, true);
+                }
             }
             else
             {
-                // Fallback: If no hit, project screen point onto an imaginary plane at lockedZ
-                Plane plane = new Plane(Vector3.forward, new Vector3(0, 0, lockedZ));
+                targetTransform.SetParent(null, true);
+                // Fallback: If no hit, project screen point onto an imaginary plane in the distance
+                float fallbackZ = lockedZ == 0f ? 50f : lockedZ;
+                Plane plane = new Plane(Vector3.forward, new Vector3(0, 0, fallbackZ));
                 if (plane.Raycast(cameraRay, out float enter))
                 {
                     lastHitPoint = cameraRay.GetPoint(enter);
                     hasHitSomething = true;
-                    
-                    Vector3 targetPos = lastHitPoint;
-                    targetPos.z = lockedZ;
-                    targetTransform.position = targetPos;
+                    targetTransform.position = lastHitPoint;
                 }
             }
 

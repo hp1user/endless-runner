@@ -19,6 +19,8 @@ MonoBehaviour:
     isGroundEnemy: 0
     minSpawnLevel: 1
     maxSpawnLevel: 999
+    alwaysChasePlayer: 1
+    chaseChance: 80
     bossTargetLevel: 5
     maxHealth: 10
     moveSpeed: 0.5
@@ -31,9 +33,11 @@ MonoBehaviour:
     isGroundEnemy: 1
     minSpawnLevel: 1
     maxSpawnLevel: 999
+    alwaysChasePlayer: 0
+    chaseChance: 80
     bossTargetLevel: 5
     maxHealth: 10
-    moveSpeed: 1
+    moveSpeed: 0.75
     damage: 15
     deathDuration: 2
     groundYPosition: 0.45

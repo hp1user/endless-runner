@@ -21,6 +21,13 @@ public class EnemyEntry
     [Tooltip("The last level this enemy can spawn (Use 999 for infinite).")]
     public int maxSpawnLevel = 999;
 
+    [Header("Chase Settings")]
+    [Tooltip("If true, the enemy will always chase the player across lanes.")]
+    public bool alwaysChasePlayer = true;
+    [Tooltip("If alwaysChasePlayer is false, this is the percentage chance (0 to 100) that the enemy will chase the player anyway.")]
+    [Range(0f, 100f)]
+    public float chaseChance = 80f;
+
     [Tooltip("If this is a Boss, EXACTLY what level does it spawn on?")]
     public int bossTargetLevel = 5;
 

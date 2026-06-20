@@ -208,4 +208,18 @@ public class EnemyManager : MonoBehaviour
         activeEnemyCount--;
         activeEnemyCount = Mathf.Max(0, activeEnemyCount);
     }
+
+    public void OnEnemyDespawned()
+    {
+        activeEnemyCount--;
+        activeEnemyCount = Mathf.Max(0, activeEnemyCount);
+    }
+
+    public void OnEnemyPassedPlayer()
+    {
+        // When an enemy passes Z=-5, it's no longer a threat. We instantly decrement
+        // enemiesSpawnedThisLevel so the manager spawns a replacement right away!
+        enemiesSpawnedThisLevel--;
+        enemiesSpawnedThisLevel = Mathf.Max(0, enemiesSpawnedThisLevel);
+    }
 }
