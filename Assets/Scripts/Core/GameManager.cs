@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     public static event Action<int> OnLevelCompleted; // Tells LevelManager to swap environments
     public static event Action OnBossFightStarted;    // Tells the Camera to flip 180 degrees!
     public static event Action OnBossDefeated;        // Tells the Camera to flip back
+    public static event Action OnEnemyKilled;         // Tells listeners (like Ultimate skill) that an enemy died
 
     private void Awake()
     {
@@ -40,6 +41,7 @@ public class GameManager : MonoBehaviour
         if (isBossFightActive || PlayerController.Instance.isDead) return;
 
         enemiesKilledThisLevel++;
+        OnEnemyKilled?.Invoke(); // Announce that an enemy was killed
 
         // Calculate the quota for this specific level
         int requiredKills = GetRequiredKillsForCurrentLevel();

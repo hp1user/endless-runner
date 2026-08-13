@@ -48,7 +48,7 @@ public class TouchManager : MonoBehaviour
         CurrentTouchPosition = position;
 
         // Check if the wheel is currently open
-        bool isWheelOpen = WeaponWheelManager.Instance != null && WeaponWheelManager.Instance.wheelUI.activeSelf;
+        bool isWheelOpen = WeaponWheelToolkitManager.Instance != null && WeaponWheelToolkitManager.Instance.IsOpen;
         bool shouldShoot = false;
 
         // --- 1. TOUCH BEGAN ---
@@ -95,7 +95,7 @@ public class TouchManager : MonoBehaviour
                 {
                     if (TouchHoldTime >= holdTimeToOpenWheel)
                     {
-                        WeaponWheelManager.Instance.OpenWheel();
+                        WeaponWheelToolkitManager.Instance.OpenWheel();
                         isSwiping = true; // Lock out swiping just in case
                     }
                 }
@@ -120,7 +120,7 @@ public class TouchManager : MonoBehaviour
 
             if (isWheelOpen)
             {
-                WeaponWheelManager.Instance.CloseWheel();
+                WeaponWheelToolkitManager.Instance.CloseWheel();
             }
         }
 

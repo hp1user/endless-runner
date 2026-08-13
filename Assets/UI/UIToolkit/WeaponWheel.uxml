@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+>
+    <ui:Style src="WeaponWheel.uss" />
+    <ui:VisualElement name="wheel-container" class="wheel-container">
+        <!-- Background Layer -->
+        <ui:VisualElement name="wheel-background" class="wheel-background" picking-mode="Ignore" />
+
+        <!-- Base Lines Layer (draws the permanent donut rings and dividers) -->
+        <ui:VisualElement name="base-lines-layer" class="highlight-layer" picking-mode="Ignore" />
+
+        <!-- The highlight layer is drawn over the background but behind icons -->
+        <ui:VisualElement name="highlight-layer" class="highlight-layer" picking-mode="Ignore" />
+
+        <!-- Weapon Slots -->
+        <ui:VisualElement name="slot-smg" class="slot-container top-mid-right">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement name="slot-heavy" class="slot-container top-right">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement name="slot-ultimate" class="slot-container bottom-right">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement name="slot-skill" class="slot-container bottom-left">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement name="slot-pistol" class="slot-container top-left">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement name="slot-ar" class="slot-container top-mid-left">
+            <ui:VisualElement name="icon" class="slot-icon" />
+        </ui:VisualElement>
+
+        <!-- Center Label for currently hovered item -->
+        <ui:Label name="center-text" text="" class="center-label"/>
+    </ui:VisualElement>
+</ui:UXML>

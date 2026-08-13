@@ -44,6 +44,10 @@ namespace Player.Control
         [Header("Roguelike Upgrades")]
         public float damageMultiplier = 1.0f;
 
+        [Header("Skills and Ultimates")]
+        public SkillData equippedSkill;
+        public SkillData equippedUltimate;
+
         private LayerMask hitMask => (playerStats != null) ? playerStats.EnemyLayer : (LayerMask)LayerMask.GetMask("Enemy");
 
         private WeaponEntry currentWeaponData;
@@ -93,6 +97,12 @@ namespace Player.Control
         private float lastDamageTime = -999f;
         private bool touchReloadRequested = false;
 
+        // Skill Tracking
+        private float currentSkillCooldownTimer = 0f;
+        private float currentUltimateKillCount = 0f;
+        private float activeRapidFireTimer = 0f;
+        private bool isRapidFireActive = false;
+
         public static PlayerController Instance { get; private set; }
         public bool isDead { get; private set; } = false;
         public static event System.Action OnPlayerDeath;
@@ -102,6 +112,7 @@ namespace Player.Control
             TouchManager.OnSwipeLeft += MoveLeft;
             TouchManager.OnSwipeRight += MoveRight;
             TouchManager.OnSwipeUp += RequestReload;
+            GameManager.OnEnemyKilled += HandleEnemyKilled;
         }
 
         private void OnDisable()
@@ -109,6 +120,22 @@ namespace Player.Control
             TouchManager.OnSwipeLeft -= MoveLeft;
             TouchManager.OnSwipeRight -= MoveRight;
             TouchManager.OnSwipeUp -= RequestReload;
+            GameManager.OnEnemyKilled -= HandleEnemyKilled;
+        }
+
+        private void HandleEnemyKilled()
+        {
+            if (equippedUltimate != null && equippedUltimate.isKillBasedRecharge)
+            {
+                if (currentUltimateKillCount < equippedUltimate.rechargeRequirement)
+                {
+                    currentUltimateKillCount++;
+                    if (debugMode && currentUltimateKillCount >= equippedUltimate.rechargeRequirement)
+                    {
+                        Debug.Log("<color=cyan>[Ultimate]</color> Ultimate is READY!");
+                    }
+                }
+            }
         }
 
         private void RequestReload() => touchReloadRequested = true;
@@ -143,7 +170,7 @@ namespace Player.Control
                 if (starterPistol != null)
                 {
                     unlockedWeapons.Add(starterPistol);
-                    if (WeaponWheelManager.Instance != null) WeaponWheelManager.Instance.AddWeaponToWheel(starterPistol);
+                    if (WeaponWheelToolkitManager.Instance != null) WeaponWheelToolkitManager.Instance.AddWeaponToWheel(starterPistol);
                     weaponLayerIndex = starterPistol.animatorLayer;
 
                     //reserveAmmo[starterPistol.category] += starterPistol.magSize * startingReserveMags;
@@ -190,6 +217,27 @@ namespace Player.Control
             HandleAiming();
             HandleActions();
             UpdateLayerWeights();
+            UpdateSkills();
+        }
+
+        private void UpdateSkills()
+        {
+            // Time-based skill cooldown
+            if (equippedSkill != null && !equippedSkill.isKillBasedRecharge && currentSkillCooldownTimer > 0)
+            {
+                currentSkillCooldownTimer -= Time.deltaTime;
+            }
+
+            // Rapid Fire duration tracking
+            if (isRapidFireActive)
+            {
+                activeRapidFireTimer -= Time.deltaTime;
+                if (activeRapidFireTimer <= 0)
+                {
+                    isRapidFireActive = false;
+                    if (debugMode) Debug.Log("<color=green>[Skill]</color> Rapid Fire ended.");
+                }
+            }
         }
 
         private void UpdateCurrentWeaponData()
@@ -261,7 +309,7 @@ namespace Player.Control
 
         private void HandleActions()
         {
-            bool shootingInput = TouchManager.IsShooting;
+            bool shootingInput = TouchManager.IsShooting || isRapidFireActive;
             bool reloadPressed = touchReloadRequested;
             touchReloadRequested = false;
 
@@ -285,6 +333,12 @@ namespace Player.Control
                     {
                         currentDynamicFireRate = Mathf.Min(targetFireSpeedMult, 1.5f);
                     }
+
+                    // Apply Rapid Fire Buff
+                    if (isRapidFireActive && equippedSkill != null && equippedSkill.skillType == SkillType.RapidFire)
+                    {
+                        currentDynamicFireRate *= equippedSkill.effectValue;
+                    }
                 }
 
                 animator.SetFloat(fireMultiplierParamHash, currentDynamicFireRate);
@@ -302,7 +356,7 @@ namespace Player.Control
             int maxAmmo = currentWeaponData != null ? currentWeaponData.magSize : 0;
 
             // AUTO-RELOAD (Only if we have reserve ammo left!)
-            if (currentAmmo <= 0 && currentWeaponData != null)
+            if (currentAmmo <= 0 && currentWeaponData != null && !isRapidFireActive)
             {
                 animator.SetBool(fireParamHash, false);
 
@@ -343,14 +397,24 @@ namespace Player.Control
             {
                 bool canShoot = true;
 
-                if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) canShoot = false;
-                if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) canShoot = false;
-                if (currentWeaponData.fireMode == WeaponFireMode.Auto && TouchManager.TouchHoldTime < 0.2f && shotsFiredThisTriggerPull >= 1) canShoot = false;
+                if (!isRapidFireActive)
+                {
+                    if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) canShoot = false;
+                    if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) canShoot = false;
+                    if (currentWeaponData.fireMode == WeaponFireMode.Auto && TouchManager.TouchHoldTime < 0.2f && shotsFiredThisTriggerPull >= 1) canShoot = false;
+                }
 
                 animator.SetBool(fireParamHash, canShoot);
 
                 if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
-                if (fireCooldownTimer <= 0f) fireCooldownTimer = 1.0f / currentWeaponData.fireRate;
+                
+                float activeFireRate = currentWeaponData.fireRate;
+                if (isRapidFireActive && equippedSkill != null && equippedSkill.skillType == SkillType.RapidFire)
+                {
+                    activeFireRate *= equippedSkill.effectValue; // Increase fire rate mathematically
+                }
+
+                if (fireCooldownTimer <= 0f) fireCooldownTimer = 1.0f / activeFireRate;
 
                 targetLayerWeight = 1f;
                 return;
@@ -443,17 +507,23 @@ namespace Player.Control
             // AnimationEventTrigger passes weight via floatParameter
             if (ae.floatParameter < 0.1f) return;
 
-            if (currentWeaponData == null || currentAmmo <= 0 || IsReloadingAnimationPlaying()) return;
+            if (currentWeaponData == null || (currentAmmo <= 0 && !isRapidFireActive) || IsReloadingAnimationPlaying()) return;
 
-            if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) return;
-            if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) return;
+            if (!isRapidFireActive)
+            {
+                if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) return;
+                if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) return;
+            }
 
             shotsFiredThisTriggerPull++;
-            currentAmmo--;
-
-            // Sync bullet count to memory so swapping weapons saves our state!
-            loadedAmmo[currentWeaponData.weaponID] = currentAmmo;
-            UpdateAmmoUI();
+            
+            if (!isRapidFireActive)
+            {
+                currentAmmo--;
+                // Sync bullet count to memory so swapping weapons saves our state!
+                loadedAmmo[currentWeaponData.weaponID] = currentAmmo;
+                UpdateAmmoUI();
+            }
 
             if (audioSource != null && currentWeaponData.audioFire != null)
             {
@@ -667,6 +737,84 @@ namespace Player.Control
             return categories;
         }
 
+        public void ActivateSkill()
+        {
+            if (equippedSkill == null) return;
+
+            if (!equippedSkill.isKillBasedRecharge)
+            {
+                if (currentSkillCooldownTimer > 0)
+                {
+                    if (debugMode) Debug.Log("<color=green>[SKILL]</color> Skill on cooldown!");
+                    return;
+                }
+            }
+
+            if (debugMode) Debug.Log($"<color=green>[SKILL]</color> {equippedSkill.skillName} activated!");
+            
+            // Apply Skill Effect
+            if (equippedSkill.skillType == SkillType.RapidFire)
+            {
+                isRapidFireActive = true;
+                activeRapidFireTimer = equippedSkill.effectDuration;
+            }
+            
+            if (equippedSkill.visualEffectPrefab != null)
+            {
+                Instantiate(equippedSkill.visualEffectPrefab, transform.position, Quaternion.identity);
+            }
+
+            // Reset Cooldown
+            if (!equippedSkill.isKillBasedRecharge)
+            {
+                currentSkillCooldownTimer = equippedSkill.rechargeRequirement;
+            }
+        }
+
+        public void ActivateUltimate()
+        {
+            if (equippedUltimate == null) return;
+
+            if (equippedUltimate.isKillBasedRecharge)
+            {
+                if (currentUltimateKillCount < equippedUltimate.rechargeRequirement)
+                {
+                    if (debugMode) Debug.Log($"<color=cyan>[ULTIMATE]</color> Ultimate not ready! Kills: {currentUltimateKillCount}/{equippedUltimate.rechargeRequirement}");
+                    return;
+                }
+            }
+
+            if (debugMode) Debug.Log($"<color=cyan>[ULTIMATE]</color> {equippedUltimate.skillName} activated!");
+
+            // Apply Ultimate Effect
+            if (equippedUltimate.skillType == SkillType.AoEKill)
+            {
+                Collider[] enemies = Physics.OverlapSphere(transform.position, equippedUltimate.effectRadius, hitMask);
+                foreach (var col in enemies)
+                {
+                    EnemyController enemy = col.GetComponent<EnemyController>();
+                    if (enemy == null) enemy = col.GetComponentInParent<EnemyController>();
+                    
+                    if (enemy != null)
+                    {
+                        // Instakill by dealing massive damage
+                        enemy.TakeDamage(9999f);
+                    }
+                }
+            }
+
+            if (equippedUltimate.visualEffectPrefab != null)
+            {
+                Instantiate(equippedUltimate.visualEffectPrefab, transform.position, Quaternion.identity);
+            }
+
+            // Reset Cooldown
+            if (equippedUltimate.isKillBasedRecharge)
+            {
+                currentUltimateKillCount = 0;
+            }
+        }
+
         public void RestoreHealth(float amount)
         {
             float maxHealth = (playerStats != null) ? runtimeMaxHealth : 100f;
@@ -714,9 +862,9 @@ namespace Player.Control
 
             unlockedWeapons.Add(newGun);
 
-            if (WeaponWheelManager.Instance != null)
+            if (WeaponWheelToolkitManager.Instance != null)
             {
-                WeaponWheelManager.Instance.AddWeaponToWheel(newGun);
+                WeaponWheelToolkitManager.Instance.AddWeaponToWheel(newGun);
             }
 
             EquipWeaponFromWheel(newGun);
@@ -740,6 +888,20 @@ namespace Player.Control
                     damageMultiplier += (card.upgradeValue / 100f);
                     break;
             }
+        }
+
+        public float GetSkillRechargeRatio()
+        {
+            if (equippedSkill == null || equippedSkill.rechargeRequirement <= 0) return 0f;
+            if (equippedSkill.isKillBasedRecharge) return 0f;
+            return 1f - Mathf.Clamp01(currentSkillCooldownTimer / equippedSkill.rechargeRequirement);
+        }
+
+        public float GetUltimateRechargeRatio()
+        {
+            if (equippedUltimate == null || equippedUltimate.rechargeRequirement <= 0) return 0f;
+            if (!equippedUltimate.isKillBasedRecharge) return 0f;
+            return Mathf.Clamp01(currentUltimateKillCount / equippedUltimate.rechargeRequirement);
         }
     }
 }
