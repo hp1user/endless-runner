@@ -4748,9 +4748,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: equippedSkill
+      value: 
+      objectReference: {fileID: 11400000, guid: e0f70518c9adc5444b03af8c46711ac7, type: 2}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
       propertyPath: hitMarkerSound
       value: 
       objectReference: {fileID: 8300000, guid: 43460a598fd4d4f518c9107b85eaf6fd, type: 3}
+    - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
+      propertyPath: equippedUltimate
+      value: 
+      objectReference: {fileID: 11400000, guid: eb82dfaa8704255469b579da1404a1cd, type: 2}
     - target: {fileID: 1463450710275739164, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
       propertyPath: hitMarkerSounds.Array.size
       value: 2
