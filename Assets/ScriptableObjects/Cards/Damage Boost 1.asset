@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: Damage Boost 1
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
   cardName: Damage Boost Epic
-  description: What does this card do?
-  cardIcon: {fileID: 0}
+  description: 'Damage Boost Card
+
+    Boost 2% damage'
+  cardIcon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   rarity: 3
-  upgradeType: 2
-  upgradeValue: 20
+  effects:
+  - upgradeType: 2
+    upgradeValue: 2
   rarityBackgroundImage: {fileID: 21300000, guid: e14d2e306a9791e418b418ebaca143ea, type: 3}
-  rarityColor: {r: 0.41918838, g: 0.14684944, b: 0.5660378, a: 1}
+  rarityColor: {r: 1, g: 1, b: 1, a: 1}
   selectedCardSprite: {fileID: 21300000, guid: cd8f52acc7753ba429c9787b4489bd55, type: 3}
   selectedCardColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

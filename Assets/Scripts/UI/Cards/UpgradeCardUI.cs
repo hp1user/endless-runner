@@ -40,14 +40,20 @@ public class UpgradeCardUI : MonoBehaviour
         // --- NEW: Format the Stat Value Text ---
         if (valueText != null)
         {
-            string suffix = "";
+            valueText.text = "";
+            if (cardData.effects != null && cardData.effects.Count > 0)
+            {
+                foreach (var effect in cardData.effects)
+                {
+                    string suffix = "";
+                    if (effect.upgradeType == UpgradeType.DamageBoost) suffix = "%";
+                    else if (effect.upgradeType == UpgradeType.MaxHealth) suffix = " HP";
+                    else if (effect.upgradeType == UpgradeType.SpeedBoost) suffix = " SPD";
 
-            // Add a cool suffix based on what kind of stat it is!
-            if (cardData.upgradeType == UpgradeType.DamageBoost) suffix = "%";
-            else if (cardData.upgradeType == UpgradeType.MaxHealth) suffix = " HP";
-            else if (cardData.upgradeType == UpgradeType.SpeedBoost) suffix = " SPD";
-
-            valueText.text = "+" + cardData.upgradeValue.ToString() + suffix;
+                    valueText.text += "+" + effect.upgradeValue.ToString() + suffix + "\n";
+                }
+                valueText.text = valueText.text.TrimEnd('\n');
+            }
         }
 
     }

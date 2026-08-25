@@ -872,21 +872,26 @@ namespace Player.Control
 
         public void ApplyUpgrade(UpgradeCard card)
         {
-            switch (card.upgradeType)
+            if (card == null || card.effects == null) return;
+            
+            foreach (var effect in card.effects)
             {
-                case UpgradeType.MaxHealth:
-                    runtimeMaxHealth += card.upgradeValue; // Increase the cap
-                    currentHealth += card.upgradeValue;    // Heal the player
-                    UpdatePlayerUI();                      // Update the health bar!
-                    break;
+                switch (effect.upgradeType)
+                {
+                    case UpgradeType.MaxHealth:
+                        runtimeMaxHealth += effect.upgradeValue; // Increase the cap
+                        currentHealth += effect.upgradeValue;    // Heal the player
+                        UpdatePlayerUI();                      // Update the health bar!
+                        break;
 
-                case UpgradeType.SpeedBoost:
-                    runtimeMovementSpeed += card.upgradeValue; // Make them run faster!
-                    break;
+                    case UpgradeType.SpeedBoost:
+                        runtimeMovementSpeed += effect.upgradeValue; // Make them run faster!
+                        break;
 
-                case UpgradeType.DamageBoost:
-                    damageMultiplier += (card.upgradeValue / 100f);
-                    break;
+                    case UpgradeType.DamageBoost:
+                        damageMultiplier += (effect.upgradeValue / 100f);
+                        break;
+                }
             }
         }
 

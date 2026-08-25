@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+>
+    <engine:VisualElement class="container">
+        <!-- Toolbar -->
+        <editor:Toolbar class="toolbar">
+            <editor:ToolbarMenu text="Data Type" name="dataTypeMenu" />
+            <editor:ToolbarButton text="Rarity Database" name="settingsButton" style="-unity-font-style: bold; color: rgb(200, 200, 255);" />
+            <engine:VisualElement style="flex-grow: 1;" />
+            <editor:ToolbarSearchField name="searchField" style="width: 200px;" />
+            <editor:ToolbarButton text="Refresh List" name="refreshButton" />
+        </editor:Toolbar>
+        
+        <!-- Main Content with Resizable Panes -->
+        <engine:TwoPaneSplitView fixed-pane-initial-dimension="250" fixed-pane-index="0" orientation="Horizontal" style="flex-grow: 1;">
+            
+            <!-- Left Pane: List -->
+            <engine:VisualElement class="left-pane">
+                <engine:Label text="Upgrade Cards" class="pane-header" />
+                <engine:ListView name="itemListView" class="item-list" />
+                
+                <engine:VisualElement class="creation-panel">
+                    <engine:TextField name="newItemNameField" label="Name" value="New Upgrade Card" />
+                    <engine:VisualElement style="flex-direction: row; justify-content: space-between; margin-top: 5px;">
+                        <engine:Button name="createNewButton" text="Create" class="action-button" />
+                        <engine:Button name="duplicateButton" text="Duplicate" class="action-button" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+
+            <!-- Middle and Right Panes -->
+            <engine:TwoPaneSplitView fixed-pane-initial-dimension="350" fixed-pane-index="1" orientation="Horizontal" style="flex-grow: 1;">
+                
+                <!-- Middle Pane: Inspector/Editor -->
+                <engine:ScrollView class="middle-pane">
+                    <engine:Label text="Inspector" class="pane-header" />
+                    <engine:VisualElement name="inspectorContainer" />
+                </engine:ScrollView>
+
+                <!-- Right Pane: Visual Preview & Sprite Previews -->
+                <engine:ScrollView class="right-pane">
+                    <engine:Label text="Card Preview" class="pane-header" />
+                    <engine:VisualElement class="preview-container">
+                        <engine:VisualElement name="previewBackground" class="card-bg">
+                            <engine:Label name="previewValue" class="card-value" text="+20%" />
+                            <engine:VisualElement name="previewIcon" class="card-icon" />
+                            <engine:Label name="previewTitle" class="card-title" text="DAMAGE BOOST" />
+                            <engine:Label name="previewDesc" class="card-desc" text="Description" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    
+                    <!-- Quick Sprite Previews moved here -->
+                    <engine:Label text="Sprite Assignments" class="pane-header" style="margin-top: 20px;" />
+                    <engine:VisualElement style="flex-direction: row; justify-content: space-around; padding: 10px;">
+                        <engine:VisualElement class="quick-sprite-box">
+                            <engine:Label text="Icon" class="quick-sprite-label" />
+                            <engine:VisualElement name="quickIcon" class="quick-sprite-img" />
+                        </engine:VisualElement>
+                        <engine:VisualElement class="quick-sprite-box">
+                            <engine:Label text="Background" class="quick-sprite-label" />
+                            <engine:VisualElement name="quickBg" class="quick-sprite-img" />
+                        </engine:VisualElement>
+                        <engine:VisualElement class="quick-sprite-box">
+                            <engine:Label text="Selected" class="quick-sprite-label" />
+                            <engine:VisualElement name="quickSel" class="quick-sprite-img" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+
+                </engine:ScrollView>
+            </engine:TwoPaneSplitView>
+        </engine:TwoPaneSplitView>
+    </engine:VisualElement>
+</engine:UXML>

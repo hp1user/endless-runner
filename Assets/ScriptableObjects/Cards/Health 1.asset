@@ -16,8 +16,9 @@ MonoBehaviour:
   description: What does this card do?
   cardIcon: {fileID: 0}
   rarity: 1
-  upgradeType: 0
-  upgradeValue: 10
+  effects:
+  - upgradeType: 0
+    upgradeValue: 15
   rarityBackgroundImage: {fileID: 21300000, guid: a915e4b01d3e1174f97d0247ebfc1dc4, type: 3}
   rarityColor: {r: 0.13725491, g: 0.6509804, b: 0.7529412, a: 1}
   selectedCardSprite: {fileID: 21300000, guid: 837cb0167322f36479e3785a6273f6e1, type: 3}

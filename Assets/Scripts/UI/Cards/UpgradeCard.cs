@@ -1,7 +1,15 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum UpgradeType { MaxHealth, SpeedBoost, DamageBoost, WeaponUnlock }
 public enum CardRarity { Common, Uncommon, Rare, Epic, Legendary, Mythic }
+
+[System.Serializable]
+public class CardEffect
+{
+    public UpgradeType upgradeType;
+    public float upgradeValue;
+}
 
 [CreateAssetMenu(fileName = "New Upgrade Card", menuName = "Game Data/Upgrade Card")]
 public class UpgradeCard : ScriptableObject
@@ -14,10 +22,9 @@ public class UpgradeCard : ScriptableObject
 
     [Header("Card Rules")]
     public CardRarity rarity = CardRarity.Common;
-    public UpgradeType upgradeType;
-
-    [Header("Stat Values")]
-    public float upgradeValue;
+    
+    [Header("Card Effects")]
+    public List<CardEffect> effects = new List<CardEffect>();
 
     // --- NEW: RARITY BACKGROUND VISUALS ---
     [Header("Rarity Background")]
@@ -31,4 +38,31 @@ public class UpgradeCard : ScriptableObject
     public Sprite selectedCardSprite;
     [Tooltip("The color to tint the background when selected, if no Selected Card Sprite is provided.")]
     public Color selectedCardColor = Color.yellow;
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        // Don't run during play mode or while Unity is recompiling/updating
+        if (Application.isPlaying || UnityEditor.EditorApplication.isUpdating) return;
+        
+        // Find the CardRarityDatabase in the project
+        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:CardRarityDatabase");
+        if (guids.Length > 0)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+            CardRarityDatabase db = UnityEditor.AssetDatabase.LoadAssetAtPath<CardRarityDatabase>(path);
+            if (db != null)
+            {
+                var settings = db.GetSettingsForRarity(rarity);
+                if (settings != null)
+                {
+                    rarityBackgroundImage = settings.rarityBackgroundImage;
+                    rarityColor = settings.rarityColor;
+                    selectedCardSprite = settings.selectedCardSprite;
+                    selectedCardColor = settings.selectedCardColor;
+                }
+            }
+        }
+    }
+#endif
 }
