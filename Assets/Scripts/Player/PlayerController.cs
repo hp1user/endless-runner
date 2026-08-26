@@ -760,7 +760,11 @@ namespace Player.Control
             
             if (equippedSkill.visualEffectPrefab != null)
             {
-                Instantiate(equippedSkill.visualEffectPrefab, transform.position, Quaternion.identity);
+                GameObject vfx = Instantiate(equippedSkill.visualEffectPrefab, transform.position, Quaternion.identity, transform);
+                if (equippedSkill.effectDuration > 0)
+                {
+                    Destroy(vfx, equippedSkill.effectDuration);
+                }
             }
 
             // Reset Cooldown
@@ -804,7 +808,11 @@ namespace Player.Control
 
             if (equippedUltimate.visualEffectPrefab != null)
             {
-                Instantiate(equippedUltimate.visualEffectPrefab, transform.position, Quaternion.identity);
+                GameObject vfx = Instantiate(equippedUltimate.visualEffectPrefab, transform.position, Quaternion.identity, transform);
+                if (equippedUltimate.effectDuration > 0)
+                {
+                    Destroy(vfx, equippedUltimate.effectDuration);
+                }
             }
 
             // Reset Cooldown
