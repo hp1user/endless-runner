@@ -10,6 +10,7 @@ public class CardEffectDrawer : PropertyDrawer
         
         var typeProp = property.FindPropertyRelative("upgradeType");
         var valProp = property.FindPropertyRelative("upgradeValue");
+        var weaponIDProp = property.FindPropertyRelative("weaponID");
 
         float padding = 5f;
         float halfWidth = (position.width - padding) / 2f;
@@ -19,9 +20,17 @@ public class CardEffectDrawer : PropertyDrawer
 
         EditorGUI.PropertyField(typeRect, typeProp, GUIContent.none);
         
-        // Add a small label for the value field to make it clear
-        EditorGUIUtility.labelWidth = 40f; 
-        EditorGUI.PropertyField(valRect, valProp, new GUIContent("Value"));
+        EditorGUIUtility.labelWidth = 50f; 
+        
+        if (typeProp.enumNames.Length > typeProp.enumValueIndex && typeProp.enumNames[typeProp.enumValueIndex] == "WeaponUnlock")
+        {
+            EditorGUI.PropertyField(valRect, weaponIDProp, new GUIContent("Wpn ID"));
+        }
+        else
+        {
+            EditorGUI.PropertyField(valRect, valProp, new GUIContent("Value"));
+        }
+        
         EditorGUIUtility.labelWidth = 0f; // Reset
 
         EditorGUI.EndProperty();

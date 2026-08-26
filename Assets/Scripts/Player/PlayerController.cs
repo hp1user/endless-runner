@@ -891,6 +891,17 @@ namespace Player.Control
                     case UpgradeType.DamageBoost:
                         damageMultiplier += (effect.upgradeValue / 100f);
                         break;
+                        
+                    case UpgradeType.WeaponUnlock:
+                        if (!string.IsNullOrEmpty(effect.weaponID))
+                        {
+                            UnlockWeapon(effect.weaponID);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("WeaponUnlock card effect is missing a Weapon ID!");
+                        }
+                        break;
                 }
             }
         }

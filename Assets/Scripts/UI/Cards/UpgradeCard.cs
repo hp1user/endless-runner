@@ -9,6 +9,9 @@ public class CardEffect
 {
     public UpgradeType upgradeType;
     public float upgradeValue;
+    
+    [Tooltip("Only used if UpgradeType is WeaponUnlock")]
+    public string weaponID;
 }
 
 [CreateAssetMenu(fileName = "New Upgrade Card", menuName = "Game Data/Upgrade Card")]

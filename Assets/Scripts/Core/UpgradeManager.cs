@@ -11,6 +11,15 @@ public class UpgradeManager : MonoBehaviour
     [Header("The Deck")]
     public List<UpgradeCard> allAvailableCards = new List<UpgradeCard>();
 
+    [Header("Boss Drops")]
+    [Tooltip("Pool of guaranteed cards that drop when a boss is defeated.")]
+    public List<UpgradeCard> bossDropPool = new List<UpgradeCard>();
+    
+    [Tooltip("Percent chance a non-guaranteed boss card is Mythic")]
+    [Range(0f, 100f)] public float bossMythicChance = 5f;
+    [Tooltip("Percent chance a non-guaranteed boss card is Legendary")]
+    [Range(0f, 100f)] public float bossLegendaryChance = 30f;
+
     [Header("Dynamic UI References")]
     public GameObject cardSelectionPanel;
     public Transform cardContainer;
@@ -102,26 +111,32 @@ public class UpgradeManager : MonoBehaviour
 
         for (int i = 0; i < amountToDraw; i++)
         {
-            CardRarity chosenRarity;
+            UpgradeCard drawnCard = null;
+            CardRarity chosenRarity = CardRarity.Common;
 
             if (isBossDrop)
             {
-                if (i == 0) chosenRarity = CardRarity.Epic;
+                if (i == 0 && bossDropPool != null && bossDropPool.Count > 0)
+                {
+                    drawnCard = GetWeightedBossDrop();
+                }
                 else
                 {
                     float bossRoll = Random.Range(0f, 100f);
-                    if (bossRoll <= 5f) chosenRarity = CardRarity.Mythic;
-                    else if (bossRoll <= 35f) chosenRarity = CardRarity.Legendary;
+                    if (bossRoll <= bossMythicChance) chosenRarity = CardRarity.Mythic;
+                    else if (bossRoll <= bossMythicChance + bossLegendaryChance) chosenRarity = CardRarity.Legendary;
                     else chosenRarity = CardRarity.Epic;
+                    
+                    drawnCard = GetRandomCardOfRarity(chosenRarity);
                 }
             }
             else
             {
                 chosenRarity = CalculateNormalRarity(level, clearTime);
+                drawnCard = GetRandomCardOfRarity(chosenRarity);
             }
 
-            UpgradeCard drawnCard = GetRandomCardOfRarity(chosenRarity);
-
+            // Fallback if we couldn't find a card of that rarity
             while (drawnCard == null && chosenRarity > CardRarity.Common)
             {
                 chosenRarity--;
@@ -132,6 +147,43 @@ public class UpgradeManager : MonoBehaviour
         }
 
         return hand;
+    }
+
+    private UpgradeCard GetWeightedBossDrop()
+    {
+        float totalWeight = 0f;
+        List<KeyValuePair<UpgradeCard, float>> weightedCards = new List<KeyValuePair<UpgradeCard, float>>();
+
+        foreach (var card in bossDropPool)
+        {
+            if (card == null) continue;
+            float weight = 0f;
+            switch (card.rarity)
+            {
+                case CardRarity.Common: weight = 100f; break;
+                case CardRarity.Uncommon: weight = 50f; break;
+                case CardRarity.Rare: weight = 25f; break;
+                case CardRarity.Epic: weight = 10f; break;
+                case CardRarity.Legendary: weight = 4f; break;
+                case CardRarity.Mythic: weight = 1f; break;
+            }
+            weightedCards.Add(new KeyValuePair<UpgradeCard, float>(card, weight));
+            totalWeight += weight;
+        }
+
+        float roll = Random.Range(0f, totalWeight);
+        float currentWeight = 0f;
+
+        foreach (var pair in weightedCards)
+        {
+            currentWeight += pair.Value;
+            if (roll <= currentWeight)
+            {
+                return pair.Key;
+            }
+        }
+
+        return bossDropPool[0]; // Fallback
     }
 
     private CardRarity CalculateNormalRarity(int level, float clearTime)
