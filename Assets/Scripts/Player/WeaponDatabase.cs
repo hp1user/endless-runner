@@ -4,65 +4,31 @@ using System.Collections.Generic;
 public enum WeaponFireMode { Single, Burst, Auto }
 public enum WeaponCategory { Pistol, SMG, Shotgun, AssaultRifle, Sniper, RocketLauncher, Minigun, Grenade }
 
-[System.Serializable]
-public class WeaponEntry
-{
-    public WeaponCategory category;
-    public string weaponName = "New Weapon";
-    public string weaponID = "new_weapon";
-    public int animatorLayer = 1;
-
-    [Header("Fire Mode Settings")]
-    public WeaponFireMode fireMode = WeaponFireMode.Auto;
-    public int burstCount = 3;
-
-    [Header("3D Model")]
-    [Tooltip("Drag your Gun Prefab here. (Using Transform slot to fix Unity Type Mismatch)")]
-    public Transform weaponPrefab;
-
-    [Header("Icon")]
-    public Sprite icon;
-    
-    [Header("Placement Offsets")]
-    public Vector3 holdPosition;
-    public Vector3 holdRotation;
-    public Vector3 localScale = Vector3.one;
-
-    [Header("Muzzle Settings")]
-    public Vector3 muzzlePosition; // Offset relative to the gun model
-    public Vector3 muzzleRotation;
-
-    [Header("Base Stats (Roguelike Foundation)")]
-    public float baseDamage = 10f;
-    public float fireRate = 5f; // Shots per second
-    public int magSize = 30;
-    public float reloadSpeedMult = 1.0f;
-    public float range = 50f;
-
-    [Header("Audio SFX")]
-    public AudioClip audioFire;
-    public AudioClip audioMagOut;
-    public AudioClip audioMagIn;
-
-    [Header("VFX Settings")]
-    [Tooltip("Drag your muzzle flash prefab here.")]
-    public Transform muzzleFlash;
-    public float flashLifetime = 0.2f;
-    public float impactLifetime = 1.0f;
-    
-    [Tooltip("Optional: Visual bullet trail. If empty, a default one will be generated.")]
-    public GameObject bulletTrailPrefab;
-    public float trailDuration = 0.05f;
-}
-
 [CreateAssetMenu(fileName = "WeaponDatabase", menuName = "Player/Weapon Database")]
 public class WeaponDatabase : ScriptableObject
 {
-    public List<WeaponEntry> weaponEntries = new List<WeaponEntry>();
-
-    public WeaponEntry GetWeaponByID(string searchID)
+    private static WeaponDatabase _instance;
+    public static WeaponDatabase Instance
     {
-        foreach (WeaponEntry weapon in weaponEntries)
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = Resources.Load<WeaponDatabase>("WeaponDatabase");
+                if (_instance == null)
+                {
+                    Debug.LogError("WeaponDatabase: Could not find 'WeaponDatabase' in any Resources folder! Please make sure the asset is named WeaponDatabase and is inside a Resources folder.");
+                }
+            }
+            return _instance;
+        }
+    }
+
+    public List<WeaponData> weaponEntries = new List<WeaponData>();
+
+    public WeaponData GetWeaponByID(string searchID)
+    {
+        foreach (WeaponData weapon in weaponEntries)
         {
             if (weapon.weaponID == searchID)
             {
@@ -73,17 +39,15 @@ public class WeaponDatabase : ScriptableObject
         return null;
     }
 
-    public WeaponEntry GetEntryByLayer(int layer)
+    public WeaponData GetEntryByLayer(int layer)
     {
         if (weaponEntries == null) return null;
         return weaponEntries.Find(e => e.animatorLayer == layer);
     }
 
-    public WeaponEntry GetWeaponByCategory(WeaponCategory searchCategory)
+    public WeaponData GetWeaponByCategory(WeaponCategory searchCategory)
     {
-        // Assuming your list/array of weapons is called 'weapons' or 'entries'
-        // Change 'allWeapons' to whatever your actual list variable is named!
-        foreach (WeaponEntry weapon in weaponEntries)
+        foreach (WeaponData weapon in weaponEntries)
         {
             if (weapon.category == searchCategory)
             {
@@ -94,4 +58,14 @@ public class WeaponDatabase : ScriptableObject
         Debug.LogWarning($"WeaponDatabase: Could not find a weapon with category {searchCategory}!");
         return null;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (Application.isPlaying || UnityEditor.EditorApplication.isUpdating) return;
+        
+        // Auto-populate from Resources/Weapons when edited in inspector
+        weaponEntries = new List<WeaponData>(Resources.LoadAll<WeaponData>("Weapons"));
+    }
+#endif
 }

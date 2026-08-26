@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ae0a6c1ca020ac44b8b7410100317c5, type: 3}
+  m_Name: Shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  category: 2
+  weaponName: Shotgun
+  weaponID: shotgun1
+  animatorLayer: 5
+  fireMode: 0
+  burstCount: 3
+  weaponPrefab: {fileID: 2729258035159530547, guid: da0117ef4ce52cc47b5d1a27406037bb, type: 3}
+  icon: {fileID: 21300000, guid: 95ae075fc538baf43bc1aeae55c0cfed, type: 3}
+  holdPosition: {x: -0.025, y: 0.205, z: 0.026}
+  holdRotation: {x: 5.105, y: 91.212, z: 87.671}
+  localScale: {x: 1, y: 1, z: 1}
+  muzzlePosition: {x: 0, y: 0, z: 0}
+  muzzleRotation: {x: 0, y: 0, z: 0}
+  baseDamage: 50
+  fireRate: 2
+  magSize: 10
+  reloadSpeedMult: 1
+  range: 50
+  audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
+  audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
+  audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}
+  muzzleFlash: {fileID: 0}
+  flashLifetime: 0.2
+  impactLifetime: 1
+  bulletTrailPrefab: {fileID: 0}
+  trailDuration: 0.05

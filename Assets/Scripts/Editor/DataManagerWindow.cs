@@ -24,6 +24,9 @@ public class DataManagerWindow : EditorWindow
     private VisualElement _quickIcon;
     private VisualElement _quickBg;
     private VisualElement _quickSel;
+    
+    private Label _listHeaderLabel;
+    private Label _previewHeaderLabel;
 
     private List<UpgradeCard> _upgradeCards = new List<UpgradeCard>();
     private List<UpgradeCard> _filteredCards = new List<UpgradeCard>();
@@ -31,7 +34,7 @@ public class DataManagerWindow : EditorWindow
     private List<ScriptableObject> _filteredItems = new List<ScriptableObject>();
     private ScriptableObject _selectedItem;
 
-    private enum DataType { UpgradeCard }
+    private enum DataType { UpgradeCard, Weapon }
     private DataType _currentDataType = DataType.UpgradeCard;
 
     [MenuItem("Tools/Endless Runner/Data Manager")]
@@ -64,6 +67,9 @@ public class DataManagerWindow : EditorWindow
         _quickIcon = rootVisualElement.Q<VisualElement>("quickIcon");
         _quickBg = rootVisualElement.Q<VisualElement>("quickBg");
         _quickSel = rootVisualElement.Q<VisualElement>("quickSel");
+        
+        _listHeaderLabel = rootVisualElement.Q<Label>("listHeaderLabel");
+        _previewHeaderLabel = rootVisualElement.Q<Label>("previewHeaderLabel");
 
         var createBtn = rootVisualElement.Q<Button>("createNewButton");
         var duplicateBtn = rootVisualElement.Q<Button>("duplicateButton");
@@ -80,6 +86,7 @@ public class DataManagerWindow : EditorWindow
         _searchField.RegisterValueChangedCallback(evt => FilterList(evt.newValue));
         
         dataTypeMenu.menu.AppendAction("Upgrade Card", (a) => SetDataType(DataType.UpgradeCard), (a) => _currentDataType == DataType.UpgradeCard ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        dataTypeMenu.menu.AppendAction("Weapon", (a) => SetDataType(DataType.Weapon), (a) => _currentDataType == DataType.Weapon ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         
         _itemListView.makeItem = () => 
         {
@@ -185,6 +192,13 @@ public class DataManagerWindow : EditorWindow
     private void SetDataType(DataType newType)
     {
         _currentDataType = newType;
+        
+        if (_listHeaderLabel != null)
+            _listHeaderLabel.text = newType == DataType.UpgradeCard ? "Upgrade Cards" : "Weapons";
+        
+        if (_previewHeaderLabel != null)
+            _previewHeaderLabel.text = newType == DataType.UpgradeCard ? "Card Preview" : "Weapon Preview";
+            
         RefreshList();
     }
 
@@ -260,7 +274,8 @@ public class DataManagerWindow : EditorWindow
     private void RefreshList()
     {
         _items.Clear();
-        string[] guids = AssetDatabase.FindAssets("t:UpgradeCard");
+        string searchType = _currentDataType == DataType.UpgradeCard ? "t:UpgradeCard" : "t:WeaponData";
+        string[] guids = AssetDatabase.FindAssets(searchType);
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -338,66 +353,108 @@ public class DataManagerWindow : EditorWindow
     {
         var previewContainer = rootVisualElement.Q<VisualElement>(className: "preview-container");
         
-        if (_selectedItem == null || !(_selectedItem is UpgradeCard))
+        if (_selectedItem == null)
         {
             ClearPreview();
             return;
         }
 
-        if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
-
-        UpgradeCard _selectedCard = _selectedItem as UpgradeCard;
-        
-        _previewTitle.text = _selectedCard.cardName;
-        _previewDesc.text = _selectedCard.description;
-        
-        _previewValue.text = "";
-        if (_selectedCard.effects != null && _selectedCard.effects.Count > 0)
+        if (_currentDataType == DataType.UpgradeCard && _selectedItem is UpgradeCard _selectedCard)
         {
-            var firstFx = _selectedCard.effects[0];
-            string suffix = firstFx.upgradeType switch
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            
+            _previewTitle.text = _selectedCard.cardName;
+            _previewDesc.text = _selectedCard.description;
+            
+            _previewValue.text = "";
+            if (_selectedCard.effects != null && _selectedCard.effects.Count > 0)
             {
-                UpgradeType.DamageBoost => "%",
-                UpgradeType.MaxHealth => " HP",
-                UpgradeType.SpeedBoost => " SPD",
-                _ => ""
-            };
-            _previewValue.text = $"+{firstFx.upgradeValue}{suffix}";
-        }
+                var firstFx = _selectedCard.effects[0];
+                string suffix = firstFx.upgradeType switch
+                {
+                    UpgradeType.DamageBoost => "%",
+                    UpgradeType.MaxHealth => " HP",
+                    UpgradeType.SpeedBoost => " SPD",
+                    _ => ""
+                };
+                _previewValue.text = $"+{firstFx.upgradeValue}{suffix}";
+            }
 
-        // Main preview sprites
-        _previewIcon.style.backgroundImage = _selectedCard.cardIcon != null ? new StyleBackground(_selectedCard.cardIcon) : null;
-        
-        if (_selectedCard.rarityBackgroundImage != null)
+            _previewIcon.style.backgroundImage = _selectedCard.cardIcon != null ? new StyleBackground(_selectedCard.cardIcon) : null;
+            
+            if (_selectedCard.rarityBackgroundImage != null)
+            {
+                _previewBackground.style.backgroundImage = new StyleBackground(_selectedCard.rarityBackgroundImage);
+                _previewBackground.style.backgroundColor = new StyleColor(Color.clear);
+            }
+            else
+            {
+                _previewBackground.style.backgroundImage = null;
+                _previewBackground.style.backgroundColor = new StyleColor(_selectedCard.rarityColor);
+            }
+            
+            _quickIcon.style.backgroundImage = _selectedCard.cardIcon != null ? new StyleBackground(_selectedCard.cardIcon) : null;
+            _quickBg.style.backgroundImage = _selectedCard.rarityBackgroundImage != null ? new StyleBackground(_selectedCard.rarityBackgroundImage) : null;
+            _quickSel.style.backgroundImage = _selectedCard.selectedCardSprite != null ? new StyleBackground(_selectedCard.selectedCardSprite) : null;
+        }
+        else if (_currentDataType == DataType.Weapon && _selectedItem is WeaponData _selectedWeapon)
         {
-            _previewBackground.style.backgroundImage = new StyleBackground(_selectedCard.rarityBackgroundImage);
-            _previewBackground.style.backgroundColor = new StyleColor(Color.clear);
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            
+            _previewTitle.text = _selectedWeapon.weaponName;
+            _previewDesc.text = $"Damage: {_selectedWeapon.baseDamage}\nFire Rate: {_selectedWeapon.fireRate}\nMag: {_selectedWeapon.magSize}";
+            _previewValue.text = _selectedWeapon.category.ToString();
+
+            _previewIcon.style.backgroundImage = _selectedWeapon.icon != null ? new StyleBackground(_selectedWeapon.icon) : null;
+            _previewBackground.style.backgroundImage = null;
+            _previewBackground.style.backgroundColor = new StyleColor(new Color(0.2f, 0.2f, 0.2f));
+            
+            _quickIcon.style.backgroundImage = _selectedWeapon.icon != null ? new StyleBackground(_selectedWeapon.icon) : null;
+            _quickBg.style.backgroundImage = null;
+            _quickSel.style.backgroundImage = null;
         }
         else
         {
-            _previewBackground.style.backgroundImage = null;
-            _previewBackground.style.backgroundColor = new StyleColor(_selectedCard.rarityColor);
+            ClearPreview();
         }
-        
-        // Quick Previews
-        _quickIcon.style.backgroundImage = _selectedCard.cardIcon != null ? new StyleBackground(_selectedCard.cardIcon) : null;
-        _quickBg.style.backgroundImage = _selectedCard.rarityBackgroundImage != null ? new StyleBackground(_selectedCard.rarityBackgroundImage) : null;
-        _quickSel.style.backgroundImage = _selectedCard.selectedCardSprite != null ? new StyleBackground(_selectedCard.selectedCardSprite) : null;
     }
 
     private void CreateNewItem()
     {
-        string path = "Assets/ScriptableObjects/Cards";
-        if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
+        ScriptableObject newItem = null;
+        string fullPath = "";
+        
+        if (_currentDataType == DataType.UpgradeCard)
+        {
+            string path = "Assets/ScriptableObjects/Cards";
+            if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
 
-        string assetName = string.IsNullOrEmpty(_newItemNameField.value) ? "New Upgrade Card" : _newItemNameField.value;
-        string fullPath = AssetDatabase.GenerateUniqueAssetPath($"{path}/{assetName}.asset");
+            string assetName = string.IsNullOrEmpty(_newItemNameField.value) ? "New Upgrade Card" : _newItemNameField.value;
+            fullPath = AssetDatabase.GenerateUniqueAssetPath($"{path}/{assetName}.asset");
 
-        UpgradeCard newItem = ScriptableObject.CreateInstance<UpgradeCard>();
-        newItem.cardName = assetName;
+            var newCard = ScriptableObject.CreateInstance<UpgradeCard>();
+            newCard.cardName = assetName;
+            newItem = newCard;
+        }
+        else if (_currentDataType == DataType.Weapon)
+        {
+            string path = "Assets/Resources/Weapons";
+            if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
 
-        AssetDatabase.CreateAsset(newItem, fullPath);
-        AssetDatabase.SaveAssets();
+            string assetName = string.IsNullOrEmpty(_newItemNameField.value) ? "New Weapon" : _newItemNameField.value;
+            fullPath = AssetDatabase.GenerateUniqueAssetPath($"{path}/{assetName}.asset");
+
+            var newWpn = ScriptableObject.CreateInstance<WeaponData>();
+            newWpn.weaponName = assetName;
+            newWpn.weaponID = assetName.Replace(" ", "_");
+            newItem = newWpn;
+        }
+
+        if (newItem != null)
+        {
+            AssetDatabase.CreateAsset(newItem, fullPath);
+            AssetDatabase.SaveAssets();
+        }
         
         RefreshList();
         

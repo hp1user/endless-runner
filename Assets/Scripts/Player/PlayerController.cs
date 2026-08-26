@@ -30,7 +30,6 @@ namespace Player.Control
         public int aimLayerIndex = 1;
 
         [Header("Weapon System")]
-        public WeaponDatabase weaponDatabase;
         public Transform weaponSocket;
         [Tooltip("How many backup magazines does a newly unlocked gun come with?")]
         public int startingReserveMags = 3;
@@ -50,7 +49,7 @@ namespace Player.Control
 
         private LayerMask hitMask => (playerStats != null) ? playerStats.EnemyLayer : (LayerMask)LayerMask.GetMask("Enemy");
 
-        private WeaponEntry currentWeaponData;
+        private WeaponData currentWeaponData;
         private GameObject currentWeaponInstance;
         private int lastWeaponLayerIndex = -1;
 
@@ -71,7 +70,7 @@ namespace Player.Control
         public bool debugMode = false;
 
         // --- NEW INVENTORY & AMMO STATE ---
-        private List<WeaponEntry> unlockedWeapons = new List<WeaponEntry>();
+        private List<WeaponData> unlockedWeapons = new List<WeaponData>();
         // Tracks how much backup ammo we have for each category
         private Dictionary<WeaponCategory, int> reserveAmmo = new Dictionary<WeaponCategory, int>();
         // Tracks exactly how many bullets are currently loaded in the magazine of each specific gun
@@ -164,9 +163,9 @@ namespace Player.Control
             // Give the player unlimited pistol ammo so they are never completely defenseless
             reserveAmmo[WeaponCategory.Pistol] = 9999;
 
-            if (weaponDatabase != null)
+            if (WeaponDatabase.Instance != null)
             {
-                WeaponEntry starterPistol = weaponDatabase.GetWeaponByID("D Eagle");
+                WeaponData starterPistol = WeaponDatabase.Instance.GetWeaponByID("D Eagle");
                 if (starterPistol != null)
                 {
                     unlockedWeapons.Add(starterPistol);
@@ -242,10 +241,10 @@ namespace Player.Control
 
         private void UpdateCurrentWeaponData()
         {
-            if (weaponDatabase != null && weaponLayerIndex != lastWeaponLayerIndex)
+            if (WeaponDatabase.Instance != null && weaponLayerIndex != lastWeaponLayerIndex)
             {
                 lastWeaponLayerIndex = weaponLayerIndex;
-                currentWeaponData = weaponDatabase.GetEntryByLayer(weaponLayerIndex);
+                currentWeaponData = WeaponDatabase.Instance.GetEntryByLayer(weaponLayerIndex);
                 SpawnWeaponModel();
             }
         }
@@ -429,8 +428,8 @@ namespace Player.Control
         {
             if (unlockedWeapons.Count <= 1) return;
 
-            WeaponEntry bestChoice = null;
-            WeaponEntry fallbackPistol = null;
+            WeaponData bestChoice = null;
+            WeaponData fallbackPistol = null;
 
             foreach (var weapon in unlockedWeapons)
             {
@@ -718,7 +717,7 @@ namespace Player.Control
         private void MoveLeft() => currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
         private void MoveRight() => currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
 
-        public void EquipWeaponFromWheel(WeaponEntry selectedWeapon)
+        public void EquipWeaponFromWheel(WeaponData selectedWeapon)
         {
             if (selectedWeapon == null) return;
             weaponLayerIndex = selectedWeapon.animatorLayer;
@@ -727,7 +726,7 @@ namespace Player.Control
         public List<WeaponCategory> GetOwnedWeaponCategories()
         {
             List<WeaponCategory> categories = new List<WeaponCategory>();
-            foreach (WeaponEntry weapon in unlockedWeapons)
+            foreach (WeaponData weapon in unlockedWeapons)
             {
                 if (!categories.Contains(weapon.category))
                 {
@@ -848,9 +847,9 @@ namespace Player.Control
 
         public void UnlockWeapon(string incomingWeaponID)
         {
-            if (weaponDatabase == null) return;
+            if (WeaponDatabase.Instance == null) return;
 
-            WeaponEntry newGun = weaponDatabase.GetWeaponByID(incomingWeaponID);
+            WeaponData newGun = WeaponDatabase.Instance.GetWeaponByID(incomingWeaponID);
             if (newGun == null) return;
 
             if (unlockedWeapons.Contains(newGun))

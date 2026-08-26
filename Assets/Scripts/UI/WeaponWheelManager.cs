@@ -14,8 +14,8 @@ public class WeaponWheelManager : MonoBehaviour
     public TextMeshProUGUI centerWeaponName;// Text in the middle of the wheel
 
     [Header("Data")]
-    // Tracks which WeaponEntry is in which slot (0-7)
-    private WeaponEntry[] slots = new WeaponEntry[8];
+    // Tracks which WeaponData is in which slot (0-7)
+    private WeaponData[] slots = new WeaponData[8];
     private int selectedIndex = -1;
 
     private void Awake()
@@ -43,7 +43,7 @@ public class WeaponWheelManager : MonoBehaviour
     }
 
     // --- ADDING WEAPONS ---
-    public void AddWeaponToWheel(WeaponEntry newWeapon)
+    public void AddWeaponToWheel(WeaponData newWeapon)
     {
         if (newWeapon == null) return;
 
@@ -87,7 +87,7 @@ public class WeaponWheelManager : MonoBehaviour
 
     private void EquipSelectedWeapon()
     {
-        WeaponEntry chosenWeapon = slots[selectedIndex];
+        WeaponData chosenWeapon = slots[selectedIndex];
         Debug.Log($"<color=green>Equipping Weapon: {chosenWeapon.weaponName}</color>");
 
         // CALL THE PLAYER CONTROLLER

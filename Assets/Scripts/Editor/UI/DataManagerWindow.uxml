@@ -20,7 +20,7 @@
             
             <!-- Left Pane: List -->
             <engine:VisualElement class="left-pane">
-                <engine:Label text="Upgrade Cards" class="pane-header" />
+                <engine:Label name="listHeaderLabel" text="Upgrade Cards" class="pane-header" />
                 <engine:ListView name="itemListView" class="item-list" />
                 
                 <engine:VisualElement class="creation-panel">
@@ -43,7 +43,7 @@
 
                 <!-- Right Pane: Visual Preview & Sprite Previews -->
                 <engine:ScrollView class="right-pane">
-                    <engine:Label text="Card Preview" class="pane-header" />
+                    <engine:Label name="previewHeaderLabel" text="Card Preview" class="pane-header" />
                     <engine:VisualElement class="preview-container">
                         <engine:VisualElement name="previewBackground" class="card-bg">
                             <engine:Label name="previewValue" class="card-value" text="+20%" />

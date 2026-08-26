@@ -42,7 +42,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     private int selectedIndex = -1;
     // 0: SMG, 1: Heavy, 2: Ultimate, 3: Skill, 4: Pistol, 5: AR
     
-    private WeaponEntry[] weaponSlots = new WeaponEntry[6];
+    private WeaponData[] weaponSlots = new WeaponData[6];
 
     public bool IsOpen => wheelContainer != null && wheelContainer.style.display == DisplayStyle.Flex;
 
@@ -131,7 +131,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         }
     }
 
-    public void AddWeaponToWheel(WeaponEntry newWeapon)
+    public void AddWeaponToWheel(WeaponData newWeapon)
     {
         if (newWeapon == null) return;
         int targetSlot = GetSlotIndexForCategory(newWeapon.category);
