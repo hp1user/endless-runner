@@ -295,4 +295,36 @@ public class UpgradeManager : MonoBehaviour
 
         Time.timeScale = 1f;
     }
+
+    /// <summary>
+    /// For Checkpoint / Testing: Automatically applies random upgrade cards directly to the player without opening UI.
+    /// </summary>
+    public List<UpgradeCard> ApplyRandomUpgrades(int count)
+    {
+        List<UpgradeCard> appliedCards = new List<UpgradeCard>();
+        if (allAvailableCards == null || allAvailableCards.Count == 0)
+        {
+            Debug.LogWarning("[UpgradeManager] Cannot apply random upgrades: allAvailableCards is empty!");
+            return appliedCards;
+        }
+
+        if (Player.Control.PlayerController.Instance == null)
+        {
+            Debug.LogWarning("[UpgradeManager] Cannot apply random upgrades: PlayerController Instance is null!");
+            return appliedCards;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            UpgradeCard randomCard = allAvailableCards[Random.Range(0, allAvailableCards.Count)];
+            if (randomCard != null)
+            {
+                Player.Control.PlayerController.Instance.ApplyUpgrade(randomCard);
+                appliedCards.Add(randomCard);
+                Debug.Log($"<color=green>[Checkpoint]</color> Awarded Card {i + 1}/{count}: <b>{randomCard.cardName}</b> ({randomCard.rarity})");
+            }
+        }
+
+        return appliedCards;
+    }
 }

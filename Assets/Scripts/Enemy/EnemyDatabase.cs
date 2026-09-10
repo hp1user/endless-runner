@@ -39,6 +39,11 @@ public class EnemyEntry
     [Header("Death Settings")]
     public float deathDuration = 3.0f;
     public float groundYPosition = 0f;
+
+    [Header("Boss Minions")]
+    public bool canSpawnMinions = false;
+    public float minionSpawnInterval = 5f;
+    public List<EnemyEntry> minionTypes = new List<EnemyEntry>();
 }
 
 [CreateAssetMenu(fileName = "EnemyDatabase", menuName = "Enemy/Enemy Database")]

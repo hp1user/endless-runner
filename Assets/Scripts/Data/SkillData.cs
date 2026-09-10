@@ -37,6 +37,13 @@ namespace Player.Control
         [Tooltip("Radius for AoE skills.")]
         public float effectRadius = 10f;
 
+        [Header("Damage Settings (For AoE / Attack Skills)")]
+        [Tooltip("Damage dealt to regular enemies (default 500 kills regular enemies).")]
+        public float damage = 500f;
+
+        [Tooltip("Damage dealt specifically to Bosses by this skill/ultimate (default 250 = 25% of 1000 HP).")]
+        public float bossDamage = 250f;
+
         [Header("Visuals (Optional)")]
         public GameObject visualEffectPrefab;
     }

@@ -18,8 +18,14 @@ public class GameManager : MonoBehaviour
 
     [Header("Boss Settings")]
     [Tooltip("A boss spawns every X levels.")]
-    public int levelsBetweenBosses = 5;
+    public int levelsBetweenBosses = 10;
     public bool isBossFightActive = false;
+
+    [Header("Boss Checkpoint Testing")]
+    [Tooltip("Target level for the custom checkpoint jump.")]
+    public int checkpointTestLevel = 5;
+    [Tooltip("If true, automatically jumps to the boss checkpoint when Play mode begins.")]
+    public bool autoJumpToCheckpointOnStart = false;
 
     // --- GLOBAL EVENTS (The GameManager shouting to the world) ---
     public static event Action<int> OnLevelCompleted; // Tells LevelManager to swap environments
@@ -32,6 +38,39 @@ public class GameManager : MonoBehaviour
         // Standard Singleton Setup
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+    }
+
+    private void Start()
+    {
+        if (autoJumpToCheckpointOnStart)
+        {
+            StartCoroutine(DelayedCheckpointJump(checkpointTestLevel));
+        }
+    }
+
+    private System.Collections.IEnumerator DelayedCheckpointJump(int level)
+    {
+        yield return null; // wait 1 frame for Awake/Start on all managers
+        BossCheckpointSystem.JumpToBossCheckpoint(level);
+    }
+
+    // --- CONTEXT MENU CHECKPOINT JUMPS (Right-click in Inspector during Play Mode) ---
+    [ContextMenu("Jump to Boss (Level 5)")]
+    public void ContextMenuJumpBossLevel5()
+    {
+        BossCheckpointSystem.JumpToBossCheckpoint(5);
+    }
+
+    [ContextMenu("Jump to Boss (Level 10)")]
+    public void ContextMenuJumpBossLevel10()
+    {
+        BossCheckpointSystem.JumpToBossCheckpoint(10);
+    }
+
+    [ContextMenu("Jump to Configured Level Checkpoint")]
+    public void ContextMenuJumpCustomLevel()
+    {
+        BossCheckpointSystem.JumpToBossCheckpoint(checkpointTestLevel);
     }
 
     // Enemies will call this method right before they die
@@ -75,7 +114,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void StartBossFight()
+    public void StartBossFight()
     {
         isBossFightActive = true;
         OnBossFightStarted?.Invoke();

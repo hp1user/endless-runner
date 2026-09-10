@@ -558,8 +558,9 @@ namespace Player.Control
             // This prevents steep camera rays from calculating a point behind the player's muzzle.
             Vector3 targetPos = (aimTarget != null) ? aimTarget.position : ray.GetPoint(100f);
             
-            // Absolute failsafe: Never shoot backwards
-            if (targetPos.z <= origin.z)
+            bool isBossFight = (GameManager.Instance != null && GameManager.Instance.isBossFightActive);
+            // Absolute failsafe: Never shoot backwards in normal mode
+            if (!isBossFight && targetPos.z <= origin.z)
             {
                 targetPos.z = origin.z + 50f;
             }
@@ -577,20 +578,31 @@ namespace Player.Control
                     PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
                 }
 
-                EnemyController enemy = hit.collider.GetComponent<EnemyController>();
-                if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
-                if (enemy != null)
+                bool hitEnemy = false;
+                BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
+                if (bodyPart != null)
                 {
-                    enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
-                    
-                    if (hitMarkerSounds != null && hitMarkerSounds.Length > 0 && audioSource != null)
+                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
+                    hitEnemy = true;
+                }
+                else
+                {
+                    EnemyController enemy = hit.collider.GetComponent<EnemyController>();
+                    if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
+                    if (enemy != null)
                     {
-                        AudioClip clip = hitMarkerSounds[Random.Range(0, hitMarkerSounds.Length)];
-                        if (clip != null)
-                        {
-                            audioSource.pitch = 1.0f; // Reset pitch in case gun shots randomized it
-                            audioSource.PlayOneShot(clip, weaponVolume);
-                        }
+                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider);
+                        hitEnemy = true;
+                    }
+                }
+
+                if (hitEnemy && hitMarkerSounds != null && hitMarkerSounds.Length > 0 && audioSource != null)
+                {
+                    AudioClip clip = hitMarkerSounds[Random.Range(0, hitMarkerSounds.Length)];
+                    if (clip != null)
+                    {
+                        audioSource.pitch = 1.0f; // Reset pitch in case gun shots randomized it
+                        audioSource.PlayOneShot(clip, weaponVolume);
                     }
                 }
             }
@@ -689,6 +701,15 @@ namespace Player.Control
             }
         }
 
+        public void Kill()
+        {
+            if (isDead) return;
+            currentHealth = 0;
+            currentArmor = 0;
+            UpdatePlayerUI();
+            Die();
+        }
+
         private void Die()
         {
             isDead = true;
@@ -714,8 +735,21 @@ namespace Player.Control
             if (debugMode) Debug.Log("<color=red>GAME OVER!</color> Player has died.");
         }
 
-        private void MoveLeft() => currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
-        private void MoveRight() => currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
+        private void MoveLeft()
+        {
+            if (GameManager.Instance != null && GameManager.Instance.isBossFightActive)
+                currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
+            else
+                currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
+        }
+
+        private void MoveRight()
+        {
+            if (GameManager.Instance != null && GameManager.Instance.isBossFightActive)
+                currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
+            else
+                currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
+        }
 
         public void EquipWeaponFromWheel(WeaponData selectedWeapon)
         {
@@ -793,15 +827,26 @@ namespace Player.Control
             if (equippedUltimate.skillType == SkillType.AoEKill)
             {
                 Collider[] enemies = Physics.OverlapSphere(transform.position, equippedUltimate.effectRadius, hitMask);
+                System.Collections.Generic.HashSet<EnemyController> hitEnemies = new System.Collections.Generic.HashSet<EnemyController>();
                 foreach (var col in enemies)
                 {
                     EnemyController enemy = col.GetComponent<EnemyController>();
                     if (enemy == null) enemy = col.GetComponentInParent<EnemyController>();
                     
-                    if (enemy != null)
+                    if (enemy != null && !hitEnemies.Contains(enemy) && !enemy.IsDead)
                     {
-                        // Instakill by dealing massive damage
-                        enemy.TakeDamage(9999f);
+                        hitEnemies.Add(enemy);
+                        if (enemy.IsBoss)
+                        {
+                            float bossDmg = (equippedUltimate.bossDamage > 0f) ? equippedUltimate.bossDamage : 250f;
+                            enemy.TakeDamage(bossDmg);
+                            Debug.Log($"<color=cyan>[ULTIMATE]</color> Dealt {bossDmg} damage to Boss! Remaining Boss HP: {enemy.CurrentHealth}");
+                        }
+                        else
+                        {
+                            float normalDmg = (equippedUltimate.damage > 0f) ? equippedUltimate.damage : 500f;
+                            enemy.TakeDamage(normalDmg);
+                        }
                     }
                 }
             }

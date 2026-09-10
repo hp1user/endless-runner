@@ -46,14 +46,14 @@ public class EnemyManager : MonoBehaviour
     private void OnEnable()
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
-        GameManager.OnBossFightStarted += SpawnBoss; // NEW: Listen for the Boss!
+        GameManager.OnBossFightStarted += HandleBossFightStarted; // NEW: Listen for the Boss!
         GameManager.OnLevelCompleted += HandleLevelCompleted;
     }
 
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
-        GameManager.OnBossFightStarted -= SpawnBoss; // NEW: Stop listening
+        GameManager.OnBossFightStarted -= HandleBossFightStarted; // NEW: Stop listening
         GameManager.OnLevelCompleted -= HandleLevelCompleted;
     }
 
@@ -164,9 +164,17 @@ public class EnemyManager : MonoBehaviour
     }
 
     // --- NEW: THE BOSS SPAWNER ---
-    private void SpawnBoss()
+    private void HandleBossFightStarted()
     {
-        if (enemyDatabase == null || player == null) return;
+        StartCoroutine(SpawnBossRoutine());
+    }
+
+    private System.Collections.IEnumerator SpawnBossRoutine()
+    {
+        // Give the camera time to flip around and the bridge to spawn before dropping the boss!
+        yield return new WaitForSeconds(2.0f);
+
+        if (enemyDatabase == null || player == null) yield break;
 
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 5;
 
@@ -180,7 +188,7 @@ public class EnemyManager : MonoBehaviour
             // Tell the GameManager to instantly cancel the boss fight and go to the next level
             if (GameManager.Instance != null) GameManager.Instance.SkipBossPhase();
 
-            return; // Stop the rest of the spawn code!
+            yield break; // Stop the rest of the spawn code!
         }
 
         // Calculate boss spawn position relative to the player
@@ -221,5 +229,23 @@ public class EnemyManager : MonoBehaviour
         // enemiesSpawnedThisLevel so the manager spawns a replacement right away!
         enemiesSpawnedThisLevel--;
         enemiesSpawnedThisLevel = Mathf.Max(0, enemiesSpawnedThisLevel);
+    }
+
+    /// <summary>
+    /// Clears and despawns all active non-boss enemies in the scene.
+    /// Useful for boss checkpoints and phase transitions.
+    /// </summary>
+    public void ClearAllActiveEnemies()
+    {
+        EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+        foreach (var enemy in enemies)
+        {
+            if (enemy != null && !enemy.IsBoss && !enemy.IsDead)
+            {
+                Destroy(enemy.gameObject);
+            }
+        }
+        activeEnemyCount = 0;
+        enemiesSpawnedThisLevel = 0;
     }
 }

@@ -105,10 +105,11 @@ namespace Animation.Tools
 
                 Transform player = (rayOriginOverride != null) ? rayOriginOverride : myTransform;
                 
+                bool isBossFight = (GameManager.Instance != null && GameManager.Instance.isBossFightActive);
                 foreach (RaycastHit hit in hits)
                 {
-                    // Ignore enemies that have already run past Z=0, AND ignore the player's own body
-                    if (hit.point.z >= 0f && hit.transform.root != player.root)
+                    // In normal mode, ignore enemies that have already passed Z=0. In boss fight, boss is behind the player (Z < 0).
+                    if ((isBossFight || hit.point.z >= 0f) && hit.transform.root != player.root)
                     {
                         lastHitPoint = hit.point;
                         hitTransform = hit.transform;
@@ -130,7 +131,8 @@ namespace Animation.Tools
             {
                 targetTransform.SetParent(null, true);
                 // Fallback: If no hit, project screen point onto an imaginary plane in the distance
-                float fallbackZ = lockedZ == 0f ? 50f : lockedZ;
+                bool isBossFight = (GameManager.Instance != null && GameManager.Instance.isBossFightActive);
+                float fallbackZ = lockedZ == 0f ? (isBossFight ? -25f : 50f) : lockedZ;
                 Plane plane = new Plane(Vector3.forward, new Vector3(0, 0, fallbackZ));
                 if (plane.Raycast(cameraRay, out float enter))
                 {
