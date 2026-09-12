@@ -559,16 +559,25 @@ namespace Player.Control
             Vector3 targetPos = (aimTarget != null) ? aimTarget.position : ray.GetPoint(100f);
             
             bool isBossFight = (GameManager.Instance != null && GameManager.Instance.isBossFightActive);
-            // Absolute failsafe: Never shoot backwards in normal mode
-            if (!isBossFight && targetPos.z <= origin.z)
+
+            // Absolute failsafe: Never shoot backwards
+            if (targetPos.z <= origin.z)
             {
-                targetPos.z = origin.z + 50f;
+                targetPos.z = origin.z + (isBossFight ? 20f : 50f);
             }
 
             Vector3 shootDir = (targetPos - origin).normalized;
             Vector3 endPoint = origin + shootDir * currentWeaponData.range;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide))
+            RaycastHit hit;
+            bool didHit = Physics.Raycast(ray, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+            if (!didHit)
+            {
+                // Fallback to SphereCast for rapid/auto firing weapons targeting thin moving limbs
+                didHit = Physics.SphereCast(ray, 0.35f, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+            }
+
+            if (didHit)
             {
                 endPoint = hit.point;
                 if (impactEffect != null)

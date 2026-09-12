@@ -123,16 +123,12 @@ namespace Animation.Tools
             {
                 // We HIT an object in 3D space! Use its exact coordinate so bullet trajectories are perfectly aligned.
                 targetTransform.position = lastHitPoint;
-                if (hitTransform != null) {
-                    targetTransform.SetParent(hitTransform, true);
-                }
             }
             else
             {
-                targetTransform.SetParent(null, true);
-                // Fallback: If no hit, project screen point onto an imaginary plane in the distance
+                // Fallback: If no direct collider hit, project screen point onto an imaginary plane in front of the camera
                 bool isBossFight = (GameManager.Instance != null && GameManager.Instance.isBossFightActive);
-                float fallbackZ = lockedZ == 0f ? (isBossFight ? -25f : 50f) : lockedZ;
+                float fallbackZ = lockedZ != 0f ? lockedZ : (isBossFight ? 20f : 50f);
                 Plane plane = new Plane(Vector3.forward, new Vector3(0, 0, fallbackZ));
                 if (plane.Raycast(cameraRay, out float enter))
                 {

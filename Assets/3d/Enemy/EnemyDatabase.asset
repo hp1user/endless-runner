@@ -47,7 +47,7 @@ MonoBehaviour:
     canSpawnMinions: 0
     minionSpawnInterval: 5
     minionTypes: []
-  - enemyName: Bug]Boss
+  - enemyName: '[Bug]Boss'
     prefab: {fileID: 144714973247079198, guid: 34ee627d6f9259a4a87c90c88d7c5f52, type: 3}
     category: 2
     isGroundEnemy: 1
@@ -57,27 +57,10 @@ MonoBehaviour:
     chaseChance: 80
     bossTargetLevel: 5
     maxHealth: 1000
-    moveSpeed: 0.5
+    moveSpeed: 0.35
     damage: 15
     deathDuration: 2
     groundYPosition: 0.45
     canSpawnMinions: 1
     minionSpawnInterval: 5
-    minionTypes:
-    - enemyName: 
-      prefab: {fileID: 0}
-      category: 0
-      isGroundEnemy: 0
-      minSpawnLevel: 0
-      maxSpawnLevel: 0
-      alwaysChasePlayer: 0
-      chaseChance: 0
-      bossTargetLevel: 0
-      maxHealth: 0
-      moveSpeed: 0
-      damage: 0
-      deathDuration: 0
-      groundYPosition: 0
-      canSpawnMinions: 0
-      minionSpawnInterval: 0
-      minionTypes: []
+    minionTypes: []

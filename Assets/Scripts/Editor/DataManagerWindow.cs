@@ -24,6 +24,7 @@ public class DataManagerWindow : EditorWindow
     private VisualElement _quickIcon;
     private VisualElement _quickBg;
     private VisualElement _quickSel;
+    private VisualElement _spriteAssignmentsSection;
     
     private Label _listHeaderLabel;
     private Label _previewHeaderLabel;
@@ -34,7 +35,13 @@ public class DataManagerWindow : EditorWindow
     private List<ScriptableObject> _filteredItems = new List<ScriptableObject>();
     private ScriptableObject _selectedItem;
 
-    private enum DataType { UpgradeCard, Weapon }
+    // Enemy Database Support
+    private EnemyDatabase _enemyDatabase;
+    private List<EnemyEntry> _enemyList = new List<EnemyEntry>();
+    private List<EnemyEntry> _filteredEnemies = new List<EnemyEntry>();
+    private EnemyEntry _selectedEnemy;
+
+    private enum DataType { UpgradeCard, Weapon, Enemy }
     private DataType _currentDataType = DataType.UpgradeCard;
 
     [MenuItem("Tools/Endless Runner/Data Manager")]
@@ -67,6 +74,7 @@ public class DataManagerWindow : EditorWindow
         _quickIcon = rootVisualElement.Q<VisualElement>("quickIcon");
         _quickBg = rootVisualElement.Q<VisualElement>("quickBg");
         _quickSel = rootVisualElement.Q<VisualElement>("quickSel");
+        _spriteAssignmentsSection = rootVisualElement.Q<VisualElement>("spriteAssignmentsSection");
         
         _listHeaderLabel = rootVisualElement.Q<Label>("listHeaderLabel");
         _previewHeaderLabel = rootVisualElement.Q<Label>("previewHeaderLabel");
@@ -87,16 +95,21 @@ public class DataManagerWindow : EditorWindow
         
         dataTypeMenu.menu.AppendAction("Upgrade Card", (a) => SetDataType(DataType.UpgradeCard), (a) => _currentDataType == DataType.UpgradeCard ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         dataTypeMenu.menu.AppendAction("Weapon", (a) => SetDataType(DataType.Weapon), (a) => _currentDataType == DataType.Weapon ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        dataTypeMenu.menu.AppendAction("Enemy", (a) => SetDataType(DataType.Enemy), (a) => _currentDataType == DataType.Enemy ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         
         _itemListView.makeItem = () => 
         {
             var container = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
             
-            var label = new Label();
-            label.name = "itemLabel";
+            var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1 } };
+            var badge = new Label { name = "itemBadge" };
+            badge.style.display = DisplayStyle.None;
+            var label = new Label { name = "itemLabel" };
             label.AddToClassList("list-item");
             label.style.flexGrow = 1;
-            
+            leftBox.Add(badge);
+            leftBox.Add(label);
+
             var btnContainer = new VisualElement { style = { flexDirection = FlexDirection.Row } };
             
             var renameBtn = new Button { name = "renameBtn", text = "✎", style = { width = 25, height = 20, paddingLeft = 2, paddingRight = 2 } };
@@ -105,7 +118,7 @@ public class DataManagerWindow : EditorWindow
             btnContainer.Add(renameBtn);
             btnContainer.Add(deleteBtn);
             
-            container.Add(label);
+            container.Add(leftBox);
             container.Add(btnContainer);
             
             return container;
@@ -113,50 +126,121 @@ public class DataManagerWindow : EditorWindow
 
         _itemListView.bindItem = (element, i) =>
         {
-            if (i < _filteredItems.Count && _filteredItems[i] != null)
+            var label = element.Q<Label>("itemLabel");
+            var badge = element.Q<Label>("itemBadge");
+            var renameBtn = element.Q<Button>("renameBtn");
+            var deleteBtn = element.Q<Button>("deleteBtn");
+
+            if (_currentDataType == DataType.Enemy)
             {
-                var item = _filteredItems[i];
-                var label = element.Q<Label>("itemLabel");
-                label.text = item.name;
-                label.style.display = DisplayStyle.Flex; // ensure visible
-                
-                var renameBtn = element.Q<Button>("renameBtn");
-                var deleteBtn = element.Q<Button>("deleteBtn");
-                
-                renameBtn.clickable = new Clickable(() => 
+                if (i < _filteredEnemies.Count && _filteredEnemies[i] != null)
                 {
-                    // Inline Rename Logic
-                    var textField = new TextField { value = item.name, style = { flexGrow = 1, marginRight = 5 } };
-                    element.Insert(0, textField);
-                    label.style.display = DisplayStyle.None;
-                    
-                    textField.Focus();
-                    textField.SelectAll();
-                    
-                    void ApplyRename()
+                    var enemy = _filteredEnemies[i];
+                    label.text = string.IsNullOrEmpty(enemy.enemyName) ? "Unnamed Enemy" : enemy.enemyName;
+                    label.style.display = DisplayStyle.Flex;
+
+                    badge.style.display = DisplayStyle.Flex;
+                    badge.ClearClassList();
+                    badge.AddToClassList("badge");
+                    switch (enemy.category)
                     {
-                        if (element.Contains(textField))
-                        {
-                            RenameItem(item, textField.value);
-                            label.style.display = DisplayStyle.Flex;
-                            element.Remove(textField);
-                        }
+                        case EnemyCategory.Standard:
+                            badge.text = "STD";
+                            badge.AddToClassList("badge-standard");
+                            break;
+                        case EnemyCategory.Elite:
+                            badge.text = "ELITE";
+                            badge.AddToClassList("badge-elite");
+                            break;
+                        case EnemyCategory.Boss:
+                            badge.text = "BOSS";
+                            badge.AddToClassList("badge-boss");
+                            break;
                     }
-                    
-                    textField.RegisterCallback<FocusOutEvent>(evt => ApplyRename());
-                    textField.RegisterCallback<KeyDownEvent>(evt => 
+
+                    renameBtn.clickable = new Clickable(() => 
                     {
-                        if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) 
-                            ApplyRename();
-                        else if (evt.keyCode == KeyCode.Escape)
+                        var textField = new TextField { value = enemy.enemyName, style = { flexGrow = 1, marginRight = 5 } };
+                        element.Q(className: "list-item").parent.Insert(1, textField);
+                        label.style.display = DisplayStyle.None;
+                        
+                        textField.Focus();
+                        textField.SelectAll();
+                        
+                        void ApplyRename()
                         {
-                            label.style.display = DisplayStyle.Flex;
-                            element.Remove(textField);
+                            if (textField.parent != null)
+                            {
+                                Undo.RecordObject(_enemyDatabase, "Rename Enemy");
+                                enemy.enemyName = textField.value;
+                                EditorUtility.SetDirty(_enemyDatabase);
+                                label.text = enemy.enemyName;
+                                label.style.display = DisplayStyle.Flex;
+                                textField.parent.Remove(textField);
+                                UpdatePreview();
+                            }
                         }
+                        
+                        textField.RegisterCallback<FocusOutEvent>(evt => ApplyRename());
+                        textField.RegisterCallback<KeyDownEvent>(evt => 
+                        {
+                            if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) 
+                                ApplyRename();
+                            else if (evt.keyCode == KeyCode.Escape)
+                            {
+                                label.style.display = DisplayStyle.Flex;
+                                if (textField.parent != null) textField.parent.Remove(textField);
+                            }
+                        });
                     });
-                });
-                
-                deleteBtn.clickable = new Clickable(() => DeleteItem(item));
+
+                    deleteBtn.clickable = new Clickable(() => DeleteEnemy(enemy));
+                }
+            }
+            else
+            {
+                badge.style.display = DisplayStyle.None;
+                if (i < _filteredItems.Count && _filteredItems[i] != null)
+                {
+                    var item = _filteredItems[i];
+                    label.text = item.name;
+                    label.style.display = DisplayStyle.Flex; // ensure visible
+                    
+                    renameBtn.clickable = new Clickable(() => 
+                    {
+                        // Inline Rename Logic
+                        var textField = new TextField { value = item.name, style = { flexGrow = 1, marginRight = 5 } };
+                        element.Q(className: "list-item").parent.Insert(0, textField);
+                        label.style.display = DisplayStyle.None;
+                        
+                        textField.Focus();
+                        textField.SelectAll();
+                        
+                        void ApplyRename()
+                        {
+                            if (element.Contains(textField))
+                            {
+                                RenameItem(item, textField.value);
+                                label.style.display = DisplayStyle.Flex;
+                                element.Remove(textField);
+                            }
+                        }
+                        
+                        textField.RegisterCallback<FocusOutEvent>(evt => ApplyRename());
+                        textField.RegisterCallback<KeyDownEvent>(evt => 
+                        {
+                            if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter) 
+                                ApplyRename();
+                            else if (evt.keyCode == KeyCode.Escape)
+                            {
+                                label.style.display = DisplayStyle.Flex;
+                                element.Remove(textField);
+                            }
+                        });
+                    });
+                    
+                    deleteBtn.clickable = new Clickable(() => DeleteItem(item));
+                }
             }
         };
         _itemListView.selectionChanged += OnItemSelected;
@@ -192,12 +276,43 @@ public class DataManagerWindow : EditorWindow
     private void SetDataType(DataType newType)
     {
         _currentDataType = newType;
+        _selectedItem = null;
+        _selectedEnemy = null;
+        _inspectorContainer.Clear();
+        ClearPreview();
         
         if (_listHeaderLabel != null)
-            _listHeaderLabel.text = newType == DataType.UpgradeCard ? "Upgrade Cards" : "Weapons";
+        {
+            _listHeaderLabel.text = newType switch
+            {
+                DataType.UpgradeCard => "Upgrade Cards",
+                DataType.Weapon => "Weapons",
+                DataType.Enemy => "Enemies",
+                _ => "Items"
+            };
+        }
         
         if (_previewHeaderLabel != null)
-            _previewHeaderLabel.text = newType == DataType.UpgradeCard ? "Card Preview" : "Weapon Preview";
+        {
+            _previewHeaderLabel.text = newType switch
+            {
+                DataType.UpgradeCard => "Card Preview",
+                DataType.Weapon => "Weapon Preview",
+                DataType.Enemy => "Enemy Preview",
+                _ => "Preview"
+            };
+        }
+
+        if (_newItemNameField != null)
+        {
+            _newItemNameField.value = newType switch
+            {
+                DataType.UpgradeCard => "New Upgrade Card",
+                DataType.Weapon => "New Weapon",
+                DataType.Enemy => "New Enemy",
+                _ => "New Item"
+            };
+        }
             
         RefreshList();
     }
@@ -221,6 +336,7 @@ public class DataManagerWindow : EditorWindow
         }
         
         _selectedItem = db;
+        _selectedEnemy = null;
         _itemListView.ClearSelection();
         
         _inspectorContainer.Clear();
@@ -271,23 +387,102 @@ public class DataManagerWindow : EditorWindow
         }
     }
 
+    private void DeleteEnemy(EnemyEntry enemy)
+    {
+        if (enemy == null || _enemyDatabase == null) return;
+
+        if (EditorUtility.DisplayDialog("Delete Enemy", $"Are you sure you want to delete {enemy.enemyName} from database?", "Delete", "Cancel"))
+        {
+            Undo.RecordObject(_enemyDatabase, "Delete Enemy");
+            _enemyDatabase.enemyTypes.Remove(enemy);
+            EditorUtility.SetDirty(_enemyDatabase);
+            AssetDatabase.SaveAssets();
+
+            if (_selectedEnemy == enemy)
+            {
+                _selectedEnemy = null;
+                _inspectorContainer.Clear();
+                ClearPreview();
+            }
+
+            RefreshList();
+        }
+    }
+
+    private void LoadOrCreateEnemyDatabase()
+    {
+        if (_enemyDatabase != null) return;
+
+        string[] guids = AssetDatabase.FindAssets("t:EnemyDatabase");
+        if (guids.Length > 0)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            _enemyDatabase = AssetDatabase.LoadAssetAtPath<EnemyDatabase>(path);
+        }
+        else
+        {
+            string dir = "Assets/3d/Enemy";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            _enemyDatabase = ScriptableObject.CreateInstance<EnemyDatabase>();
+            AssetDatabase.CreateAsset(_enemyDatabase, dir + "/EnemyDatabase.asset");
+            AssetDatabase.SaveAssets();
+        }
+    }
+
     private void RefreshList()
     {
-        _items.Clear();
-        string searchType = _currentDataType == DataType.UpgradeCard ? "t:UpgradeCard" : "t:WeaponData";
-        string[] guids = AssetDatabase.FindAssets(searchType);
-        foreach (string guid in guids)
+        if (_currentDataType == DataType.Enemy)
         {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            ScriptableObject item = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-            if (item != null) _items.Add(item);
+            LoadOrCreateEnemyDatabase();
+        }
+        else
+        {
+            _items.Clear();
+            string searchType = _currentDataType == DataType.UpgradeCard ? "t:UpgradeCard" : "t:WeaponData";
+            string[] guids = AssetDatabase.FindAssets(searchType);
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                ScriptableObject item = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                if (item != null) _items.Add(item);
+            }
         }
         
-        FilterList(_searchField.value);
+        FilterList(_searchField != null ? _searchField.value : "");
     }
 
     private void FilterList(string query)
     {
+        if (_currentDataType == DataType.Enemy)
+        {
+            LoadOrCreateEnemyDatabase();
+            _enemyList = _enemyDatabase != null && _enemyDatabase.enemyTypes != null ? _enemyDatabase.enemyTypes : new List<EnemyEntry>();
+
+            if (string.IsNullOrEmpty(query))
+            {
+                _filteredEnemies = new List<EnemyEntry>(_enemyList);
+            }
+            else
+            {
+                _filteredEnemies = _enemyList.Where(e => !string.IsNullOrEmpty(e.enemyName) && e.enemyName.ToLower().Contains(query.ToLower())).ToList();
+            }
+
+            _itemListView.itemsSource = _filteredEnemies;
+            _itemListView.Rebuild();
+
+            if (_filteredEnemies.Count > 0)
+            {
+                _itemListView.SetSelection(0);
+            }
+            else
+            {
+                _selectedEnemy = null;
+                _inspectorContainer.Clear();
+                ClearPreview();
+            }
+            return;
+        }
+
         if (string.IsNullOrEmpty(query))
         {
             _filteredItems = new List<ScriptableObject>(_items);
@@ -306,6 +501,7 @@ public class DataManagerWindow : EditorWindow
         }
         else
         {
+            _selectedItem = null;
             _inspectorContainer.Clear();
             ClearPreview();
         }
@@ -316,8 +512,17 @@ public class DataManagerWindow : EditorWindow
         _inspectorContainer.Clear();
         foreach (var obj in selection)
         {
-            if (obj is ScriptableObject item)
+            if (_currentDataType == DataType.Enemy && obj is EnemyEntry enemy)
             {
+                _selectedEnemy = enemy;
+                _selectedItem = null;
+                BuildEnemyInspector(enemy);
+                UpdatePreview();
+                break;
+            }
+            else if (obj is ScriptableObject item)
+            {
+                _selectedEnemy = null;
                 _selectedItem = item;
                 
                 var serializedObject = new SerializedObject(item);
@@ -329,8 +534,298 @@ public class DataManagerWindow : EditorWindow
                 
                 _inspectorContainer.Add(inspectorElement);
                 UpdatePreview();
+                break;
             }
         }
+    }
+
+    private void BuildEnemyInspector(EnemyEntry enemy)
+    {
+        _inspectorContainer.Clear();
+        if (enemy == null || _enemyDatabase == null) return;
+
+        var scroll = new ScrollView();
+        scroll.style.flexGrow = 1;
+
+        VisualElement CreateHeader(string title)
+        {
+            var h = new Label(title);
+            h.AddToClassList("section-header");
+            return h;
+        }
+
+        // --- GENERAL & VISUALS ---
+        scroll.Add(CreateHeader("General & Visuals"));
+
+        var nameField = new TextField("Enemy Name") { value = enemy.enemyName };
+        nameField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Enemy Name");
+            enemy.enemyName = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            _itemListView.Rebuild();
+            UpdatePreview();
+        });
+        scroll.Add(nameField);
+
+        var prefabField = new ObjectField("Prefab")
+        {
+            objectType = typeof(Transform),
+            value = enemy.prefab
+        };
+        prefabField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Enemy Prefab");
+            enemy.prefab = evt.newValue as Transform;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(prefabField);
+
+        var categoryField = new EnumField("Category", enemy.category);
+        scroll.Add(categoryField);
+
+        var isGroundField = new Toggle("Is Ground Enemy") { value = enemy.isGroundEnemy };
+        isGroundField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Ground Enemy");
+            enemy.isGroundEnemy = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(isGroundField);
+
+        var groundYField = new FloatField("Ground Y Position") { value = enemy.groundYPosition };
+        groundYField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Ground Y");
+            enemy.groundYPosition = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(groundYField);
+
+        // --- SPAWN RULES ---
+        scroll.Add(CreateHeader("Spawn Rules"));
+
+        var minLevelField = new IntegerField("Min Spawn Level") { value = enemy.minSpawnLevel };
+        minLevelField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Min Level");
+            enemy.minSpawnLevel = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(minLevelField);
+
+        var maxLevelField = new IntegerField("Max Spawn Level") { value = enemy.maxSpawnLevel };
+        maxLevelField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Max Level");
+            enemy.maxSpawnLevel = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(maxLevelField);
+
+        var bossLevelField = new IntegerField("Boss Target Level") { value = enemy.bossTargetLevel };
+        bossLevelField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Boss Target Level");
+            enemy.bossTargetLevel = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(bossLevelField);
+
+        // --- CHASE SETTINGS ---
+        scroll.Add(CreateHeader("Chase Settings"));
+
+        var alwaysChaseField = new Toggle("Always Chase Player") { value = enemy.alwaysChasePlayer };
+        alwaysChaseField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Always Chase");
+            enemy.alwaysChasePlayer = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(alwaysChaseField);
+
+        var chaseChanceSlider = new Slider("Chase Chance (%)", 0f, 100f) { value = enemy.chaseChance, showInputField = true };
+        chaseChanceSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Chase Chance");
+            enemy.chaseChance = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(chaseChanceSlider);
+
+        // --- STATS ---
+        scroll.Add(CreateHeader("Combat Stats"));
+
+        var hpField = new FloatField("Max Health") { value = enemy.maxHealth };
+        hpField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Health");
+            enemy.maxHealth = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(hpField);
+
+        var speedField = new FloatField("Move Speed") { value = enemy.moveSpeed };
+        speedField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Speed");
+            enemy.moveSpeed = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(speedField);
+
+        var dmgField = new FloatField("Damage") { value = enemy.damage };
+        dmgField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Damage");
+            enemy.damage = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(dmgField);
+
+        var deathDurationField = new FloatField("Death Duration (s)") { value = enemy.deathDuration };
+        deathDurationField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Death Duration");
+            enemy.deathDuration = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(deathDurationField);
+
+        // --- BOSS MINIONS SECTION ---
+        var minionsSection = new VisualElement();
+        minionsSection.name = "minionsSection";
+        scroll.Add(minionsSection);
+
+        void RefreshMinionsUI()
+        {
+            minionsSection.Clear();
+            bool isBoss = enemy.category == EnemyCategory.Boss;
+            bossLevelField.style.display = isBoss ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (!isBoss) return;
+
+            minionsSection.Add(CreateHeader("Boss Minions Configuration"));
+
+            var canSpawnMinionsToggle = new Toggle("Can Spawn Minions") { value = enemy.canSpawnMinions };
+            canSpawnMinionsToggle.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Toggle Can Spawn Minions");
+                enemy.canSpawnMinions = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(canSpawnMinionsToggle);
+
+            var spawnIntervalField = new FloatField("Spawn Interval (s)") { value = enemy.minionSpawnInterval };
+            spawnIntervalField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Minion Interval");
+                enemy.minionSpawnInterval = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(spawnIntervalField);
+
+            // Quick Minion Assigner UI
+            var assignContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 8, marginBottom = 8, alignItems = Align.Center } };
+            
+            var candidateEnemies = _enemyDatabase.enemyTypes.Where(e => e != enemy && e.category != EnemyCategory.Boss).ToList();
+            if (candidateEnemies.Count == 0)
+            {
+                candidateEnemies = _enemyDatabase.enemyTypes.Where(e => e != enemy).ToList();
+            }
+
+            List<string> candidateNames = candidateEnemies.Select(e => string.IsNullOrEmpty(e.enemyName) ? "Unnamed" : $"{e.enemyName} [{e.category}]").ToList();
+            if (candidateNames.Count == 0)
+            {
+                candidateNames.Add("(No available enemies)");
+            }
+
+            var enemyDropdown = new DropdownField("Add Minion From", candidateNames, 0);
+            enemyDropdown.style.flexGrow = 1;
+            assignContainer.Add(enemyDropdown);
+
+            var addMinionBtn = new Button { text = "+ Add Minion", style = { height = 24, marginLeft = 6 } };
+            addMinionBtn.clicked += () =>
+            {
+                if (candidateEnemies.Count > 0 && enemyDropdown.index >= 0 && enemyDropdown.index < candidateEnemies.Count)
+                {
+                    var chosen = candidateEnemies[enemyDropdown.index];
+                    Undo.RecordObject(_enemyDatabase, "Add Boss Minion");
+                    if (enemy.minionTypes == null) enemy.minionTypes = new List<EnemyEntry>();
+                    enemy.minionTypes.Add(chosen.Clone());
+                    enemy.canSpawnMinions = true;
+                    canSpawnMinionsToggle.value = true;
+                    EditorUtility.SetDirty(_enemyDatabase);
+                    RefreshMinionsUI();
+                }
+            };
+            assignContainer.Add(addMinionBtn);
+            minionsSection.Add(assignContainer);
+
+            // Minions Cards List
+            var minionsListContainer = new VisualElement { style = { marginTop = 4 } };
+            if (enemy.minionTypes != null && enemy.minionTypes.Count > 0)
+            {
+                for (int mIdx = 0; mIdx < enemy.minionTypes.Count; mIdx++)
+                {
+                    int indexCapture = mIdx;
+                    var minion = enemy.minionTypes[mIdx];
+
+                    var card = new VisualElement();
+                    card.AddToClassList("minion-card");
+
+                    var info = new VisualElement();
+                    info.AddToClassList("minion-info");
+
+                    var nameLbl = new Label($"{minion.enemyName}  [{minion.category}]");
+                    nameLbl.AddToClassList("minion-name");
+
+                    var statsLbl = new Label($"HP: {minion.maxHealth} | SPD: {minion.moveSpeed} | DMG: {minion.damage}");
+                    statsLbl.AddToClassList("minion-stats");
+
+                    info.Add(nameLbl);
+                    info.Add(statsLbl);
+
+                    var removeBtn = new Button { text = "✖ Remove", style = { height = 22, backgroundColor = new StyleColor(new Color(0.6f, 0.2f, 0.2f)) } };
+                    removeBtn.clicked += () =>
+                    {
+                        Undo.RecordObject(_enemyDatabase, "Remove Boss Minion");
+                        enemy.minionTypes.RemoveAt(indexCapture);
+                        EditorUtility.SetDirty(_enemyDatabase);
+                        RefreshMinionsUI();
+                    };
+
+                    card.Add(info);
+                    card.Add(removeBtn);
+                    minionsListContainer.Add(card);
+                }
+            }
+            else
+            {
+                var noMinionsLbl = new Label("No minions assigned yet. Use the dropdown above to add minions.") { style = { color = new StyleColor(Color.gray), unityFontStyleAndWeight = FontStyle.Italic, marginTop = 4 } };
+                minionsListContainer.Add(noMinionsLbl);
+            }
+            minionsSection.Add(minionsListContainer);
+        }
+
+        categoryField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Category");
+            enemy.category = (EnemyCategory)evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            _itemListView.Rebuild();
+            UpdatePreview();
+            RefreshMinionsUI();
+        });
+
+        RefreshMinionsUI();
+        _inspectorContainer.Add(scroll);
     }
 
     private void ClearPreview()
@@ -347,17 +842,66 @@ public class DataManagerWindow : EditorWindow
         
         var previewContainer = rootVisualElement.Q<VisualElement>(className: "preview-container");
         if (previewContainer != null) previewContainer.style.display = DisplayStyle.None;
+        if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
     }
 
     private void UpdatePreview()
     {
         var previewContainer = rootVisualElement.Q<VisualElement>(className: "preview-container");
         
+        if (_currentDataType == DataType.Enemy)
+        {
+            if (_selectedEnemy == null)
+            {
+                ClearPreview();
+                return;
+            }
+
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
+
+            _previewTitle.text = string.IsNullOrEmpty(_selectedEnemy.enemyName) ? "UNNAMED" : _selectedEnemy.enemyName.ToUpper();
+            _previewDesc.text = $"HP: {_selectedEnemy.maxHealth} | Speed: {_selectedEnemy.moveSpeed}\nDamage: {_selectedEnemy.damage}\nLevels: {_selectedEnemy.minSpawnLevel} - {_selectedEnemy.maxSpawnLevel}";
+            _previewValue.text = _selectedEnemy.category.ToString().ToUpper();
+
+            Texture2D previewTex = null;
+            if (_selectedEnemy.prefab != null)
+            {
+                previewTex = AssetPreview.GetAssetPreview(_selectedEnemy.prefab.gameObject);
+                if (previewTex == null)
+                {
+                    previewTex = AssetPreview.GetMiniThumbnail(_selectedEnemy.prefab.gameObject);
+                }
+            }
+
+            if (previewTex != null)
+            {
+                _previewIcon.style.backgroundImage = new StyleBackground(previewTex);
+            }
+            else
+            {
+                _previewIcon.style.backgroundImage = null;
+            }
+
+            Color bgColor = _selectedEnemy.category switch
+            {
+                EnemyCategory.Boss => new Color(0.35f, 0.12f, 0.12f),
+                EnemyCategory.Elite => new Color(0.25f, 0.12f, 0.35f),
+                _ => new Color(0.12f, 0.2f, 0.3f)
+            };
+
+            _previewBackground.style.backgroundImage = null;
+            _previewBackground.style.backgroundColor = new StyleColor(bgColor);
+            return;
+        }
+
         if (_selectedItem == null)
         {
             ClearPreview();
             return;
         }
+
+        if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.Flex;
 
         if (_currentDataType == DataType.UpgradeCard && _selectedItem is UpgradeCard _selectedCard)
         {
@@ -421,6 +965,32 @@ public class DataManagerWindow : EditorWindow
 
     private void CreateNewItem()
     {
+        if (_currentDataType == DataType.Enemy)
+        {
+            LoadOrCreateEnemyDatabase();
+            if (_enemyDatabase == null) return;
+
+            string enemyName = string.IsNullOrEmpty(_newItemNameField.value) ? "New Enemy" : _newItemNameField.value;
+            EnemyEntry newEnemy = new EnemyEntry();
+            newEnemy.enemyName = enemyName;
+
+            Undo.RecordObject(_enemyDatabase, "Create Enemy");
+            if (_enemyDatabase.enemyTypes == null) _enemyDatabase.enemyTypes = new List<EnemyEntry>();
+            _enemyDatabase.enemyTypes.Add(newEnemy);
+            EditorUtility.SetDirty(_enemyDatabase);
+            AssetDatabase.SaveAssets();
+
+            RefreshList();
+
+            int index = _filteredEnemies.IndexOf(newEnemy);
+            if (index >= 0)
+            {
+                _itemListView.SetSelection(index);
+                _itemListView.ScrollToItem(index);
+            }
+            return;
+        }
+
         ScriptableObject newItem = null;
         string fullPath = "";
         
@@ -458,16 +1028,48 @@ public class DataManagerWindow : EditorWindow
         
         RefreshList();
         
-        int index = _filteredItems.IndexOf(newItem);
-        if (index >= 0)
+        int idx = _filteredItems.IndexOf(newItem);
+        if (idx >= 0)
         {
-            _itemListView.SetSelection(index);
-            _itemListView.ScrollToItem(index);
+            _itemListView.SetSelection(idx);
+            _itemListView.ScrollToItem(idx);
         }
     }
 
     private void DuplicateSelectedItem()
     {
+        if (_currentDataType == DataType.Enemy)
+        {
+            if (_selectedEnemy == null || _enemyDatabase == null) return;
+
+            Undo.RecordObject(_enemyDatabase, "Duplicate Enemy");
+            EnemyEntry duplicate = _selectedEnemy.Clone();
+            duplicate.enemyName = _selectedEnemy.enemyName + " Copy";
+            if (_selectedEnemy.minionTypes != null && _selectedEnemy.minionTypes.Count > 0)
+            {
+                duplicate.minionTypes = new List<EnemyEntry>();
+                foreach (var m in _selectedEnemy.minionTypes)
+                {
+                    duplicate.minionTypes.Add(m.Clone());
+                }
+                duplicate.canSpawnMinions = _selectedEnemy.canSpawnMinions;
+                duplicate.minionSpawnInterval = _selectedEnemy.minionSpawnInterval;
+            }
+
+            _enemyDatabase.enemyTypes.Add(duplicate);
+            EditorUtility.SetDirty(_enemyDatabase);
+            AssetDatabase.SaveAssets();
+
+            RefreshList();
+            int index = _filteredEnemies.IndexOf(duplicate);
+            if (index >= 0)
+            {
+                _itemListView.SetSelection(index);
+                _itemListView.ScrollToItem(index);
+            }
+            return;
+        }
+
         if (_selectedItem == null) return;
         
         string path = AssetDatabase.GetAssetPath(_selectedItem);

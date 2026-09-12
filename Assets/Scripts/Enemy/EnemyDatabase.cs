@@ -44,6 +44,29 @@ public class EnemyEntry
     public bool canSpawnMinions = false;
     public float minionSpawnInterval = 5f;
     public List<EnemyEntry> minionTypes = new List<EnemyEntry>();
+
+    public EnemyEntry Clone()
+    {
+        EnemyEntry copy = new EnemyEntry();
+        copy.enemyName = this.enemyName;
+        copy.prefab = this.prefab;
+        copy.category = this.category;
+        copy.isGroundEnemy = this.isGroundEnemy;
+        copy.minSpawnLevel = this.minSpawnLevel;
+        copy.maxSpawnLevel = this.maxSpawnLevel;
+        copy.alwaysChasePlayer = this.alwaysChasePlayer;
+        copy.chaseChance = this.chaseChance;
+        copy.bossTargetLevel = this.bossTargetLevel;
+        copy.maxHealth = this.maxHealth;
+        copy.moveSpeed = this.moveSpeed;
+        copy.damage = this.damage;
+        copy.deathDuration = this.deathDuration;
+        copy.groundYPosition = this.groundYPosition;
+        copy.canSpawnMinions = false;
+        copy.minionSpawnInterval = this.minionSpawnInterval;
+        copy.minionTypes = new List<EnemyEntry>();
+        return copy;
+    }
 }
 
 [CreateAssetMenu(fileName = "EnemyDatabase", menuName = "Enemy/Enemy Database")]

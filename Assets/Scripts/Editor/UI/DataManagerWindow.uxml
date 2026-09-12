@@ -54,19 +54,21 @@
                     </engine:VisualElement>
                     
                     <!-- Quick Sprite Previews moved here -->
-                    <engine:Label text="Sprite Assignments" class="pane-header" style="margin-top: 20px;" />
-                    <engine:VisualElement style="flex-direction: row; justify-content: space-around; padding: 10px;">
-                        <engine:VisualElement class="quick-sprite-box">
-                            <engine:Label text="Icon" class="quick-sprite-label" />
-                            <engine:VisualElement name="quickIcon" class="quick-sprite-img" />
-                        </engine:VisualElement>
-                        <engine:VisualElement class="quick-sprite-box">
-                            <engine:Label text="Background" class="quick-sprite-label" />
-                            <engine:VisualElement name="quickBg" class="quick-sprite-img" />
-                        </engine:VisualElement>
-                        <engine:VisualElement class="quick-sprite-box">
-                            <engine:Label text="Selected" class="quick-sprite-label" />
-                            <engine:VisualElement name="quickSel" class="quick-sprite-img" />
+                    <engine:VisualElement name="spriteAssignmentsSection">
+                        <engine:Label text="Sprite Assignments" class="pane-header" style="margin-top: 20px;" />
+                        <engine:VisualElement style="flex-direction: row; justify-content: space-around; padding: 10px;">
+                            <engine:VisualElement class="quick-sprite-box">
+                                <engine:Label text="Icon" class="quick-sprite-label" />
+                                <engine:VisualElement name="quickIcon" class="quick-sprite-img" />
+                            </engine:VisualElement>
+                            <engine:VisualElement class="quick-sprite-box">
+                                <engine:Label text="Background" class="quick-sprite-label" />
+                                <engine:VisualElement name="quickBg" class="quick-sprite-img" />
+                            </engine:VisualElement>
+                            <engine:VisualElement class="quick-sprite-box">
+                                <engine:Label text="Selected" class="quick-sprite-label" />
+                                <engine:VisualElement name="quickSel" class="quick-sprite-img" />
+                            </engine:VisualElement>
                         </engine:VisualElement>
                     </engine:VisualElement>
 

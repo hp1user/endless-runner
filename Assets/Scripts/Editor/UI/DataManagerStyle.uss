@@ -155,3 +155,67 @@
     -unity-background-scale-mode: scale-to-fit;
     background-color: rgb(20,20,20);
 }
+
+/* Badges for List Items */
+.badge {
+    font-size: 10px;
+    -unity-font-style: bold;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+.badge-standard {
+    background-color: rgb(50, 70, 90);
+    color: rgb(180, 210, 240);
+}
+
+.badge-elite {
+    background-color: rgb(90, 45, 110);
+    color: rgb(220, 180, 255);
+}
+
+.badge-boss {
+    background-color: rgb(130, 30, 30);
+    color: rgb(255, 180, 180);
+}
+
+/* Minions UI */
+.minion-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(42, 42, 42);
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    border-left-width: 3px;
+    border-left-color: rgb(180, 50, 50);
+}
+
+.minion-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.minion-name {
+    -unity-font-style: bold;
+    font-size: 12px;
+    color: white;
+}
+
+.minion-stats {
+    font-size: 10px;
+    color: rgb(180, 180, 180);
+}
+
+.section-header {
+    -unity-font-style: bold;
+    font-size: 13px;
+    color: rgb(220, 220, 220);
+    background-color: rgb(35, 35, 35);
+    padding: 5px 8px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    border-radius: 3px;
+}

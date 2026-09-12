@@ -272,9 +272,16 @@ namespace Enemy.Control
             if (targetDirection != Vector3.zero)
             {
                 float currentMoveSpeed = moveSpeed;
-                if (isBoss && leftLegBroken && rightLegBroken)
+                if (isBoss)
                 {
-                    currentMoveSpeed = moveSpeed * 0.5f;
+                    if (leftLegBroken && rightLegBroken)
+                    {
+                        currentMoveSpeed = moveSpeed * 0.4f;
+                    }
+                    else if (leftLegBroken || rightLegBroken)
+                    {
+                        currentMoveSpeed = moveSpeed * 0.75f;
+                    }
                 }
 
                 transform.Translate(targetDirection * currentMoveSpeed * Time.deltaTime, Space.World);
@@ -474,10 +481,10 @@ namespace Enemy.Control
         {
             if (isDead || animator == null) return;
 
-            // If BOTH legs are broken, boss does NOT die; it moves at 1/2 speed and limps heavily towards player
+            // If BOTH legs are broken, boss does NOT die; it moves at 0.4x speed and limps heavily towards player
             if (leftLegBroken && rightLegBroken)
             {
-                Debug.Log("<color=orange><b>[Boss] BOTH legs are broken! Boss moves slowly (1/2 speed) towards player!</b></color>");
+                Debug.Log("<color=orange><b>[Boss] BOTH legs are broken! Boss moves slowly (0.4x speed) towards player!</b></color>");
                 animator.SetFloat(horizontalParamHash, 0f);
                 animator.SetFloat(verticalParamHash, 2f);
                 return;
