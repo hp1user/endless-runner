@@ -2920,10 +2920,10 @@ MonoBehaviour:
   baseEnemiesPerWave: 10
   additionalEnemiesPerWave: 2
   levelClearTimer: 0
-  levelsBetweenBosses: 1
+  bossLevels: 050000000f000000140000001900000028000000
   isBossFightActive: 0
   checkpointTestLevel: 5
-  autoJumpToCheckpointOnStart: 1
+  autoJumpToCheckpointOnStart: 0
 --- !u!4 &1344424053 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8279553672727265445, guid: 0057b526bb50bf841b9830afde117b2e, type: 3}
