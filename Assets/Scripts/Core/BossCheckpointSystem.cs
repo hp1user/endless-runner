@@ -54,10 +54,10 @@ public static class BossCheckpointSystem
         // 4. Unlock weapons and stock ammo appropriate for this level
         UnlockWeaponsForLevel(targetLevel);
 
-        // 5. Trigger the Boss Fight!
-        GameManager.Instance.StartBossFight();
+        // 5. Trigger the Boss Transition (City -> Bridge -> Boss Camera -> Boss Fight!)
+        GameManager.Instance.StartBossTransition();
 
-        Debug.Log($"<color=orange><b>[Boss Checkpoint]</b></color> <b>READY!</b> Level {targetLevel} Boss Fight initiated with full gear!");
+        Debug.Log($"<color=orange><b>[Boss Checkpoint]</b></color> <b>READY!</b> Level {targetLevel} Boss Transition initiated with full gear!");
     }
 
     private static void UnlockWeaponsForLevel(int level)

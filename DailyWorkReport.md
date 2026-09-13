@@ -71,3 +71,31 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - **SphereCast Fallback**: Added a 0.35f radius `SphereCast` fallback in `PlayerController.PerformRaycastHit()` for rapid-fire / full-auto weapons, ensuring continuous gunfire reliably hits moving limbs without missing through thin frame gaps.
   - **SMG Muzzle Alignment**: Updated `muzzlePosition` in `SMG.asset` from unconfigured `(0, 0, 0)` to `(0.28, 0, -0.07)` and `muzzleRotation` to `(0, 0, -90)` so bullet trails emit directly from the SMG barrel tip instead of the character's wrist.
   - **Boss Leg Collider Alignment in Prefab**: Repositioned and expanded `L_Leg` and `R_Leg` BoxColliders in `Bug Boss.prefab` to accurately encompass the animated leg bone sweep volume (`size: (1.2, 1.2, 1.5)` at `localPos: (±0.028, 0.015, -0.028)`), ensuring clicks on visual legs always connect with colliders.
+
+## Date: 2026-09-13
+
+### Features Added
+- **15-Second City-to-Bridge Environment Transition**:
+  - Configured `bossTransitionDuration = 15f` in `LevelManager.cs`.
+  - When the boss transition starts, the player runs forward through the city in the front-facing camera for 15 seconds.
+  - At ~11.5s into the transition, `Bridge_1` is queued and rolls under the player at the 15-second mark, triggering `OnBridgeReached`.
+- **Bridge Arrival Detection & Boss Camera Switch**:
+  - `LevelManager.CheckBridgeArrival()` detects when the bridge chunk's leading edge reaches the player ($Z = 0$).
+  - Once on the bridge, `GameManager.OnBridgeReached()` fires `OnBossFightStarted`.
+  - `BossCameraController` switches from `standardFrontCamera` (`Cam`) to `bossBackCamera` (`Cam_1`) looking down the bridge.
+  - Converts preceding chunks in front of the player to `Bridge_1` so the entire combat arena is on the bridge.
+  - `EnemyManager` spawns the Boss onto the bridge at $Z = +25$, beginning combat.
+- **Bridge-to-City Exit Transition**:
+  - Added `PrepareCityTransition()` in `LevelManager.cs` called upon boss defeat (`HandleBossDefeated`).
+  - Swaps upcoming chunks behind the player back to city ruins (`currentTheme.chunkVariants`) so the bridge ends and the city road seamlessly returns.
+- **Flexible Boss Schedule System**:
+  - Replaced rigid modulo formula (`currentLevel % levelsBetweenBosses == 0`) with a configurable list in `GameManager.cs`: `bossLevels = [5, 15, 20, 25, 40]`.
+  - Added `EnemyDatabase.GetBossForLevel()` fallback so that if an exact level boss isn't mapped, it automatically scales an available boss instead of skipping and leaving the camera stuck.
+- **Weapon Switching Fix (AR / Pistol & Hotkeys)**:
+  - Fixed initialization race condition in `WeaponWheelToolkitManager.cs` by syncing `GetUnlockedWeapons()` in `Start()` and on `OpenWheel()`, ensuring slot 4 (Pistol) is always populated and selectable.
+  - Updated `PlayerController.EquipWeaponFromWheel()` to immediately assign `currentWeaponData`, spawn the model, and update ammo UI.
+  - Added keyboard hotkeys (`1`, `2`, `3`, `4`, `5`, `Q`, `E`) in `PlayerController.cs` for instant weapon switching at any time, even while holding AR with remaining ammo.
+
+### Bugs Fixed & Improvements
+- **Camera Lock on Level 10 Fix**: Updated `GameManager.SkipBossPhase()` to invoke `OnBossDefeated`, ensuring `BossCameraController` and `LevelManager` properly reset back to standard front camera and city theme.
+- **Data Manager UI Cleanup**: Removed nested submenu in `DataManagerWindow` toolbar (changed `"Enemy / Boss"` to `"Enemy"`) and purged uninitialized dummy minion entry from `EnemyDatabase.asset`.

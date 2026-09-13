@@ -17,9 +17,14 @@ public class GameManager : MonoBehaviour
     public float levelClearTimer = 0f;
 
     [Header("Boss Settings")]
-    [Tooltip("A boss spawns every X levels.")]
-    public int levelsBetweenBosses = 10;
+    [Tooltip("Levels where boss battles occur (e.g. 5, 15, 20, 25, 40).")]
+    public System.Collections.Generic.List<int> bossLevels = new System.Collections.Generic.List<int> { 5, 15, 20, 25, 40 };
     public bool isBossFightActive = false;
+
+    public bool IsBossLevel(int level)
+    {
+        return bossLevels != null && bossLevels.Contains(level);
+    }
 
     [Header("Boss Checkpoint Testing")]
     [Tooltip("Target level for the custom checkpoint jump.")]
@@ -29,9 +34,12 @@ public class GameManager : MonoBehaviour
 
     // --- GLOBAL EVENTS (The GameManager shouting to the world) ---
     public static event Action<int> OnLevelCompleted; // Tells LevelManager to swap environments
-    public static event Action OnBossFightStarted;    // Tells the Camera to flip 180 degrees!
+    public static event Action OnBossTransitionStarted; // Tells LevelManager & systems to transition from City to Bridge!
+    public static event Action OnBossFightStarted;    // Tells the Camera to flip 180 degrees when on the bridge!
     public static event Action OnBossDefeated;        // Tells the Camera to flip back
     public static event Action OnEnemyKilled;         // Tells listeners (like Ultimate skill) that an enemy died
+
+    public bool isBossTransitionActive { get; private set; } = false;
 
     private void Awake()
     {
@@ -61,10 +69,10 @@ public class GameManager : MonoBehaviour
         BossCheckpointSystem.JumpToBossCheckpoint(5);
     }
 
-    [ContextMenu("Jump to Boss (Level 10)")]
-    public void ContextMenuJumpBossLevel10()
+    [ContextMenu("Jump to Boss (Level 15)")]
+    public void ContextMenuJumpBossLevel15()
     {
-        BossCheckpointSystem.JumpToBossCheckpoint(10);
+        BossCheckpointSystem.JumpToBossCheckpoint(15);
     }
 
     [ContextMenu("Jump to Configured Level Checkpoint")]
@@ -76,8 +84,8 @@ public class GameManager : MonoBehaviour
     // Enemies will call this method right before they die
     public void RegisterEnemyKill()
     {
-        // Don't count normal kills if we are currently fighting a boss
-        if (isBossFightActive || PlayerController.Instance.isDead) return;
+        // Don't count normal kills if we are currently fighting a boss or transitioning
+        if (isBossFightActive || isBossTransitionActive || PlayerController.Instance.isDead) return;
 
         enemiesKilledThisLevel++;
         OnEnemyKilled?.Invoke(); // Announce that an enemy was killed
@@ -93,18 +101,16 @@ public class GameManager : MonoBehaviour
 
     public int GetRequiredKillsForCurrentLevel()
     {
-        int wavePhase = (currentLevel - 1) / levelsBetweenBosses;
-        return baseEnemiesPerWave + (wavePhase * additionalEnemiesPerWave);
+        return baseEnemiesPerWave + ((currentLevel - 1) * additionalEnemiesPerWave);
     }
 
     private void TriggerNextPhase()
     {
         enemiesKilledThisLevel = 0; // Reset the counter
 
-        // Is the NEXT level a Boss Level? (e.g., Level 5, 10, 15...)
-        if (currentLevel % levelsBetweenBosses == 0)
+        if (IsBossLevel(currentLevel))
         {
-            StartBossFight();
+            StartBossTransition();
         }
         else
         {
@@ -114,18 +120,41 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void StartBossTransition()
+    {
+        if (isBossFightActive || isBossTransitionActive) return;
+
+        isBossTransitionActive = true;
+        OnBossTransitionStarted?.Invoke();
+        Debug.Log("<color=yellow>[GameManager]</color> APPROACHING BOSS! Transitioning from City to Bridge...");
+    }
+
+    // Called by LevelManager when the player physically enters the Bridge chunk
+    public void OnBridgeReached()
+    {
+        isBossTransitionActive = false;
+        StartBossFight();
+    }
+
     public void StartBossFight()
     {
+        // If the player is not yet on the bridge and not currently in transition, initiate transition first
+        if (LevelManager.Instance != null && !LevelManager.Instance.isPlayerOnBridge && !isBossTransitionActive)
+        {
+            StartBossTransition();
+            return;
+        }
+
+        isBossTransitionActive = false;
         isBossFightActive = true;
         OnBossFightStarted?.Invoke();
-        Debug.Log($"<color=red>[GameManager] WARNING:</color> BOSS FIGHT INITIATED!");
-
-        // TODO: Tell EnemyManager to spawn the Boss Prefab!
+        Debug.Log($"<color=red>[GameManager] WARNING:</color> ON THE BRIDGE! BOSS FIGHT INITIATED!");
     }
 
     // The Boss will call this method when its health hits 0
     public void BossDefeated()
     {
+        isBossTransitionActive = false;
         isBossFightActive = false;
         currentLevel++;
 
@@ -137,10 +166,13 @@ public class GameManager : MonoBehaviour
 
     public void SkipBossPhase()
     {
+        isBossTransitionActive = false;
         isBossFightActive = false;
-        currentLevel++; // Jump to level 6!
+        currentLevel++; // Jump to next level
+
+        OnBossDefeated?.Invoke(); // Ensures cameras & environment return to normal front view!
         OnLevelCompleted?.Invoke(currentLevel); // Tell the environment to swap
 
-        Debug.Log($"<color=cyan>[GameManager]</color> No Boss found. Skipping phase! Advancing to Level {currentLevel}");
+        Debug.Log($"<color=cyan>[GameManager]</color> No Boss found for phase. Skipping! Advancing to Level {currentLevel}");
     }
 }

@@ -46,15 +46,23 @@ public class EnemyManager : MonoBehaviour
     private void OnEnable()
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
-        GameManager.OnBossFightStarted += HandleBossFightStarted; // NEW: Listen for the Boss!
+        GameManager.OnBossTransitionStarted += HandleBossTransitionStarted;
+        GameManager.OnBossFightStarted += HandleBossFightStarted;
         GameManager.OnLevelCompleted += HandleLevelCompleted;
     }
 
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
-        GameManager.OnBossFightStarted -= HandleBossFightStarted; // NEW: Stop listening
+        GameManager.OnBossTransitionStarted -= HandleBossTransitionStarted;
+        GameManager.OnBossFightStarted -= HandleBossFightStarted;
         GameManager.OnLevelCompleted -= HandleLevelCompleted;
+    }
+
+    private void HandleBossTransitionStarted()
+    {
+        // Clear active wave enemies so the transition road is clear for the bridge approach
+        ClearAllActiveEnemies();
     }
 
     private void HandleGameOver()
@@ -85,7 +93,7 @@ public class EnemyManager : MonoBehaviour
     {
         if (isGameOver) return;
 
-        if (GameManager.Instance != null && GameManager.Instance.isBossFightActive) return;
+        if (GameManager.Instance != null && (GameManager.Instance.isBossFightActive || GameManager.Instance.isBossTransitionActive)) return;
 
         timer += Time.deltaTime;
 
@@ -171,8 +179,8 @@ public class EnemyManager : MonoBehaviour
 
     private System.Collections.IEnumerator SpawnBossRoutine()
     {
-        // Give the camera time to flip around and the bridge to spawn before dropping the boss!
-        yield return new WaitForSeconds(2.0f);
+        // Give the camera a brief moment to begin its blend on the bridge before dropping the boss!
+        yield return new WaitForSeconds(0.8f);
 
         if (enemyDatabase == null || player == null) yield break;
 

@@ -101,24 +101,38 @@ public class EnemyDatabase : ScriptableObject
         return validEnemies[Random.Range(0, validEnemies.Count)];
     }
 
-    // 2. Gets a BOSS valid for the current level
+    // 2. Gets a BOSS valid for the current level (with fallback to available bosses)
     public EnemyEntry GetBossForLevel(int currentLevel)
     {
         if (enemyTypes == null || enemyTypes.Count == 0) return null;
 
-        List<EnemyEntry> validBosses = new List<EnemyEntry>();
+        List<EnemyEntry> exactMatches = new List<EnemyEntry>();
+        List<EnemyEntry> allBosses = new List<EnemyEntry>();
 
         foreach (EnemyEntry enemy in enemyTypes)
         {
-            // NEW: Check if it's a boss AND its target level exactly matches the current level!
-            if (enemy.category == EnemyCategory.Boss && enemy.bossTargetLevel == currentLevel)
+            if (enemy.category == EnemyCategory.Boss)
             {
-                validBosses.Add(enemy);
+                allBosses.Add(enemy);
+                if (enemy.bossTargetLevel == currentLevel)
+                {
+                    exactMatches.Add(enemy);
+                }
             }
         }
 
-        if (validBosses.Count == 0) return null;
+        if (exactMatches.Count > 0)
+        {
+            return exactMatches[Random.Range(0, exactMatches.Count)];
+        }
 
-        return validBosses[Random.Range(0, validBosses.Count)];
+        // Fallback: If no boss is specifically assigned to this level, return an available boss
+        if (allBosses.Count > 0)
+        {
+            Debug.Log($"<color=yellow>[EnemyDatabase]</color> No boss specifically configured for Level {currentLevel}. Using available boss: {allBosses[0].enemyName}");
+            return allBosses[Random.Range(0, allBosses.Count)];
+        }
+
+        return null;
     }
 }

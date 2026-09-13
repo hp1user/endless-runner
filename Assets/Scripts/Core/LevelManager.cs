@@ -4,26 +4,30 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
+    public static LevelManager Instance { get; private set; }
+
     public enum MoveDirection { Backward, Forward }
 
     [Header("Movement Settings")]
     [Tooltip("Backward = Chunks move towards -Z. Forward = Chunks move towards +Z.")]
-    public MoveDirection chunkDirection = MoveDirection.Backward;
+    public MoveDirection chunkDirection = MoveDirection.Forward;
     public float worldMoveSpeed = 15f;
 
     [Header("Chunk Settings")]
     public LevelDatabase levelDatabase;
     public float chunkLength = 40f;
-    public int chunksOnScreen = 5;
+    public int chunksOnScreen = 3;
 
     [Tooltip("Distance from 0 where the chunk is destroyed (use a positive number)")]
-    public float despawnDistance = 40f;
+    public float despawnDistance = 80f;
+
+    public bool isTransitioningToBridge { get; private set; } = false;
+    public bool isPlayerOnBridge { get; private set; } = false;
 
     private LevelThemeData currentTheme;
-    private int currentThemeIndex = 0; // NEW: Tracks which theme we are currently using
+    private int currentThemeIndex = 0; // Tracks which theme we are currently using
 
-    // THE FIX: We now track both the spawned chunk AND the prefab it came from!
-    private struct ChunkTracker
+    public struct ChunkTracker
     {
         public GameObject instance;
         public GameObject originalPrefab;
@@ -33,19 +37,29 @@ public class LevelManager : MonoBehaviour
     private Transform lastSpawnedChunk;
 
     private bool isGameOver = false;
-    private bool isBossPhase = false; // NEW: Tells the spawner to use the bridge!
+    private bool isBossPhase = false;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     private void OnEnable()
     {
         PlayerController.OnPlayerDeath += HandleGameOver;
-        GameManager.OnBossFightStarted += HandleBossFight; // Listen for the Boss
-        GameManager.OnLevelCompleted += HandleLevelComplete; // Listen for Theme changes
+        GameManager.OnBossTransitionStarted += HandleBossTransitionStarted;
+        GameManager.OnBossFightStarted += HandleBossFight;
+        GameManager.OnBossDefeated += HandleBossDefeated;
+        GameManager.OnLevelCompleted += HandleLevelComplete;
     }
 
     private void OnDisable()
     {
         PlayerController.OnPlayerDeath -= HandleGameOver;
+        GameManager.OnBossTransitionStarted -= HandleBossTransitionStarted;
         GameManager.OnBossFightStarted -= HandleBossFight;
+        GameManager.OnBossDefeated -= HandleBossDefeated;
         GameManager.OnLevelCompleted -= HandleLevelComplete;
     }
 
@@ -54,26 +68,40 @@ public class LevelManager : MonoBehaviour
         isGameOver = true;
     }
 
+    private void HandleBossTransitionStarted()
+    {
+        isBossPhase = true;
+        isTransitioningToBridge = true;
+        isPlayerOnBridge = false;
+
+        Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Spawning Bridge chunks at the horizon naturally!");
+    }
+
     private void HandleBossFight()
     {
-        isBossPhase = true; // Switch to Bridge chunks!
+        isBossPhase = true;
+        isTransitioningToBridge = false;
+    }
+
+    private void HandleBossDefeated()
+    {
+        isBossPhase = false;
+        isTransitioningToBridge = false;
+
+        Debug.Log("<color=orange>[LevelManager]</color> Boss Defeated: Spawning City chunks at the horizon. Bridge will end seamlessly!");
     }
 
     private void HandleLevelComplete(int newLevel)
     {
-        isBossPhase = false; // Turn off the Bridge chunks
+        isBossPhase = false;
+        isTransitioningToBridge = false;
 
-        // Move to the next theme in the database!
-        currentThemeIndex++;
-
-        // If we run out of themes, loop back to the beginning
-        if (currentThemeIndex >= levelDatabase.allThemes.Count)
+        if (levelDatabase != null && levelDatabase.allThemes.Count > 0)
         {
-            currentThemeIndex = 0;
+            currentThemeIndex = (currentThemeIndex + 1) % levelDatabase.allThemes.Count;
+            currentTheme = levelDatabase.allThemes[currentThemeIndex];
+            Debug.Log($"<color=cyan>[LevelManager]</color> Advancing to Theme: {currentTheme.themeName}");
         }
-
-        currentTheme = levelDatabase.allThemes[currentThemeIndex];
-        Debug.Log($"<color=cyan>[LevelManager]</color> Advancing to Theme: {currentTheme.themeName}");
     }
 
     private void Start()
@@ -84,7 +112,6 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // Start with the first theme in the database
         currentThemeIndex = 0;
         currentTheme = levelDatabase.allThemes[currentThemeIndex];
 
@@ -100,59 +127,119 @@ public class LevelManager : MonoBehaviour
 
         // Clamp deltaTime to prevent the world from teleporting when unpausing
         float dt = Mathf.Min(Time.deltaTime, 0.1f);
-
         Vector3 moveDir = (chunkDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
 
         // 1. Move all active chunks
         foreach (ChunkTracker tracker in activeChunks)
         {
-            tracker.instance.transform.position += moveDir * worldMoveSpeed * dt;
+            if (tracker.instance != null)
+            {
+                tracker.instance.transform.position += moveDir * worldMoveSpeed * dt;
+            }
         }
 
-        // 2. Check if we need to spawn a new chunk
-        bool needsNewChunk = false;
-
-        if (chunkDirection == MoveDirection.Backward)
+        // 2. Detect which chunk is currently under the player (at Z = 0)
+        if (activeChunks.Count > 0 && currentTheme != null)
         {
-            needsNewChunk = lastSpawnedChunk.position.z < (chunksOnScreen * chunkLength) - chunkLength;
+            ChunkTracker chunkAtPlayer = GetChunkAtPlayer();
+            if (chunkAtPlayer.instance != null)
+            {
+                bool isBridge = (currentTheme.transitionBridge != null && chunkAtPlayer.originalPrefab == currentTheme.transitionBridge);
+
+                if (!isPlayerOnBridge && isBridge)
+                {
+                    isPlayerOnBridge = true;
+                    isTransitioningToBridge = false;
+                    Debug.Log("<color=green>[LevelManager]</color> Player stepped onto the Bridge! Triggering Boss Fight...");
+                    if (GameManager.Instance != null)
+                    {
+                        GameManager.Instance.OnBridgeReached();
+                    }
+                }
+                else if (isPlayerOnBridge && !isBridge)
+                {
+                    isPlayerOnBridge = false;
+                    Debug.Log("<color=cyan>[LevelManager]</color> Player exited the Bridge and returned to the City!");
+                }
+            }
         }
-        else
+
+        // 3. Check if we need to spawn a new chunk at the horizon
+        if (lastSpawnedChunk != null)
         {
-            needsNewChunk = lastSpawnedChunk.position.z > -(chunksOnScreen * chunkLength) + chunkLength;
+            bool needsNewChunk = false;
+            if (chunkDirection == MoveDirection.Backward)
+            {
+                needsNewChunk = lastSpawnedChunk.position.z < (chunksOnScreen * chunkLength) - chunkLength;
+            }
+            else
+            {
+                needsNewChunk = lastSpawnedChunk.position.z > -(chunksOnScreen * chunkLength) + chunkLength;
+            }
+
+            if (needsNewChunk)
+            {
+                SpawnNextChunk();
+            }
         }
 
-        if (needsNewChunk)
+        // 4. Recycle chunks that have passed the despawn threshold
+        if (activeChunks.Count > 0)
         {
-            SpawnNextChunk();
+            bool shouldDespawn = false;
+            float firstChunkZ = activeChunks.Peek().instance.transform.position.z;
+
+            if (chunkDirection == MoveDirection.Backward)
+                shouldDespawn = firstChunkZ < -despawnDistance;
+            else
+                shouldDespawn = firstChunkZ > despawnDistance;
+
+            if (shouldDespawn)
+            {
+                ChunkTracker oldChunk = activeChunks.Dequeue();
+                PoolManager.Instance.ReturnToPool(oldChunk.instance, oldChunk.originalPrefab);
+            }
         }
+    }
 
-        // 3. POOL RETURN: Recycle chunks that have passed the despawn threshold
-        bool shouldDespawn = false;
-        float firstChunkZ = activeChunks.Peek().instance.transform.position.z;
+    /// <summary>
+    /// Returns the chunk tracker whose center is currently closest to the player at Z = 0.
+    /// </summary>
+    public ChunkTracker GetChunkAtPlayer()
+    {
+        if (activeChunks.Count == 0) return default;
 
-        if (chunkDirection == MoveDirection.Backward)
-            shouldDespawn = firstChunkZ < -despawnDistance;
-        else
-            shouldDespawn = firstChunkZ > despawnDistance;
+        ChunkTracker closest = default;
+        float minDistance = float.MaxValue;
 
-        if (shouldDespawn)
+        foreach (ChunkTracker tracker in activeChunks)
         {
-            ChunkTracker oldChunk = activeChunks.Dequeue();
-            PoolManager.Instance.ReturnToPool(oldChunk.instance, oldChunk.originalPrefab);
+            if (tracker.instance == null) continue;
+            float dist = Mathf.Abs(tracker.instance.transform.position.z);
+            if (dist < minDistance)
+            {
+                minDistance = dist;
+                closest = tracker;
+            }
         }
+
+        return closest;
     }
 
     private void SpawnNextChunk()
     {
+        if (currentTheme == null) return;
+
         GameObject prefabToSpawn;
 
-        // NEW: Let the GameManager dictate what spawns, not a chunk counter!
-        if (isBossPhase)
+        // In boss phase, spawn the Bridge chunk at the horizon! Otherwise spawn City chunks!
+        if (isBossPhase && currentTheme.transitionBridge != null)
         {
             prefabToSpawn = currentTheme.transitionBridge;
         }
         else
         {
+            if (currentTheme.chunkVariants == null || currentTheme.chunkVariants.Length == 0) return;
             int randomVariantIndex = Random.Range(0, currentTheme.chunkVariants.Length);
             prefabToSpawn = currentTheme.chunkVariants[randomVariantIndex];
         }

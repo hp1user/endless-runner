@@ -215,6 +215,7 @@ namespace Player.Control
             HandleMovement();
             HandleAiming();
             HandleActions();
+            HandleWeaponHotkeys();
             UpdateLayerWeights();
             UpdateSkills();
         }
@@ -764,6 +765,46 @@ namespace Player.Control
         {
             if (selectedWeapon == null) return;
             weaponLayerIndex = selectedWeapon.animatorLayer;
+            lastWeaponLayerIndex = weaponLayerIndex;
+            currentWeaponData = selectedWeapon;
+            SpawnWeaponModel();
+            Debug.Log($"<color=cyan>[Weapon]</color> Equipped: {selectedWeapon.weaponName}");
+        }
+
+        public List<WeaponData> GetUnlockedWeapons() => unlockedWeapons;
+
+        private void HandleWeaponHotkeys()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current == null) return;
+
+            var kb = Keyboard.current;
+            if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Pistol);
+            else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.SMG);
+            else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.AssaultRifle);
+            else if (kb.digit4Key.wasPressedThisFrame || kb.numpad4Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Shotgun);
+            else if (kb.digit5Key.wasPressedThisFrame || kb.numpad5Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Sniper);
+            else if (kb.qKey.wasPressedThisFrame) CycleUnlockedWeapons(-1);
+            else if (kb.eKey.wasPressedThisFrame) CycleUnlockedWeapons(1);
+#endif
+        }
+
+        public void SwitchToCategory(WeaponCategory category)
+        {
+            var match = unlockedWeapons.Find(w => w.category == category);
+            if (match != null && match != currentWeaponData)
+            {
+                EquipWeaponFromWheel(match);
+            }
+        }
+
+        public void CycleUnlockedWeapons(int step)
+        {
+            if (unlockedWeapons.Count <= 1) return;
+            int currentIndex = unlockedWeapons.IndexOf(currentWeaponData);
+            if (currentIndex < 0) currentIndex = 0;
+            int nextIndex = (currentIndex + step + unlockedWeapons.Count) % unlockedWeapons.Count;
+            EquipWeaponFromWheel(unlockedWeapons[nextIndex]);
         }
 
         public List<WeaponCategory> GetOwnedWeaponCategories()

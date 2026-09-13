@@ -115,7 +115,21 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         }
     }
 
-    // --- FIXED SLOT MAPPING ---
+    private void Start()
+    {
+        SyncUnlockedWeapons();
+    }
+
+    public void SyncUnlockedWeapons()
+    {
+        if (PlayerController.Instance != null)
+        {
+            foreach (var weapon in PlayerController.Instance.GetUnlockedWeapons())
+            {
+                AddWeaponToWheel(weapon);
+            }
+        }
+    }
     private int GetSlotIndexForCategory(WeaponCategory category)
     {
         switch (category)
@@ -177,6 +191,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     public void OpenWheel()
     {
         if (wheelContainer == null) return;
+        SyncUnlockedWeapons();
         wheelContainer.style.display = DisplayStyle.Flex;
         Time.timeScale = 0.1f;
         selectedIndex = -1; // Reset selection
