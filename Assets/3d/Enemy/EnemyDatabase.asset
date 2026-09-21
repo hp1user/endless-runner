@@ -56,15 +56,15 @@ MonoBehaviour:
     alwaysChasePlayer: 0
     chaseChance: 80
     bossTargetLevel: 5
-    maxHealth: 1000
+    maxHealth: 4500
     moveSpeed: 0.35
     damage: 15
     deathDuration: 2
     groundYPosition: 0.45
     canSpawnMinions: 1
-    minionSpawnInterval: 5
+    minionSpawnInterval: 4
     minionTypes:
-    - enemyName: Box
+    - enemyName: Beetle
       prefab: {fileID: 6496899720755277723, guid: ac838dd9c16a9774a80cc0e6f6c78cb6, type: 3}
       category: 0
       isGroundEnemy: 0
@@ -73,8 +73,8 @@ MonoBehaviour:
       alwaysChasePlayer: 1
       chaseChance: 80
       bossTargetLevel: 5
-      maxHealth: 10
-      moveSpeed: 0.5
+      maxHealth: 15
+      moveSpeed: 1.5
       damage: 10
       deathDuration: 2
       groundYPosition: 0.45

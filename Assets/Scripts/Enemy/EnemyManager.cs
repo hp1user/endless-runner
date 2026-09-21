@@ -179,7 +179,7 @@ public class EnemyManager : MonoBehaviour
 
     private System.Collections.IEnumerator SpawnBossRoutine()
     {
-        // Give the camera a brief moment to begin its blend on the bridge before dropping the boss!
+        // Give the camera a brief moment to begin its blend on the bridge
         yield return new WaitForSeconds(0.8f);
 
         if (enemyDatabase == null || player == null) yield break;
@@ -199,9 +199,56 @@ public class EnemyManager : MonoBehaviour
             yield break; // Stop the rest of the spawn code!
         }
 
+        Debug.Log("<color=yellow><b>[Boss Phase]</b></color> Bridge reached! Minion swarm advancing...");
+
+        // 1. Staged Minion Intro Phase (0-12s): Spawn 3 waves of swarm minions on the bridge ahead of the boss
+        float[] runnerLanes = new float[] { -2f, 0f, 2f };
+        var candidateMinions = (bossData.minionTypes != null && bossData.minionTypes.Count > 0)
+            ? bossData.minionTypes
+            : enemyDatabase.enemyTypes.FindAll(e => e.category == EnemyCategory.Standard);
+
+        for (int wave = 0; wave < 3; wave++)
+        {
+            yield return new WaitForSeconds(wave == 0 ? 0.8f : 3.6f);
+
+            if (candidateMinions != null && candidateMinions.Count > 0 && player != null)
+            {
+                // Spawn 2 minions across 2 different lanes
+                int firstLane = Random.Range(0, 3);
+                int secondLane = (firstLane + Random.Range(1, 3)) % 3;
+                int[] waveLanes = new int[] { firstLane, secondLane };
+
+                foreach (int laneIdx in waveLanes)
+                {
+                    EnemyEntry minionEntry = candidateMinions[Random.Range(0, candidateMinions.Count)];
+                    if (minionEntry != null && minionEntry.prefab != null && PoolManager.Instance != null)
+                    {
+                        Vector3 minionSpawnPos = new Vector3(
+                            runnerLanes[laneIdx],
+                            minionEntry.groundYPosition > 0f ? minionEntry.groundYPosition : 0.45f,
+                            player.transform.position.z + 28f
+                        );
+
+                        GameObject mObj = PoolManager.Instance.SpawnFromPool(minionEntry.prefab.gameObject, minionSpawnPos, Quaternion.identity);
+                        if (mObj != null)
+                        {
+                            EnemyController mCtrl = mObj.GetComponent<EnemyController>();
+                            if (mCtrl == null) mCtrl = mObj.AddComponent<EnemyController>();
+                            mCtrl.Initialize(minionEntry, player.transform, this, minionEntry.prefab.gameObject);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Brief delay before the Boss drops onto the bridge
+        yield return new WaitForSeconds(2.0f);
+
+        if (player == null) yield break;
+
         // Calculate boss spawn position relative to the player
         Vector3 spawnPos = player.transform.position;
-        spawnPos.z += bossSpawnZOffset; // Spawns way behind the player
+        spawnPos.z += bossSpawnZOffset; // Spawns way behind the player on bridge
         spawnPos.y += spawnOffsetY;
 
         // Bosses use Instantiate instead of the Object Pool

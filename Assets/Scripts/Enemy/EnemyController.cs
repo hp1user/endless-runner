@@ -61,6 +61,14 @@ namespace Enemy.Control
         private int verticalParamHash = Animator.StringToHash("Vertical");
         private int deathParamHash = Animator.StringToHash("Death");
 
+        [Header("Boss Projectile Attack")]
+        private bool isAttacking = false;
+        private float nextProjectileAttackTime;
+        private float projectileMinInterval = 4f;
+        private float projectileMaxInterval = 9f;
+        private float projectileDamage = 25f;
+        private float projectileSpeed = 14f;
+
         private void Awake()
         {
             // Failsafe if boss is placed directly in the scene or spawned without calling Initialize()
@@ -163,8 +171,9 @@ namespace Enemy.Control
 
             if (isBoss)
             {
-                bossHeadHealth = 600f * healthMultiplier;
-                bossLegHealth = 200f * healthMultiplier;
+                float baseTotal = data.maxHealth > 0 ? data.maxHealth : 2500f;
+                bossHeadHealth = (baseTotal * 0.6f) * healthMultiplier;
+                bossLegHealth = (baseTotal * 0.2f) * healthMultiplier;
                 currentHealth = bossHeadHealth + (bossLegHealth * 2f);
             }
             else
@@ -191,6 +200,8 @@ namespace Enemy.Control
                 }
                 leftLegBroken = false;
                 rightLegBroken = false;
+                isAttacking = false;
+                nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
                 SetupBossBodyParts();
             }
 
@@ -268,19 +279,23 @@ namespace Enemy.Control
                 targetDirection = dir.normalized;
             }
 
-            // 2. MOVEMENT: Apply the cached direction every frame for smooth motion
-            if (targetDirection != Vector3.zero)
+            // 2. MOVEMENT: Apply movement when not in attack windup
+            if (targetDirection != Vector3.zero && !isAttacking)
             {
                 float currentMoveSpeed = moveSpeed;
                 if (isBoss)
                 {
                     if (leftLegBroken && rightLegBroken)
                     {
-                        currentMoveSpeed = moveSpeed * 0.4f;
+                        currentMoveSpeed = 0.10f; // User specified: 0.1 for both crippled legs
                     }
                     else if (leftLegBroken || rightLegBroken)
                     {
-                        currentMoveSpeed = moveSpeed * 0.75f;
+                        currentMoveSpeed = 0.25f; // User specified: 0.25 for 1 crippled leg
+                    }
+                    else
+                    {
+                        currentMoveSpeed = 0.35f; // User specified: 0.35 base speed
                     }
                 }
 
@@ -301,7 +316,14 @@ namespace Enemy.Control
                 Despawn();
             }
 
-            // 3. Boss Minion Spawning
+            // 3. Boss Projectile Attack (Stops and fires 2-lane acid projectile every 4-8s)
+            if (isBoss && !isDead && !isAttacking && playerTransform != null && Time.time >= nextProjectileAttackTime)
+            {
+                nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
+                StartCoroutine(PerformProjectileAttackRoutine());
+            }
+
+            // 4. Boss Minion Spawning
             if (isBoss && canSpawnMinions && minionTypes != null && minionTypes.Count > 0)
             {
                 if (Time.time >= nextMinionSpawnTime)
@@ -311,7 +333,7 @@ namespace Enemy.Control
                 }
             }
 
-            // 4. Boss Reached Player check (instantly kills player for Game Over)
+            // 5. Boss Reached Player check (instantly kills player for Game Over)
             if (isBoss && !isDead && playerTransform != null)
             {
                 float deltaZ = Mathf.Abs(transform.position.z - playerTransform.position.z);
@@ -327,22 +349,85 @@ namespace Enemy.Control
             }
         }
 
+        private System.Collections.IEnumerator PerformProjectileAttackRoutine()
+        {
+            if (isDead || playerTransform == null) yield break;
+
+            isAttacking = true;
+
+            // 1. Pick 2 random lanes out of 3 (-2, 0, 2)
+            float[] allLanes = new float[] { -2f, 0f, 2f };
+            int safeLaneIndex = Random.Range(0, 3); // 1 lane is guaranteed safe!
+            System.Collections.Generic.List<float> targetedLanesList = new System.Collections.Generic.List<float>();
+            for (int i = 0; i < 3; i++)
+            {
+                if (i != safeLaneIndex) targetedLanesList.Add(allLanes[i]);
+            }
+            float[] targetedLanes = targetedLanesList.ToArray();
+
+            Debug.Log($"<color=red><b>[Boss Attack]</b></color> Boss fired 2-lane projectile! (Safe Lane: {allLanes[safeLaneIndex]})");
+
+            // Halt walk animation during attack stop
+            if (animator != null)
+            {
+                animator.SetFloat(verticalParamHash, 0f);
+            }
+
+            // 2. Launch the 2-lane projectile barrage immediately
+            Vector3 spawnOrigin = transform.position;
+            spawnOrigin.y += 0.8f;
+            spawnOrigin.z -= 1.5f;
+
+            BossProjectile.Spawn(targetedLanes, spawnOrigin, projectileSpeed, projectileDamage, playerTransform);
+
+            // Visual telegraph overlay matching the attack trajectory
+            float telegraphDuration = 2.0f;
+            float startZ = transform.position.z;
+            float endZ = playerTransform.position.z - 5f;
+            BossAttackTelegraph.Create(targetedLanes, startZ, endZ, telegraphDuration);
+
+            // 3. Post-shot recovery: wait 4.5 seconds stationary before resuming chase
+            float recoveryDuration = 4.5f;
+            yield return new WaitForSeconds(recoveryDuration);
+
+            isAttacking = false;
+            if (isBoss && !isDead)
+            {
+                UpdateLegCrippleState();
+            }
+        }
+
         private void SpawnMinion()
         {
             if (myManager == null || playerTransform == null) return;
+            if (minionTypes == null || minionTypes.Count == 0) return;
+
             EnemyEntry minionData = minionTypes[Random.Range(0, minionTypes.Count)];
             if (minionData == null || minionData.prefab == null) return;
 
-            Vector3 spawnPos = transform.position;
-            spawnPos.z += 5f; // Spawn slightly in front of the boss
-            spawnPos.x += Random.Range(-2f, 2f); // Random lane offset
+            // Spawn minions in front of the boss (closer to player) so they are clearly visible and charge forward
+            float playerZ = playerTransform.position.z;
+            float bossZ = transform.position.z;
+            
+            // Spawn position midway between boss and player (clamped safely in front)
+            float spawnZ = Mathf.Clamp(playerZ + (bossZ - playerZ) * 0.5f, playerZ + 8f, bossZ - 4f);
+            
+            // Pick a clean runner lane (-2, 0, +2)
+            float[] lanes = new float[] { -2f, 0f, 2f };
+            float spawnX = lanes[Random.Range(0, lanes.Length)];
+            float spawnY = minionData.groundYPosition > 0f ? minionData.groundYPosition : 0.45f;
+
+            Vector3 spawnPos = new Vector3(spawnX, spawnY, spawnZ);
 
             if (PoolManager.Instance != null)
             {
                 GameObject minionObj = PoolManager.Instance.SpawnFromPool(minionData.prefab.gameObject, spawnPos, Quaternion.identity);
-                EnemyController minionController = minionObj.GetComponent<EnemyController>();
-                if (minionController == null) minionController = minionObj.AddComponent<EnemyController>();
-                minionController.Initialize(minionData, playerTransform, myManager, minionData.prefab.gameObject);
+                if (minionObj != null)
+                {
+                    EnemyController minionController = minionObj.GetComponent<EnemyController>();
+                    if (minionController == null) minionController = minionObj.AddComponent<EnemyController>();
+                    minionController.Initialize(minionData, playerTransform, myManager, minionData.prefab.gameObject);
+                }
             }
         }
 
@@ -499,19 +584,19 @@ namespace Enemy.Control
             }
             else if (leftLegBroken)
             {
-                Debug.Log("<color=orange><b>[Boss] Left Leg broken! Playing 'Cripple_L' animation (0.75x speed)</b></color>");
+                Debug.Log("<color=orange><b>[Boss] Left Leg broken! Playing Left Leg Cripple animation (0.75x speed)</b></color>");
                 if (animator != null)
                 {
-                    animator.SetFloat(horizontalParamHash, -1f);
+                    animator.SetFloat(horizontalParamHash, 1f);
                     animator.SetFloat(verticalParamHash, 2f);
                 }
             }
             else if (rightLegBroken)
             {
-                Debug.Log("<color=orange><b>[Boss] Right Leg broken! Playing 'Cripple R' animation (0.75x speed)</b></color>");
+                Debug.Log("<color=orange><b>[Boss] Right Leg broken! Playing Right Leg Cripple animation (0.75x speed)</b></color>");
                 if (animator != null)
                 {
-                    animator.SetFloat(horizontalParamHash, 1f);
+                    animator.SetFloat(horizontalParamHash, -1f);
                     animator.SetFloat(verticalParamHash, 2f);
                 }
             }

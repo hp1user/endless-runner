@@ -130,3 +130,25 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - **Immediate Horizon Placement**: `LevelManager.HandleBossTransitionStarted()` now immediately sets the horizon chunk (Chunk 2, ~60–80m away) as the `transitionBridge` chunk while keeping Chunk 0 (under player) and Chunk 1 (road ahead) as solid City. The bridge is instantly visible in the distance without popping.
   - **Dynamic Transition Speed**: Configured `transitionSpeed = 4.5f` during the bridge approach, ensuring the city sprint down towards the bridge takes a balanced ~12–15 seconds before crossing and starting the boss battle.
   - **Strict Despawn Recycling**: Clamped despawn threshold to `chunkLength + 5f` (45m) so chunks despawn promptly behind the camera, keeping exactly 3 visible chunks active at all times with zero queue bloat.
+
+## Date: 2026-09-21
+
+### Features & Balancing
+- **Boss Staged Minion Intro Phase (12–15s)**:
+  - Updated `EnemyManager.SpawnBossRoutine()`: When entering the bridge, 3 waves of swarm minions spawn across runner lanes over the first ~12 seconds before the Boss emerges at $Z = +30\text{m}$, creating pacing, combat buildup, and tension.
+- **Boss 2-Lane Projectile & Danger Telegraph Attack**:
+  - Every 4–8 seconds, the boss immediately fires a 2-lane wide acid barrage down the bridge (with a danger trajectory telegraph), then completely stops moving for **4.5 seconds** in post-shot recovery before resuming chase. This keeps the boss at range and gives the player uninterrupted windows to shoot limbs and clear minions.
+- **Boss Health & Speed Rebalance**:
+  - Configured custom speed curve in `EnemyController.cs` and `EnemyDatabase.asset`:
+    - Undamaged Base speed: **0.35 m/s**
+    - 1 Leg Broken: **0.25 m/s**
+    - Both Legs Broken: **0.10 m/s**
+  - Scaled Boss health pool to **4500 HP** (Head: 2700 HP, Left Leg: 900 HP, Right Leg: 900 HP) in `EnemyDatabase.asset`.
+- **Boss Minion Forward Spawning**:
+  - Updated `EnemyController.SpawnMinion()`: Mid-combat minions spawn in front of the boss, midway between the boss and player (`playerZ + (bossZ - playerZ) * 0.5f`), cleanly distributed across runner lanes (`X = -2, 0, +2`) with high charge speed (`moveSpeed = 1.5`).
+
+### Bugs Fixed & Improvements
+- **Boss Leg Cripple Animation Inversion Fix**:
+  - Swapped blend tree horizontal parameter values in `EnemyController.UpdateLegCrippleState()`: shooting the Left Leg now triggers the Left Leg Cripple (`Horizontal = 1`), and shooting the Right Leg triggers the Right Leg Cripple (`Horizontal = -1`).
+- **Loot & Supply Drop Clarification**:
+  - Confirmed and documented that periodic Supply Crates (`LootManager.cs`) with Smart Ammo detection is the final intended design. Updated [`ProjectStatusReport.md`](file:///g:/Unity/Unity%20Project/endless-runner/ProjectStatusReport.md) accordingly.
