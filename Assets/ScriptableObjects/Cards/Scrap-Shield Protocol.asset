@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bed7a25e43127540a118a5cc490e605, type: 3}
+  m_Name: Scrap-Shield Protocol
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
+  cardName: Scrap-Shield Protocol
+  description: Automatically triggers an explosive blast when your health drops below 30%, violently knocking back all ground and airborne enemies in your current and adjacent lanes. Cooldown 60s.
+  cardIcon: {fileID: 0}
+  rarity: 3
+  category: Mobility / Survival
+  flavorText: "Personal space is mandatory."
+  visualConcept: A hexagonal holographic barrier expanding outward in a shockwave, shattering small bugs into pieces.
+  effects:
+  - upgradeType: 0
+    upgradeValue: 50
+    weaponID: 
+  rarityBackgroundImage: {fileID: 21300000, guid: e14d2e306a9791e418b418ebaca143ea, type: 3}
+  rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCardSprite: {fileID: 21300000, guid: cd8f52acc7753ba429c9787b4489bd55, type: 3}
+  selectedCardColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

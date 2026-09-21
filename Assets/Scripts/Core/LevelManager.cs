@@ -13,19 +13,23 @@ public class LevelManager : MonoBehaviour
     public MoveDirection chunkDirection = MoveDirection.Forward;
     public float worldMoveSpeed = 15f;
 
+    [Header("Transition Settings")]
+    [Tooltip("World movement speed during bridge approach transition (smooth ~12-15s city run)")]
+    public float transitionSpeed = 4.5f;
+
     [Header("Chunk Settings")]
     public LevelDatabase levelDatabase;
     public float chunkLength = 40f;
     public int chunksOnScreen = 3;
 
     [Tooltip("Distance from 0 where the chunk is destroyed (use a positive number)")]
-    public float despawnDistance = 80f;
+    public float despawnDistance = 45f;
 
     public bool isTransitioningToBridge { get; private set; } = false;
     public bool isPlayerOnBridge { get; private set; } = false;
 
     private LevelThemeData currentTheme;
-    private int currentThemeIndex = 0; // Tracks which theme we are currently using
+    private int currentThemeIndex = 0;
 
     public struct ChunkTracker
     {
@@ -74,7 +78,29 @@ public class LevelManager : MonoBehaviour
         isTransitioningToBridge = true;
         isPlayerOnBridge = false;
 
-        Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Spawning Bridge chunks at the horizon naturally!");
+        // Place the Bridge chunk at the horizon (Chunk 2, ~60-80m away) so it immediately connects to the city road ahead
+        if (currentTheme != null && currentTheme.transitionBridge != null && activeChunks.Count >= 3)
+        {
+            var chunkList = new List<ChunkTracker>(activeChunks);
+            // chunkList[0] = City chunk currently under player
+            // chunkList[1] = City road in front of player
+            // chunkList[2] and beyond = Bridge at the horizon!
+            for (int i = 2; i < chunkList.Count; i++)
+            {
+                if (chunkList[i].originalPrefab != currentTheme.transitionBridge)
+                {
+                    Vector3 pos = chunkList[i].instance.transform.position;
+                    Quaternion rot = chunkList[i].instance.transform.rotation;
+                    PoolManager.Instance.ReturnToPool(chunkList[i].instance, chunkList[i].originalPrefab);
+                    GameObject newBridge = PoolManager.Instance.SpawnFromPool(currentTheme.transitionBridge, pos, rot, this.transform);
+                    chunkList[i] = new ChunkTracker { instance = newBridge, originalPrefab = currentTheme.transitionBridge };
+                }
+            }
+            activeChunks = new Queue<ChunkTracker>(chunkList);
+            lastSpawnedChunk = chunkList[chunkList.Count - 1].instance.transform;
+        }
+
+        Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Bridge placed at the horizon. Player running ~12-15s through city towards bridge!");
     }
 
     private void HandleBossFight()
@@ -128,13 +154,14 @@ public class LevelManager : MonoBehaviour
         // Clamp deltaTime to prevent the world from teleporting when unpausing
         float dt = Mathf.Min(Time.deltaTime, 0.1f);
         Vector3 moveDir = (chunkDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
+        float currentSpeed = isTransitioningToBridge ? transitionSpeed : worldMoveSpeed;
 
         // 1. Move all active chunks
         foreach (ChunkTracker tracker in activeChunks)
         {
             if (tracker.instance != null)
             {
-                tracker.instance.transform.position += moveDir * worldMoveSpeed * dt;
+                tracker.instance.transform.position += moveDir * currentSpeed * dt;
             }
         }
 
@@ -164,40 +191,26 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // 3. Check if we need to spawn a new chunk at the horizon
-        if (lastSpawnedChunk != null)
-        {
-            bool needsNewChunk = false;
-            if (chunkDirection == MoveDirection.Backward)
-            {
-                needsNewChunk = lastSpawnedChunk.position.z < (chunksOnScreen * chunkLength) - chunkLength;
-            }
-            else
-            {
-                needsNewChunk = lastSpawnedChunk.position.z > -(chunksOnScreen * chunkLength) + chunkLength;
-            }
-
-            if (needsNewChunk)
-            {
-                SpawnNextChunk();
-            }
-        }
-
-        // 4. Recycle chunks that have passed the despawn threshold
+        // 3. Recycle chunks that have passed behind the camera and immediately replenish at horizon
         if (activeChunks.Count > 0)
         {
+            // Keep chunks within visible camera range (despawn promptly once past player and camera)
+            float threshold = Mathf.Min(despawnDistance, chunkLength + 5f);
             bool shouldDespawn = false;
             float firstChunkZ = activeChunks.Peek().instance.transform.position.z;
 
             if (chunkDirection == MoveDirection.Backward)
-                shouldDespawn = firstChunkZ < -despawnDistance;
+                shouldDespawn = firstChunkZ < -threshold;
             else
-                shouldDespawn = firstChunkZ > despawnDistance;
+                shouldDespawn = firstChunkZ > threshold;
 
             if (shouldDespawn)
             {
                 ChunkTracker oldChunk = activeChunks.Dequeue();
                 PoolManager.Instance.ReturnToPool(oldChunk.instance, oldChunk.originalPrefab);
+
+                // Maintain constant chunk count: immediately spawn next chunk at horizon
+                SpawnNextChunk();
             }
         }
     }

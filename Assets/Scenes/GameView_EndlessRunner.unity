@@ -3145,6 +3145,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ad6546bd5062fc54caba360ee2d6c440, type: 2}
   - {fileID: 11400000, guid: 31f976cde04bf7e4ab46de7b1633aa1a, type: 2}
   - {fileID: 11400000, guid: 1af6c5792c714b943a2e7f445874c787, type: 2}
+  - {fileID: 11400000, guid: 0608111b895f7464bb8f7f11cbf25402, type: 2}
+  - {fileID: 11400000, guid: 5f206f932b01d1a43bf39c37c15a18d6, type: 2}
+  - {fileID: 11400000, guid: 06aacea8b86e77648b49def925a7aad2, type: 2}
+  - {fileID: 11400000, guid: c2037b2bea98e694588d0e05fe823b2a, type: 2}
+  - {fileID: 11400000, guid: 6b7a038ccd146054a998bf46d87aee33, type: 2}
+  - {fileID: 11400000, guid: 33f677de5c685e1408a01091071e5ae3, type: 2}
+  - {fileID: 11400000, guid: ff1b10e0f6854eb49b466d9fa96cf0fd, type: 2}
+  - {fileID: 11400000, guid: ff13bb24c73ce2f458bedd591c8b53a4, type: 2}
   bossDropPool: []
   bossMythicChance: 5
   bossLegendaryChance: 30
@@ -3814,6 +3822,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   chunkDirection: 1
   worldMoveSpeed: 2
+  transitionSpeed: 4.5
   levelDatabase: {fileID: 11400000, guid: 5722e255a5690154b9fec35172221cdc, type: 2}
   chunkLength: 40
   chunksOnScreen: 3

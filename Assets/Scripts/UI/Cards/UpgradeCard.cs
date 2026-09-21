@@ -25,6 +25,11 @@ public class UpgradeCard : ScriptableObject
 
     [Header("Card Rules")]
     public CardRarity rarity = CardRarity.Common;
+    public string category = "General";
+    [TextArea(1, 3)]
+    public string flavorText = "";
+    [TextArea(1, 3)]
+    public string visualConcept = "";
     
     [Header("Card Effects")]
     public List<CardEffect> effects = new List<CardEffect>();
@@ -43,9 +48,8 @@ public class UpgradeCard : ScriptableObject
     public Color selectedCardColor = Color.yellow;
 
 #if UNITY_EDITOR
-    private void OnValidate()
+    public void ApplyRaritySettings()
     {
-        // Don't run during play mode or while Unity is recompiling/updating
         if (Application.isPlaying || UnityEditor.EditorApplication.isUpdating) return;
         
         // Find the CardRarityDatabase in the project
@@ -66,6 +70,11 @@ public class UpgradeCard : ScriptableObject
                 }
             }
         }
+    }
+
+    private void OnValidate()
+    {
+        ApplyRaritySettings();
     }
 #endif
 }

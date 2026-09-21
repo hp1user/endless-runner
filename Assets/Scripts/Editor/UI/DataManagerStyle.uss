@@ -158,13 +158,17 @@
 
 /* Badges for List Items */
 .badge {
-    font-size: 10px;
+    font-size: 9px;
     -unity-font-style: bold;
-    padding: 2px 5px;
+    padding: 2px 6px;
     border-radius: 3px;
     margin-right: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    -unity-text-align: middle-center;
 }
 
+/* Enemy Category Badges */
 .badge-standard {
     background-color: rgb(50, 70, 90);
     color: rgb(180, 210, 240);
@@ -177,6 +181,37 @@
 
 .badge-boss {
     background-color: rgb(130, 30, 30);
+    color: rgb(255, 180, 180);
+}
+
+/* Card Rarity Badges: Common(grey), Uncommon(green), Rare(blue), Epic(purple), Legendary(orange/gold), Mythic(red) */
+.badge-common {
+    background-color: rgb(65, 70, 75);
+    color: rgb(210, 215, 220);
+}
+
+.badge-uncommon {
+    background-color: rgb(25, 90, 40);
+    color: rgb(155, 245, 170);
+}
+
+.badge-rare {
+    background-color: rgb(45, 75, 110);
+    color: rgb(180, 210, 240);
+}
+
+.badge-epic {
+    background-color: rgb(95, 40, 125);
+    color: rgb(225, 175, 255);
+}
+
+.badge-legendary {
+    background-color: rgb(150, 80, 15);
+    color: rgb(255, 215, 115);
+}
+
+.badge-mythic {
+    background-color: rgb(140, 25, 25);
     color: rgb(255, 180, 180);
 }
 

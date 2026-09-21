@@ -101,8 +101,8 @@ public class DataManagerWindow : EditorWindow
         {
             var container = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
             
-            var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1 } };
-            var badge = new Label { name = "itemBadge" };
+            var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1, overflow = Overflow.Hidden } };
+            var badge = new Label { name = "itemBadge", style = { flexShrink = 0, whiteSpace = WhiteSpace.NoWrap } };
             badge.style.display = DisplayStyle.None;
             var label = new Label { name = "itemLabel" };
             label.AddToClassList("list-item");
@@ -199,12 +199,47 @@ public class DataManagerWindow : EditorWindow
             }
             else
             {
-                badge.style.display = DisplayStyle.None;
                 if (i < _filteredItems.Count && _filteredItems[i] != null)
                 {
                     var item = _filteredItems[i];
                     label.text = item.name;
                     label.style.display = DisplayStyle.Flex; // ensure visible
+
+                    if (item is UpgradeCard card)
+                    {
+                        badge.style.display = DisplayStyle.Flex;
+                        badge.ClearClassList();
+                        badge.AddToClassList("badge");
+                        badge.text = card.rarity.ToString().ToUpper();
+                        switch (card.rarity)
+                        {
+                            case CardRarity.Common:
+                                badge.AddToClassList("badge-common");
+                                break;
+                            case CardRarity.Uncommon:
+                                badge.AddToClassList("badge-uncommon");
+                                break;
+                            case CardRarity.Rare:
+                                badge.AddToClassList("badge-rare");
+                                break;
+                            case CardRarity.Epic:
+                                badge.AddToClassList("badge-epic");
+                                break;
+                            case CardRarity.Legendary:
+                                badge.AddToClassList("badge-legendary");
+                                break;
+                            case CardRarity.Mythic:
+                                badge.AddToClassList("badge-mythic");
+                                break;
+                            default:
+                                badge.AddToClassList("badge-common");
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        badge.style.display = DisplayStyle.None;
+                    }
                     
                     renameBtn.clickable = new Clickable(() => 
                     {
@@ -246,7 +281,7 @@ public class DataManagerWindow : EditorWindow
         _itemListView.selectionChanged += OnItemSelected;
 
         // Auto Refresh Preview on Inspector Change
-        Undo.undoRedoPerformed += UpdatePreview;
+        Undo.undoRedoPerformed += OnUndoRedo;
         
         // Dynamically scale the fixed 980x460 card to fit the available space perfectly
         var previewContainer = rootVisualElement.Q<VisualElement>(className: "preview-container");
@@ -268,9 +303,15 @@ public class DataManagerWindow : EditorWindow
         RefreshList();
     }
     
+    private void OnUndoRedo()
+    {
+        _itemListView?.RefreshItems();
+        UpdatePreview();
+    }
+
     private void OnDestroy()
     {
-        Undo.undoRedoPerformed -= UpdatePreview;
+        Undo.undoRedoPerformed -= OnUndoRedo;
     }
 
     private void SetDataType(DataType newType)
@@ -530,7 +571,26 @@ public class DataManagerWindow : EditorWindow
                 inspectorElement.Bind(serializedObject);
                 
                 // Track all changes to the serialized object
-                inspectorElement.TrackSerializedObjectValue(serializedObject, so => UpdatePreview());
+                inspectorElement.TrackSerializedObjectValue(serializedObject, so =>
+                {
+                    if (item is UpgradeCard card)
+                    {
+                        var rarityProp = so.FindProperty("rarity");
+                        if (rarityProp != null)
+                        {
+                            CardRarity newRarity = (CardRarity)rarityProp.enumValueIndex;
+                            if (card.rarity != newRarity)
+                            {
+                                card.rarity = newRarity;
+                                card.ApplyRaritySettings();
+                                EditorUtility.SetDirty(card);
+                                so.Update();
+                            }
+                        }
+                    }
+                    _itemListView.RefreshItems();
+                    UpdatePreview();
+                });
                 
                 _inspectorContainer.Add(inspectorElement);
                 UpdatePreview();
@@ -583,6 +643,14 @@ public class DataManagerWindow : EditorWindow
         scroll.Add(prefabField);
 
         var categoryField = new EnumField("Category", enemy.category);
+        categoryField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Enemy Category");
+            enemy.category = (EnemyCategory)evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            _itemListView.RefreshItems();
+            UpdatePreview();
+        });
         scroll.Add(categoryField);
 
         var isGroundField = new Toggle("Is Ground Enemy") { value = enemy.isGroundEnemy };
@@ -908,7 +976,18 @@ public class DataManagerWindow : EditorWindow
             if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
             
             _previewTitle.text = _selectedCard.cardName;
-            _previewDesc.text = _selectedCard.description;
+            
+            string descText = "";
+            if (!string.IsNullOrEmpty(_selectedCard.category))
+            {
+                descText += $"<b>[{_selectedCard.category}]</b>\n";
+            }
+            descText += _selectedCard.description;
+            if (!string.IsNullOrEmpty(_selectedCard.flavorText))
+            {
+                descText += $"\n\n<i>\"{_selectedCard.flavorText}\"</i>";
+            }
+            _previewDesc.text = descText;
             
             _previewValue.text = "";
             if (_selectedCard.effects != null && _selectedCard.effects.Count > 0)

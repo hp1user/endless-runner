@@ -479,35 +479,50 @@ namespace Enemy.Control
 
         private void UpdateLegCrippleState()
         {
-            if (isDead || animator == null) return;
+            if (isDead) return;
 
-            // If BOTH legs are broken, boss does NOT die; it moves at 0.4x speed and limps heavily towards player
+            // Coordinates in Bug Boss Blend Tree:
+            // Idle:        Horizontal =  0, Vertical = 0
+            // Walk:        Horizontal =  0, Vertical = 1
+            // Cripple_L:   Horizontal = -1, Vertical = 2
+            // Cripple R:   Horizontal =  1, Vertical = 2
+            // Criple Both: Horizontal =  0, Vertical = 2
+
             if (leftLegBroken && rightLegBroken)
             {
-                Debug.Log("<color=orange><b>[Boss] BOTH legs are broken! Boss moves slowly (0.4x speed) towards player!</b></color>");
-                animator.SetFloat(horizontalParamHash, 0f);
-                animator.SetFloat(verticalParamHash, 2f);
-                return;
+                Debug.Log("<color=orange><b>[Boss] BOTH legs are broken! Playing 'Criple Both' animation (0.4x speed)</b></color>");
+                if (animator != null)
+                {
+                    animator.SetFloat(horizontalParamHash, 0f);
+                    animator.SetFloat(verticalParamHash, 2f);
+                }
             }
-
-            // At a time only 1 cripple animation can play:
-            // Notice: Right Leg broken -> Horizontal = -1, Vertical = 2
-            //         Left Leg broken  -> Horizontal =  1, Vertical = 2
-            if (rightLegBroken && !leftLegBroken)
+            else if (leftLegBroken)
             {
-                animator.SetFloat(horizontalParamHash, -1f);
-                animator.SetFloat(verticalParamHash, 2f);
+                Debug.Log("<color=orange><b>[Boss] Left Leg broken! Playing 'Cripple_L' animation (0.75x speed)</b></color>");
+                if (animator != null)
+                {
+                    animator.SetFloat(horizontalParamHash, -1f);
+                    animator.SetFloat(verticalParamHash, 2f);
+                }
             }
-            else if (leftLegBroken && !rightLegBroken)
+            else if (rightLegBroken)
             {
-                animator.SetFloat(horizontalParamHash, 1f);
-                animator.SetFloat(verticalParamHash, 2f);
+                Debug.Log("<color=orange><b>[Boss] Right Leg broken! Playing 'Cripple R' animation (0.75x speed)</b></color>");
+                if (animator != null)
+                {
+                    animator.SetFloat(horizontalParamHash, 1f);
+                    animator.SetFloat(verticalParamHash, 2f);
+                }
             }
             else
             {
                 // Neither leg broken yet: walk normally!
-                animator.SetFloat(horizontalParamHash, 0f);
-                animator.SetFloat(verticalParamHash, 1f);
+                if (animator != null)
+                {
+                    animator.SetFloat(horizontalParamHash, 0f);
+                    animator.SetFloat(verticalParamHash, 1f);
+                }
             }
         }
 

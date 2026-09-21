@@ -99,3 +99,34 @@ Use this document to track daily progress, features implemented, and bugs fixed.
 ### Bugs Fixed & Improvements
 - **Camera Lock on Level 10 Fix**: Updated `GameManager.SkipBossPhase()` to invoke `OnBossDefeated`, ensuring `BossCameraController` and `LevelManager` properly reset back to standard front camera and city theme.
 - **Data Manager UI Cleanup**: Removed nested submenu in `DataManagerWindow` toolbar (changed `"Enemy / Boss"` to `"Enemy"`) and purged uninitialized dummy minion entry from `EnemyDatabase.asset`.
+
+## Date: 2026-09-18
+
+### Features Added
+- **Boss Both Legs Crippled Animation State (`Criple Both`)**:
+  - Connected the new 2D Blend Tree state in `Bug Boss.controller` (`Criple Both` at `Horizontal = 0, Vertical = 2`).
+  - Updated `EnemyController.UpdateLegCrippleState()`:
+    - Both Legs Broken: plays `Criple Both` (`Horizontal = 0, Vertical = 2`) with speed reduced to 0.4x (`moveSpeed * 0.4f`).
+    - Left Leg Broken: plays `Cripple_L` (`Horizontal = -1, Vertical = 2`) with speed reduced to 0.75x.
+    - Right Leg Broken: plays `Cripple R` (`Horizontal = 1, Vertical = 2`) with speed reduced to 0.75x.
+    - Neither Broken: plays `Walk` (`Horizontal = 0, Vertical = 1`) at 1.0x base speed.
+- **New Roguelike Upgrade Cards Added**:
+  - Extended `UpgradeCard.cs` with `category`, `flavorText`, and `visualConcept` fields.
+  - Created 8 distinct ScriptableObject card assets in `Assets/ScriptableObjects/Cards/` spanning all rarities:
+    1. **Shredder Rounds** (Common, Weapon / Firepower): +15% weapon damage, -1 piercing.
+    2. **Kinetic Dampeners** (Common, Mobility / Survival): +20% lane-switch speed, 0.5s shield.
+    3. **Acidic Payload** (Rare, Elemental / Bullet Effects): Corrosive DoT, armor melting.
+    4. **Tactical Severance** (Rare, Precision / Boss Encounters): +40% critical damage on boss limbs/joints.
+    5. **Adrenaline Engine** (Epic, Skill / Ultimate Synergies): 10 streak kills reduce Ultimate cooldown by 15%.
+    6. **Scrap-Shield Protocol** (Epic, Mobility / Survival): Emergency shockwave explosion at <30% HP.
+    7. **Singularity Chambers** (Legendary, Elemental / High-Reward): Every 10th shot fires micro-black hole.
+    8. **Dead Man's Switch** (Legendary, High-Risk / High-Reward): Caps Max HP at 50%, +150% Base Damage, heals on limb sever.
+  - Added all 8 cards to `UpgradeManager.allAvailableCards` deck in `GameView_EndlessRunner.unity`.
+  - Enhanced `DataManagerWindow.cs` to show color-coded rarity badges (`[COMMON]`, `[RARE]`, `[EPIC]`, `[LEGENDARY]`) in the list view and render Card Category, Effect values, and italicized Flavor Text in the 2D Card Preview.
+
+### Bugs Fixed & Improvements
+- **Bridge Transition Timing & Queue Bloat Fix**:
+  - **Identified Root Cause**: The previous setup allowed 4–5 chunks to spawn, queuing the bridge chunk up to 160–200 meters away (well beyond the 100m camera far clip plane), forcing a ~20s delay before spawning and a ~60s wait before reaching the player.
+  - **Immediate Horizon Placement**: `LevelManager.HandleBossTransitionStarted()` now immediately sets the horizon chunk (Chunk 2, ~60–80m away) as the `transitionBridge` chunk while keeping Chunk 0 (under player) and Chunk 1 (road ahead) as solid City. The bridge is instantly visible in the distance without popping.
+  - **Dynamic Transition Speed**: Configured `transitionSpeed = 4.5f` during the bridge approach, ensuring the city sprint down towards the bridge takes a balanced ~12–15 seconds before crossing and starting the boss battle.
+  - **Strict Despawn Recycling**: Clamped despawn threshold to `chunkLength + 5f` (45m) so chunks despawn promptly behind the camera, keeping exactly 3 visible chunks active at all times with zero queue bloat.
