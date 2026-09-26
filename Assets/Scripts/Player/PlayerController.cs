@@ -86,6 +86,8 @@ namespace Player.Control
 
         private int currentAmmo;
         private int shotsFiredThisTriggerPull = 0;
+        private bool wasShootingLastFrame = false;
+        private float lastShotTime = -999f;
         private float currentHealth;
         private float runtimeMaxHealth;
         private float currentArmor;
@@ -317,23 +319,20 @@ namespace Player.Control
             if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) reloadPressed = true;
 #endif
 
+            // Reset shot count only on the leading edge of a new trigger press
+            if (shootingInput && !wasShootingLastFrame)
+            {
+                shotsFiredThisTriggerPull = 0;
+            }
+            wasShootingLastFrame = shootingInput;
+
             if (currentWeaponData != null)
             {
                 float targetFireSpeedMult = currentWeaponData.fireRate / 5f;
-                float currentDynamicFireRate = 1f;
+                float currentDynamicFireRate = targetFireSpeedMult;
 
                 if (shootingInput)
                 {
-                    if (currentWeaponData.fireMode == WeaponFireMode.Auto)
-                    {
-                        float rampProgress = Mathf.Clamp01(TouchManager.TouchHoldTime / 0.3f);
-                        currentDynamicFireRate = Mathf.Lerp(1f, targetFireSpeedMult, rampProgress);
-                    }
-                    else
-                    {
-                        currentDynamicFireRate = Mathf.Min(targetFireSpeedMult, 1.5f);
-                    }
-
                     // Apply Rapid Fire Buff
                     if (isRapidFireActive && equippedSkill != null && equippedSkill.skillType == SkillType.RapidFire)
                     {
@@ -380,17 +379,14 @@ namespace Player.Control
                 return;
             }
 
-            // MANUAL RELOAD (Swipe up)
+            // MANUAL RELOAD (Swipe up or 'R' key)
             if (reloadPressed && currentAmmo < maxAmmo && currentReserve > 0)
             {
-                if (!shootingInput || TouchManager.TouchHoldTime < 0.4f)
-                {
-                    animator.SetBool(fireParamHash, false);
-                    animator.SetBool(reloadParamHash, true);
-                    Invoke(nameof(ResetReloadParameter), 0.15f);
-                    targetLayerWeight = 1f;
-                    return;
-                }
+                animator.SetBool(fireParamHash, false);
+                animator.SetBool(reloadParamHash, true);
+                Invoke(nameof(ResetReloadParameter), 0.15f);
+                targetLayerWeight = 1f;
+                return;
             }
 
             if (shootingInput && currentWeaponData != null)
@@ -401,7 +397,6 @@ namespace Player.Control
                 {
                     if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) canShoot = false;
                     if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) canShoot = false;
-                    if (currentWeaponData.fireMode == WeaponFireMode.Auto && TouchManager.TouchHoldTime < 0.2f && shotsFiredThisTriggerPull >= 1) canShoot = false;
                 }
 
                 animator.SetBool(fireParamHash, canShoot);
@@ -421,7 +416,6 @@ namespace Player.Control
             }
 
             animator.SetBool(fireParamHash, false);
-            shotsFiredThisTriggerPull = 0;
             targetLayerWeight = 1f;
         }
 
@@ -503,19 +497,54 @@ namespace Player.Control
             // Prevent initialization bugs where default states trigger animation events on start
             if (Time.timeSinceLevelLoad < 0.5f) return;
             
-            // Ignore animation events from background layers with 0 weight
-            // AnimationEventTrigger passes weight via floatParameter
-            if (ae.floatParameter < 0.1f) return;
+            // Ignore animation events from background layers with low weight
+            if (ae.floatParameter < 0.3f) return;
 
             if (currentWeaponData == null || (currentAmmo <= 0 && !isRapidFireActive) || IsReloadingAnimationPlaying()) return;
 
-            if (!isRapidFireActive)
+            bool shootingInput = TouchManager.IsShooting || isRapidFireActive;
+            
+            // For Automatic / Burst: Stop immediately when the player has released the input (no trailing transition shots)
+            if (!shootingInput && currentWeaponData.fireMode == WeaponFireMode.Auto)
             {
-                if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1) return;
-                if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount) return;
+                animator.SetBool(fireParamHash, false);
+                return;
             }
 
+            // Rate-limiting check to prevent double-firing in rapid transition frames
+            float activeFireRate = Mathf.Max(currentWeaponData.fireRate, 1f);
+            if (isRapidFireActive && equippedSkill != null && equippedSkill.skillType == SkillType.RapidFire)
+            {
+                activeFireRate *= equippedSkill.effectValue;
+            }
+            float minShotInterval = 1f / (activeFireRate * 1.5f);
+            if (Time.time < lastShotTime + minShotInterval)
+            {
+                return;
+            }
+
+            if (!isRapidFireActive)
+            {
+                if (currentWeaponData.fireMode == WeaponFireMode.Single && shotsFiredThisTriggerPull >= 1)
+                {
+                    animator.SetBool(fireParamHash, false);
+                    return;
+                }
+                if (currentWeaponData.fireMode == WeaponFireMode.Burst && shotsFiredThisTriggerPull >= currentWeaponData.burstCount)
+                {
+                    animator.SetBool(fireParamHash, false);
+                    return;
+                }
+            }
+
+            lastShotTime = Time.time;
             shotsFiredThisTriggerPull++;
+
+            // For Single shot weapons (Pistol, Sniper, Shotgun), immediately clear fire parameter so animation does not loop
+            if (currentWeaponData.fireMode == WeaponFireMode.Single)
+            {
+                animator.SetBool(fireParamHash, false);
+            }
             
             if (!isRapidFireActive)
             {

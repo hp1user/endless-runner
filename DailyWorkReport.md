@@ -152,3 +152,24 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - Swapped blend tree horizontal parameter values in `EnemyController.UpdateLegCrippleState()`: shooting the Left Leg now triggers the Left Leg Cripple (`Horizontal = 1`), and shooting the Right Leg triggers the Right Leg Cripple (`Horizontal = -1`).
 - **Loot & Supply Drop Clarification**:
   - Confirmed and documented that periodic Supply Crates (`LootManager.cs`) with Smart Ammo detection is the final intended design. Updated [`ProjectStatusReport.md`](file:///g:/Unity/Unity%20Project/endless-runner/ProjectStatusReport.md) accordingly.
+
+## Date: 2026-09-25
+
+### Bugs Fixed & Controls Tuning
+- **Lane Movement Unblocked**:
+  - Removed the `if (TouchManager.IsShooting) return;` block from `PlayerController.MoveLeft()` and `MoveRight()`. When a swipe gesture is recognized, `TouchManager` sets `IsShooting = false` and executes lane movement immediately.
+  - Added dynamic resolution-adaptive swipe threshold (`Mathf.Clamp(Screen.width * swipeScreenPercentage, 40f, 200f)`), ensuring responsive swiping across both mouse and mobile touchscreens.
+- **Single-Click Multi-Shot Bug Fix Across All Weapons**:
+  - **Identified Root Cause**: In `PlayerController.HandleActions()`, `shotsFiredThisTriggerPull` was being continuously reset to `0` on every frame when the mouse/touch was not held. When clicking, the trigger release cleared the counter while the Animator's `Fire` state and transition were still playing/blending, allowing trailing animation event markers to fire 2–3 duplicate shots.
+  - **Leading-Edge Trigger Reset**: `shotsFiredThisTriggerPull` is now reset exclusively on the leading edge of a new trigger press (`if (shootingInput && !wasShootingLastFrame)`).
+  - **Trailing Event Suppression**: Full-auto/burst weapons immediately reject animation events once the user has released the trigger (`!shootingInput`), preventing phantom bullets during the exit transition.
+  - **Fire Rate Interval Limiter**: Added minimum shot interval safety check (`minShotInterval = 1f / (activeFireRate * 1.5f)`) preventing animation event overlap from double-firing bullets faster than the weapon's design fire rate.
+- **Swipe-Up Reload Reliability on Mobile/Touch**:
+  - **Identified Root Causes**:
+    1. When swiping up from the bottom of the screen, the initial touch often landed over the player runner model, setting `isHoldingOnPlayer = true`. Previously, `isHoldingOnPlayer` completely bypassed swipe detection unless held for 0.5s to open the wheel, dropping swipe gestures.
+    2. The swipe duration window was restricted to $\le 0.3\text{s}$, causing standard thumb flick motions (~0.35–0.4s) on mobile devices to be dropped.
+    3. `PlayerController` had a redundant secondary hold-time check discarding reload requests if input was held $\ge 0.4\text{s}$.
+  - **Player Touch Cancellation on Drag**: If a touch starts on the player model but moves $\ge \text{swipeThreshold}$, `isHoldingOnPlayer` is automatically cancelled and the swipe event (Swipe Up Reload or Lane Swap) is executed immediately.
+  - **Dynamic Swipe Timing & Cleanup**: Expanded mobile flick detection window to $\le 0.45\text{s}$ and removed redundant hold checks in `PlayerController.HandleActions()`. Reloading now activates promptly for all weapons (Pistol, AR, Shotgun, SMG, Sniper).
+- **Drag-to-Aim & Full-Auto Lane Switching Isolation**:
+  - In `TouchManager.cs`, flicks within $0.45\text{s}$ trigger lane shifts or reloads. Holding beyond $0.45\text{s}$ is treated exclusively as an aim-drag for continuous shooting, ensuring dragging to aim with AR/SMG never causes unwanted lane shifts.
