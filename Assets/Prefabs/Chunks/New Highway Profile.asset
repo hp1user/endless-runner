@@ -1,0 +1,200 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd60c5ba1a3d5a4fa5133ec648cd573, type: 3}
+  m_Name: New Highway Profile
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.ProceduralEnvironmentProfile
+  profileName: Highway Procedural
+  roadBasePrefab: {fileID: 7051464841809001761, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
+  roadBaseOffset: {x: 0, y: 0, z: 5}
+  chunkLength: 40
+  roadWidth: 12
+  dualHighway:
+    enableSecondaryHighway: 1
+    secondaryRoadOffset: {x: -10.5, y: 0, z: 5}
+    medianX: -5.25
+    populateVisualHighwayProps: 1
+    visualObstacleMultiplier: 2
+    visualVehicleSpawnChance: 0.95
+    minVisualVehicles: 3
+    maxVisualVehicles: 6
+  sideRailings:
+    enabled: 1
+    railingPrefabs:
+    - assetName: Divider 1
+      prefab: {fileID: 7579522069654299132, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Divider 2
+      prefab: {fileID: 1251275565171080785, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    segmentLength: 4.16
+    leftX: -5.5
+    rightX: 5.5
+    spawnChance: 1
+  centerDividers:
+    enabled: 1
+    dividerPrefabs:
+    - assetName: Divider 1
+      prefab: {fileID: 7579522069654299132, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      weight: 4
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Divider 2
+      prefab: {fileID: 1251275565171080785, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Divider 3
+      prefab: {fileID: 1030708920400864097, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    segmentLength: 4.2
+    centerX: 0
+    spawnChance: 1
+    includeCenterLights: 1
+    centerLightPrefabs:
+    - assetName: Stree Light
+      prefab: {fileID: 5242838100307476732, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 90, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    centerLightInterval: 20
+  streetLights:
+    enabled: 1
+    lightPrefabs:
+    - assetName: Stree Light
+      prefab: {fileID: 5242838100307476732, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      weight: 1.5
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Small Pole 1
+      prefab: {fileID: 4578308251286423793, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Small Pole 2
+      prefab: {fileID: 2552084865816126167, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Small Pole 3
+      prefab: {fileID: 1704040253684044557, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Small Pole 4
+      prefab: {fileID: 9003380841712874823, guid: d2a83659787aa8e4dbcec5d281247183, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    intervalZ: 20
+    leftX: -5.8
+    rightX: 5.8
+    placementMode: 1
+    spawnChance: 0.9
+  overheadSigns:
+    enabled: 1
+    signPrefabs:
+    - assetName: Big Sign Board
+      prefab: {fileID: 206471229066266946, guid: 3039b66ae37e6b04b855e889640d247f, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    spawnChancePerChunk: 0.35
+    centerX: 0.35
+    heightY: 0
+  debrisAndClutter:
+    enabled: 1
+    spawnOnPlayableRoad: 0
+    debrisPrefabs:
+    - assetName: Debris
+      prefab: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
+      weight: 1.5
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Cone
+      prefab: {fileID: 919132149155446097, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: block 1
+      prefab: {fileID: 919132149155446097, guid: 1226322cdc0fa084284410d465db7516, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: block 2
+      prefab: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    minItemsPerChunk: 1
+    maxItemsPerChunk: 4
+    minX: -5
+    maxX: 5
+    randomizeYaw: 1
+  vehicles:
+    enabled: 1
+    spawnOnPlayableRoad: 0
+    vehiclePrefabs:
+    - assetName: Bus
+      prefab: {fileID: 7190922695679026899, guid: 4dfc0f65eb9a1fd47bd0f66006eccd76, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Car
+      prefab: {fileID: 9165125218981963523, guid: 3d524bf037c6d1d46a9f1074a49a0435, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: SUV
+      prefab: {fileID: 2067897568946410426, guid: 8c40a70a49697dc4e89d9b2f93089501, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Van
+      prefab: {fileID: 1092843071914709398, guid: 65d9629ccce772b4ebb8c7e17b60186b, type: 3}
+      weight: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    spawnChancePerChunk: 0.651
+    maxVehiclesPerChunk: 2
+    spawnLanesX:
+    - -2
+    - 0
+    - 2
+    - -5
+    - 5
+    randomizeYaw: 1

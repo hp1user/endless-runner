@@ -270,6 +270,13 @@ public class LevelManager : MonoBehaviour
 
         GameObject newChunk = PoolManager.Instance.SpawnFromPool(prefabToSpawn, spawnPos, Quaternion.identity, this.transform);
 
+        // Support dynamic runtime procedural chunks
+        var procChunk = newChunk.GetComponent<EndlessRunner.LevelGen.ProceduralChunk>();
+        if (procChunk != null)
+        {
+            procChunk.GenerateRandomLayout();
+        }
+
         ChunkTracker newTracker = new ChunkTracker { instance = newChunk, originalPrefab = prefabToSpawn };
         activeChunks.Enqueue(newTracker);
 

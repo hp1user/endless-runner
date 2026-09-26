@@ -173,3 +173,29 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - **Dynamic Swipe Timing & Cleanup**: Expanded mobile flick detection window to $\le 0.45\text{s}$ and removed redundant hold checks in `PlayerController.HandleActions()`. Reloading now activates promptly for all weapons (Pistol, AR, Shotgun, SMG, Sniper).
 - **Drag-to-Aim & Full-Auto Lane Switching Isolation**:
   - In `TouchManager.cs`, flicks within $0.45\text{s}$ trigger lane shifts or reloads. Holding beyond $0.45\text{s}$ is treated exclusively as an aim-drag for continuous shooting, ensuring dragging to aim with AR/SMG never causes unwanted lane shifts.
+
+## Date: 2026-09-26
+
+### Features & Tools
+- **Procedural Highway Chunk Studio & Generator (`ProceduralChunkEditorWindow.cs`)**:
+  - Created an interactive Unity Editor Tool accessible via `Tools > Endless Runner > Procedural Chunk Studio`.
+  - Added 1-Click **"Auto-Fill Highway Pack"** button that automatically scans `Assets/3d/Environment/Highway/Prefabs/` and maps assets into organized categories:
+    - Side Railings & Barriers (`Side Railing.prefab`)
+    - Center Dividers & Center Lights (`Divider 1-4.prefab`, `Stree Light.prefab`)
+    - Street Lights & Small Poles (`Stree Light.prefab`, `Small Pole 1-4.prefab`)
+    - Overhead / Big Sign Boards (`Big Sign Board.prefab`)
+    - Debris, Clutter & Road Props (`Debris.prefab`, `Cone.fbx`, `block 1-2.fbx`)
+    - Vehicles & Heavy Obstacles (`Obstrucle1-2.prefab`)
+  - **Live Scene Preview**: Added a `🎲 Preview Random Chunk in Scene` button to instantly visualize generated chunks at $(0, 0, 0)$ in the Scene View with instant cleanup.
+  - **1-Click Batch Prefab Baker**: Generates $N$ unique, clean, optimized chunk prefabs saved to `Assets/Prefabs/Chunks/Generated/` and optionally binds them directly to active `LevelThemeData` ScriptableObjects.
+  - **Runtime Dynamic Chunk Support**: Added `ProceduralChunk.cs` and hooked it into `LevelManager.SpawnNextChunk()`, allowing runtime dynamic randomization on-the-fly when spawned/recycled from `PoolManager`.
+- **Dual Highway (Twin Roadway) Generation**:
+  - Implemented `DualHighwaySettings` in `ProceduralEnvironmentProfile.cs` and `ProceduralChunk.cs`.
+  - Configured parallel background visual highway on the right side of the screen/camera view (`secondaryRoadOffset = (-10.5, 0, 5)`) alongside the playable road (`X = 0`).
+  - Positioned the center median dividers/lights directly in the middle between both highways (`medianX = -5.25`).
+  - Configured outer boundaries: outer left railing at $X = -15.45$, outer right railing at $X = +4.95$, and center dividers at $X = -5.25$.
+  - Integrated newly pulled vehicle models (`Bus.fbx`, `Car.fbx`, `SUV.fbx`, `Van.fbx`) into the procedural clutter pool.
+  - Implemented **2x Obstacle Density on Visual Highway**:
+    - Debris and clutter on the visual road are generated at $2\times$ the rate of the playable highway (`visualObstacleMultiplier = 2.0f`).
+    - Visual highway vehicle traffic spawn rate increased (`visualVehicleSpawnChance = 0.95f`, `minVisualVehicles = 3`, `maxVisualVehicles = 6`) with multi-lane spread across 5 visual lanes and randomized crash/parking angles to simulate a dense, abandoned highway gridlock.
+    - Added dedicated **`Spawn On Playable Road`** toggles to both Debris and Vehicle rules (default: `false`), allowing the playable runner highway to remain 100% clean for dynamic obstacle/enemy spawn managers while the visual background highway populates full 2x traffic and clutter.
