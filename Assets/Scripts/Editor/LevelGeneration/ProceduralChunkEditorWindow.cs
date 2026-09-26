@@ -8,21 +8,31 @@ namespace EndlessRunner.LevelGen.Editor
 {
     public class ProceduralChunkEditorWindow : EditorWindow
     {
+        private int currentTab = 0;
+        private readonly string[] tabTitles = new string[] { "🛣️ Highway Chunk Studio", "🚧 Obstacle Manager & Pool" };
+
+        // Tab 0: Chunk Studio
         private ProceduralEnvironmentProfile profile;
         private Vector2 scrollPos;
         private int bakeCount = 10;
         private string bakeFolder = "Assets/Prefabs/Chunks/Generated";
         private LevelThemeData targetThemeToAssign;
-
         private GameObject currentPreviewChunk;
         private SerializedObject serializedProfile;
+
+        // Tab 1: Obstacle Manager
+        private ObstacleManager sceneObstacleManager;
+        private SerializedObject serializedObstacleManager;
+        private Vector2 obstacleScrollPos;
+        private GameObject dropPrefabToSetup;
+        private float newObstacleDamage = 25f;
 
         [MenuItem("Tools/Endless Runner/Procedural Chunk Studio", false, 10)]
         [MenuItem("Window/Procedural Chunk Studio", false, 200)]
         public static void OpenWindow()
         {
-            var win = GetWindow<ProceduralChunkEditorWindow>("Chunk Studio");
-            win.minSize = new Vector2(480, 600);
+            var win = GetWindow<ProceduralChunkEditorWindow>("Chunk & Obstacle Studio");
+            win.minSize = new Vector2(520, 650);
             win.Show();
         }
 
@@ -43,6 +53,17 @@ namespace EndlessRunner.LevelGen.Editor
             {
                 serializedProfile = new SerializedObject(profile);
             }
+
+            FindSceneObstacleManager();
+        }
+
+        private void FindSceneObstacleManager()
+        {
+            sceneObstacleManager = Object.FindObjectOfType<ObstacleManager>();
+            if (sceneObstacleManager != null)
+            {
+                serializedObstacleManager = new SerializedObject(sceneObstacleManager);
+            }
         }
 
         private void OnGUI()
@@ -51,6 +72,39 @@ namespace EndlessRunner.LevelGen.Editor
             DrawHeader();
 
             EditorGUILayout.Space(4);
+            currentTab = GUILayout.Toolbar(currentTab, tabTitles, GUILayout.Height(30));
+
+            EditorGUILayout.Space(6);
+
+            switch (currentTab)
+            {
+                case 0:
+                    DrawChunkStudioTab();
+                    break;
+                case 1:
+                    DrawObstacleManagerTab();
+                    break;
+            }
+        }
+
+        private void DrawHeader()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("🛣️ Procedural Studio & Obstacle Hub", EditorStyles.boldLabel);
+            if (GUILayout.Button("🔄 Refresh", GUILayout.Width(75)))
+            {
+                FindSceneObstacleManager();
+            }
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Label("Design procedural highway chunks, live preview layouts, and easily manage gameplay ObstacleManager pools.", EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.EndVertical();
+        }
+
+        #region TAB 0: CHUNK STUDIO
+
+        private void DrawChunkStudioTab()
+        {
             DrawProfileSelector();
 
             if (profile == null)
@@ -89,14 +143,6 @@ namespace EndlessRunner.LevelGen.Editor
                 serializedProfile.ApplyModifiedProperties();
                 EditorUtility.SetDirty(profile);
             }
-        }
-
-        private void DrawHeader()
-        {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            GUILayout.Label("🛣️ Procedural Chunk Studio", EditorStyles.boldLabel);
-            GUILayout.Label("Categorize highway assets, preview layouts in scene, and batch-bake randomized chunk prefabs.", EditorStyles.wordWrappedMiniLabel);
-            EditorGUILayout.EndVertical();
         }
 
         private void DrawProfileSelector()
@@ -287,7 +333,6 @@ namespace EndlessRunner.LevelGen.Editor
                 proc.profile = profile;
                 proc.GenerateRandomLayout(UnityEngine.Random.Range(1000, 999999));
 
-                // Clean up ProceduralChunk script from baked static prefab so it's clean and lightweight
                 DestroyImmediate(proc);
 
                 string prefabPath = $"{bakeFolder}/{chunkName}.prefab";
@@ -369,7 +414,7 @@ namespace EndlessRunner.LevelGen.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(roadGuids[0]);
                 profile.roadBasePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                profile.roadBaseOffset = new Vector3(0f, 0f, 5f); // Centers Path_1 exactly from -20m to +20m
+                profile.roadBaseOffset = new Vector3(0f, 0f, 5f);
                 profile.chunkLength = 40f;
                 profile.roadWidth = 10f;
             }
@@ -377,7 +422,7 @@ namespace EndlessRunner.LevelGen.Editor
             // 2. Side Railings
             profile.sideRailings.leftX = -4.95f;
             profile.sideRailings.rightX = 4.95f;
-            profile.sideRailings.segmentLength = 2.58f; // Exact length of Side Railing.prefab mesh
+            profile.sideRailings.segmentLength = 2.58f;
             profile.sideRailings.spawnChance = 1.0f;
             profile.sideRailings.railingPrefabs.Clear();
             AddPrefabIfFound("Side Railing", profile.sideRailings.railingPrefabs, 1f, new Vector3(0, 0, 0), new Vector3(0, 0, 0));
@@ -420,8 +465,10 @@ namespace EndlessRunner.LevelGen.Editor
 
             // 7. Vehicles
             profile.vehicles.vehiclePrefabs.Clear();
-            AddPrefabIfFound("Obstrucle1", profile.vehicles.vehiclePrefabs, 1f);
-            AddPrefabIfFound("Obstrucle2", profile.vehicles.vehiclePrefabs, 1f);
+            AddPrefabIfFound("Bus", profile.vehicles.vehiclePrefabs, 1f);
+            AddPrefabIfFound("Car", profile.vehicles.vehiclePrefabs, 1f);
+            AddPrefabIfFound("SUV", profile.vehicles.vehiclePrefabs, 1f);
+            AddPrefabIfFound("Van", profile.vehicles.vehiclePrefabs, 1f);
 
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
@@ -443,5 +490,543 @@ namespace EndlessRunner.LevelGen.Editor
                 }
             }
         }
+
+        #endregion
+
+        #region TAB 1: OBSTACLE MANAGER
+
+        private void DrawObstacleManagerTab()
+        {
+            if (sceneObstacleManager == null)
+            {
+                FindSceneObstacleManager();
+            }
+
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField("🎯 Active Scene ObstacleManager Target", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            var newManager = (ObstacleManager)EditorGUILayout.ObjectField("Target Manager", sceneObstacleManager, typeof(ObstacleManager), true);
+            if (newManager != sceneObstacleManager)
+            {
+                sceneObstacleManager = newManager;
+                if (sceneObstacleManager != null) serializedObstacleManager = new SerializedObject(sceneObstacleManager);
+            }
+
+            if (GUILayout.Button("🔍 Find in Scene", GUILayout.Width(110)))
+            {
+                FindSceneObstacleManager();
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (sceneObstacleManager == null)
+            {
+                EditorGUILayout.HelpBox("No ObstacleManager found in the current active scene.", MessageType.Warning);
+                if (GUILayout.Button("➕ Create New ObstacleManager in Scene", GUILayout.Height(30)))
+                {
+                    CreateSceneObstacleManager();
+                }
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("🎯 Ping in Hierarchy", GUILayout.Height(22)))
+            {
+                EditorGUIUtility.PingObject(sceneObstacleManager.gameObject);
+                Selection.activeGameObject = sceneObstacleManager.gameObject;
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+
+            if (serializedObstacleManager == null || serializedObstacleManager.targetObject != sceneObstacleManager)
+            {
+                serializedObstacleManager = new SerializedObject(sceneObstacleManager);
+            }
+
+            serializedObstacleManager.Update();
+
+            obstacleScrollPos = EditorGUILayout.BeginScrollView(obstacleScrollPos);
+
+            EditorGUILayout.Space(8);
+
+            // 1. Quick Add Obstacles from Project
+            DrawQuickAddProjectObstaclesSection();
+
+            EditorGUILayout.Space(8);
+
+            // 2. Active Obstacle Pool List
+            DrawObstaclePoolSection();
+
+            EditorGUILayout.Space(8);
+
+            // 3. Spawning & Movement Settings
+            DrawObstacleSpawnerSettingsSection();
+
+            EditorGUILayout.Space(8);
+
+            // 4. Quick Convert / Setup Obstacle Prefab
+            DrawConvertObstaclePrefabSection();
+
+            EditorGUILayout.Space(12);
+            EditorGUILayout.EndScrollView();
+
+            if (serializedObstacleManager.hasModifiedProperties)
+            {
+                serializedObstacleManager.ApplyModifiedProperties();
+                EditorUtility.SetDirty(sceneObstacleManager);
+            }
+        }
+
+        private HashSet<string> dismissedDetectedPaths = new HashSet<string>();
+        private bool showDismissedDetected = false;
+
+        private void DrawQuickAddProjectObstaclesSection()
+        {
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("⚡ Quick-Add Detected Obstacles & Vehicles", EditorStyles.boldLabel);
+
+            if (dismissedDetectedPaths.Count > 0)
+            {
+                showDismissedDetected = GUILayout.Toggle(showDismissedDetected, $"Show Dismissed ({dismissedDetectedPaths.Count})", "Button", GUILayout.Width(140));
+            }
+
+            GUI.backgroundColor = new Color(0.4f, 1f, 0.4f);
+            if (GUILayout.Button("➕ Add All Detected", GUILayout.Width(130)))
+            {
+                AddAllDetectedObstaclesToPool();
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.HelpBox("Click '+ Add' to assign into active pool, or '⊘ Dismiss' to remove unwanted candidates from this detected list.", MessageType.None);
+
+            string[] detectedPaths = FindCandidateObstaclePrefabs();
+            if (detectedPaths.Length == 0)
+            {
+                EditorGUILayout.LabelField("No candidate obstacle prefabs found in project.", EditorStyles.miniLabel);
+            }
+            else
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                foreach (string path in detectedPaths)
+                {
+                    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    if (prefab == null) continue;
+
+                    bool alreadyInPool = sceneObstacleManager.obstaclePool != null && sceneObstacleManager.obstaclePool.Contains(prefab);
+
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.ObjectField(prefab, typeof(GameObject), false, GUILayout.Width(190));
+
+                    Obstacle obs = prefab.GetComponent<Obstacle>();
+                    Collider col = prefab.GetComponent<Collider>();
+
+                    if (obs != null && col != null)
+                    {
+                        GUILayout.Label($"Damage: {obs.damageAmount} HP", EditorStyles.miniLabel, GUILayout.Width(95));
+                    }
+                    else
+                    {
+                        GUILayout.Label("⚠️ Needs Setup", EditorStyles.miniLabel, GUILayout.Width(95));
+                    }
+
+                    if (alreadyInPool)
+                    {
+                        GUI.backgroundColor = new Color(1f, 0.45f, 0.45f);
+                        if (GUILayout.Button("✕ Remove", GUILayout.Width(75)))
+                        {
+                            RemovePrefabFromObstaclePool(prefab);
+                        }
+                        GUI.backgroundColor = Color.white;
+                    }
+                    else
+                    {
+                        GUI.backgroundColor = new Color(0.6f, 0.9f, 1f);
+                        if (GUILayout.Button("+ Add", GUILayout.Width(75)))
+                        {
+                            if (obs == null || col == null)
+                            {
+                                SetupPrefabAsObstacle(prefab, 25f);
+                            }
+                            AddPrefabToObstaclePool(prefab);
+                        }
+                        GUI.backgroundColor = Color.white;
+                    }
+
+                    if (dismissedDetectedPaths.Contains(path))
+                    {
+                        if (GUILayout.Button("↩ Restore", GUILayout.Width(65)))
+                        {
+                            dismissedDetectedPaths.Remove(path);
+                        }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button("⊘ Dismiss", GUILayout.Width(65)))
+                        {
+                            dismissedDetectedPaths.Add(path);
+                        }
+                    }
+
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawObstaclePoolSection()
+        {
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"📦 Active Obstacle Pool ({sceneObstacleManager.obstaclePool?.Count ?? 0} Prefabs)", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("➕ Add Slot", GUILayout.Width(85)))
+            {
+                if (sceneObstacleManager.obstaclePool == null) sceneObstacleManager.obstaclePool = new List<GameObject>();
+                Undo.RecordObject(sceneObstacleManager, "Add Obstacle Pool Slot");
+                sceneObstacleManager.obstaclePool.Add(null);
+                EditorUtility.SetDirty(sceneObstacleManager);
+            }
+
+            GUI.backgroundColor = new Color(0.85f, 0.95f, 1f);
+            if (GUILayout.Button("✨ Deduplicate", GUILayout.Width(95)))
+            {
+                RemoveDuplicatesFromObstaclePool();
+            }
+            GUI.backgroundColor = Color.white;
+
+            if (GUILayout.Button("🧹 Clear", GUILayout.Width(65)))
+            {
+                if (EditorUtility.DisplayDialog("Clear Obstacle Pool?", "Are you sure you want to remove all prefabs from the ObstacleManager pool?", "Yes", "No"))
+                {
+                    Undo.RecordObject(sceneObstacleManager, "Clear Obstacle Pool");
+                    sceneObstacleManager.obstaclePool?.Clear();
+                    EditorUtility.SetDirty(sceneObstacleManager);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (sceneObstacleManager.obstaclePool == null || sceneObstacleManager.obstaclePool.Count == 0)
+            {
+                EditorGUILayout.HelpBox("Obstacle pool is empty! Add prefabs using the Quick-Add list above or drag & drop below.", MessageType.Info);
+            }
+            else
+            {
+                for (int i = 0; i < sceneObstacleManager.obstaclePool.Count; i++)
+                {
+                    EditorGUILayout.BeginHorizontal("box");
+                    GUILayout.Label($"[{i + 1}]", GUILayout.Width(26));
+
+                    GameObject current = sceneObstacleManager.obstaclePool[i];
+                    GameObject updated = (GameObject)EditorGUILayout.ObjectField(current, typeof(GameObject), false);
+                    if (updated != current)
+                    {
+                        Undo.RecordObject(sceneObstacleManager, "Change Obstacle Prefab");
+                        sceneObstacleManager.obstaclePool[i] = updated;
+                        EditorUtility.SetDirty(sceneObstacleManager);
+                    }
+
+                    if (updated != null)
+                    {
+                        Obstacle obs = updated.GetComponent<Obstacle>();
+                        Collider col = updated.GetComponent<Collider>();
+
+                        if (obs != null && col != null)
+                        {
+                            GUI.color = Color.green;
+                            GUILayout.Label("✓ Ready", EditorStyles.miniLabel, GUILayout.Width(55));
+                            GUI.color = Color.white;
+                        }
+                        else
+                        {
+                            GUI.color = new Color(1f, 0.7f, 0.2f);
+                            GUILayout.Label("⚠️ Setup Req", EditorStyles.miniLabel, GUILayout.Width(75));
+                            GUI.color = Color.white;
+
+                            if (GUILayout.Button("Fix", GUILayout.Width(40)))
+                            {
+                                SetupPrefabAsObstacle(updated, 25f);
+                            }
+                        }
+                    }
+
+                    GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+                    if (GUILayout.Button("✕", GUILayout.Width(26)))
+                    {
+                        Undo.RecordObject(sceneObstacleManager, "Remove Obstacle Prefab");
+                        sceneObstacleManager.obstaclePool.RemoveAt(i);
+                        EditorUtility.SetDirty(sceneObstacleManager);
+                        GUIUtility.ExitGUI();
+                    }
+                    GUI.backgroundColor = Color.white;
+
+                    EditorGUILayout.EndHorizontal();
+                }
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawObstacleSpawnerSettingsSection()
+        {
+            EditorGUILayout.BeginVertical("box");
+            GUILayout.Label("⚙️ Obstacle Spawner & Movement Settings", EditorStyles.boldLabel);
+
+            SerializedProperty spawnIntervalProp = serializedObstacleManager.FindProperty("spawnIntervalRange");
+            SerializedProperty lanePositionsProp = serializedObstacleManager.FindProperty("lanePositions");
+            SerializedProperty spawnYProp = serializedObstacleManager.FindProperty("spawnYPosition");
+            SerializedProperty obstacleDirProp = serializedObstacleManager.FindProperty("obstacleDirection");
+            SerializedProperty despawnThresholdProp = serializedObstacleManager.FindProperty("obstacleDespawnThreshold");
+
+            if (spawnIntervalProp != null) EditorGUILayout.PropertyField(spawnIntervalProp, new GUIContent("Spawn Interval (Min/Max s)"));
+            if (lanePositionsProp != null) EditorGUILayout.PropertyField(lanePositionsProp, new GUIContent("Playable Lanes X"), true);
+            if (spawnYProp != null) EditorGUILayout.PropertyField(spawnYProp, new GUIContent("Spawn Height Y"));
+            if (obstacleDirProp != null) EditorGUILayout.PropertyField(obstacleDirProp, new GUIContent("Obstacle Move Direction"));
+            if (despawnThresholdProp != null) EditorGUILayout.PropertyField(despawnThresholdProp, new GUIContent("Despawn Distance Threshold"));
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private bool setupRandomizeYaw = true;
+        private bool setupAllowFlip180 = true;
+        private bool setupFullRandom360 = false;
+        private float setupMaxYawVariation = 15f;
+
+        private void DrawConvertObstaclePrefabSection()
+        {
+            EditorGUILayout.BeginVertical("box");
+            GUILayout.Label("🛠️ 1-Click Obstacle Prefab Setup Helper", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Drop any 3D model or prefab here to automatically configure a BoxCollider trigger and Obstacle component with custom damage & rotation rules.", MessageType.None);
+
+            EditorGUILayout.BeginHorizontal();
+            dropPrefabToSetup = (GameObject)EditorGUILayout.ObjectField("Source Prefab / Model", dropPrefabToSetup, typeof(GameObject), false);
+            newObstacleDamage = EditorGUILayout.FloatField("Damage Amount", newObstacleDamage, GUILayout.Width(130));
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            setupRandomizeYaw = EditorGUILayout.ToggleLeft("Randomize Yaw", setupRandomizeYaw, GUILayout.Width(110));
+            setupAllowFlip180 = EditorGUILayout.ToggleLeft("Flip 0/180°", setupAllowFlip180, GUILayout.Width(90));
+            setupFullRandom360 = EditorGUILayout.ToggleLeft("Full 360°", setupFullRandom360, GUILayout.Width(80));
+            setupMaxYawVariation = EditorGUILayout.FloatField("± Angle", setupMaxYawVariation, GUILayout.Width(80));
+            EditorGUILayout.EndHorizontal();
+
+            if (dropPrefabToSetup != null)
+            {
+                GUI.backgroundColor = new Color(0.4f, 0.9f, 0.4f);
+                if (GUILayout.Button($"✨ Configure '{dropPrefabToSetup.name}' as Obstacle & Add to Pool", GUILayout.Height(30)))
+                {
+                    SetupPrefabAsObstacle(dropPrefabToSetup, newObstacleDamage, setupRandomizeYaw, setupAllowFlip180, setupFullRandom360, setupMaxYawVariation);
+                    AddPrefabToObstaclePool(dropPrefabToSetup);
+                    dropPrefabToSetup = null;
+                }
+                GUI.backgroundColor = Color.white;
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        private void CreateSceneObstacleManager()
+        {
+            GameObject go = new GameObject("ObstacleManager");
+            sceneObstacleManager = go.AddComponent<ObstacleManager>();
+            sceneObstacleManager.spawnIntervalRange = new Vector2(4f, 10f);
+            sceneObstacleManager.lanePositions = new float[] { -2f, 0f, 2f };
+            sceneObstacleManager.obstacleDirection = Obstacle.MoveDirection.Forward;
+            sceneObstacleManager.obstacleDespawnThreshold = 20f;
+            sceneObstacleManager.obstaclePool = new List<GameObject>();
+
+            AddAllDetectedObstaclesToPool();
+
+            Undo.RegisterCreatedObjectUndo(go, "Create ObstacleManager");
+            serializedObstacleManager = new SerializedObject(sceneObstacleManager);
+            Selection.activeGameObject = go;
+            Debug.Log("<color=green>[ObstacleStudio]</color> Created new ObstacleManager in scene!");
+        }
+
+        private string[] FindCandidateObstaclePrefabs()
+        {
+            Dictionary<string, string> uniqueCandidates = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase);
+            string[] guids = AssetDatabase.FindAssets("t:Prefab");
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                string lower = path.ToLower();
+
+                // Check for obstacles, vehicles, debris
+                if (lower.Contains("obstruc") || lower.Contains("obstacle") || lower.Contains("bus") || lower.Contains("car") || lower.Contains("suv") || lower.Contains("van") || lower.Contains("block") || lower.Contains("cone") || lower.Contains("debris"))
+                {
+                    // Exclude UI cards and procedural chunk root variants
+                    if (!lower.Contains("card") && !lower.Contains("ui") && !lower.Contains("generated") && !lower.Contains("dynamicchunk"))
+                    {
+                        string assetName = Path.GetFileNameWithoutExtension(path);
+                        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                        if (prefab == null) continue;
+
+                        bool isConfiguredObstacle = prefab.GetComponent<Obstacle>() != null && prefab.GetComponent<Collider>() != null;
+
+                        if (uniqueCandidates.TryGetValue(assetName, out string existingPath))
+                        {
+                            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(existingPath);
+                            bool existingConfigured = existing != null && existing.GetComponent<Obstacle>() != null && existing.GetComponent<Collider>() != null;
+
+                            // Prefer configured obstacle over unconfigured model/prefab
+                            if (isConfiguredObstacle && !existingConfigured)
+                            {
+                                uniqueCandidates[assetName] = path;
+                            }
+                            else if (lower.Contains("obstrucle") && !existingPath.ToLower().Contains("obstrucle"))
+                            {
+                                uniqueCandidates[assetName] = path;
+                            }
+                        }
+                        else
+                        {
+                            uniqueCandidates[assetName] = path;
+                        }
+                    }
+                }
+            }
+
+            List<string> filtered = new List<string>();
+            foreach (var kvp in uniqueCandidates)
+            {
+                if (showDismissedDetected || !dismissedDetectedPaths.Contains(kvp.Value))
+                {
+                    filtered.Add(kvp.Value);
+                }
+            }
+
+            return filtered.ToArray();
+        }
+
+        private void RemovePrefabFromObstaclePool(GameObject prefab)
+        {
+            if (sceneObstacleManager == null || prefab == null || sceneObstacleManager.obstaclePool == null) return;
+
+            Undo.RecordObject(sceneObstacleManager, "Remove Obstacle from Pool");
+            sceneObstacleManager.obstaclePool.RemoveAll(p => p == prefab);
+            EditorUtility.SetDirty(sceneObstacleManager);
+            Debug.Log($"<color=orange>[ObstacleStudio]</color> Removed {prefab.name} from ObstacleManager pool.");
+        }
+
+        private void RemoveDuplicatesFromObstaclePool()
+        {
+            if (sceneObstacleManager == null || sceneObstacleManager.obstaclePool == null) return;
+
+            Undo.RecordObject(sceneObstacleManager, "Remove Obstacle Pool Duplicates");
+            HashSet<GameObject> seen = new HashSet<GameObject>();
+            List<GameObject> unique = new List<GameObject>();
+
+            foreach (var item in sceneObstacleManager.obstaclePool)
+            {
+                if (item != null)
+                {
+                    if (seen.Add(item))
+                    {
+                        unique.Add(item);
+                    }
+                }
+            }
+
+            int removed = sceneObstacleManager.obstaclePool.Count - unique.Count;
+            sceneObstacleManager.obstaclePool = unique;
+            EditorUtility.SetDirty(sceneObstacleManager);
+            Debug.Log($"<color=green>[ObstacleStudio]</color> Cleaned ObstacleManager pool (removed {removed} duplicate/empty slots)!");
+        }
+
+        private void AddPrefabToObstaclePool(GameObject prefab)
+        {
+            if (sceneObstacleManager == null || prefab == null) return;
+            if (sceneObstacleManager.obstaclePool == null) sceneObstacleManager.obstaclePool = new List<GameObject>();
+
+            if (!sceneObstacleManager.obstaclePool.Contains(prefab))
+            {
+                Undo.RecordObject(sceneObstacleManager, "Add Obstacle to Pool");
+                sceneObstacleManager.obstaclePool.Add(prefab);
+                EditorUtility.SetDirty(sceneObstacleManager);
+                Debug.Log($"<color=green>[ObstacleStudio]</color> Added {prefab.name} to ObstacleManager pool.");
+            }
+        }
+
+        private void AddAllDetectedObstaclesToPool()
+        {
+            if (sceneObstacleManager == null) return;
+            string[] paths = FindCandidateObstaclePrefabs();
+            int count = 0;
+
+            foreach (string path in paths)
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (prefab != null)
+                {
+                    if (sceneObstacleManager.obstaclePool == null) sceneObstacleManager.obstaclePool = new List<GameObject>();
+                    if (!sceneObstacleManager.obstaclePool.Contains(prefab))
+                    {
+                        // Ensure it has Obstacle and Collider
+                        if (prefab.GetComponent<Obstacle>() == null || prefab.GetComponent<Collider>() == null)
+                        {
+                            SetupPrefabAsObstacle(prefab, 25f);
+                        }
+
+                        Undo.RecordObject(sceneObstacleManager, "Add Obstacle to Pool");
+                        sceneObstacleManager.obstaclePool.Add(prefab);
+                        count++;
+                    }
+                }
+            }
+
+            EditorUtility.SetDirty(sceneObstacleManager);
+            Debug.Log($"<color=green>[ObstacleStudio]</color> Added {count} obstacle prefabs into ObstacleManager pool!");
+        }
+
+        private void SetupPrefabAsObstacle(GameObject prefab, float damage, bool randomizeYaw = true, bool allowFlip180 = true, bool full360 = false, float maxYawVariation = 15f)
+        {
+            if (prefab == null) return;
+
+            string path = AssetDatabase.GetAssetPath(prefab);
+            if (string.IsNullOrEmpty(path)) return;
+
+            using (var scope = new PrefabUtility.EditPrefabContentsScope(path))
+            {
+                GameObject root = scope.prefabContentsRoot;
+
+                // 1. BoxCollider
+                BoxCollider col = root.GetComponent<BoxCollider>();
+                if (col == null)
+                {
+                    col = root.AddComponent<BoxCollider>();
+                    Renderer[] rends = root.GetComponentsInChildren<Renderer>();
+                    if (rends.Length > 0)
+                    {
+                        Bounds b = rends[0].bounds;
+                        foreach (var r in rends) b.Encapsulate(r.bounds);
+                        col.center = root.transform.InverseTransformPoint(b.center);
+                        col.size = b.size;
+                    }
+                }
+                col.isTrigger = true;
+
+                // 2. Obstacle component
+                Obstacle obs = root.GetComponent<Obstacle>();
+                if (obs == null)
+                {
+                    obs = root.AddComponent<Obstacle>();
+                }
+                obs.damageAmount = damage;
+                obs.worldMoveSpeed = 15f;
+                obs.randomizeYaw = randomizeYaw;
+                obs.allowFlip180 = allowFlip180;
+                obs.fullRandom360 = full360;
+                obs.maxRandomYawVariation = maxYawVariation;
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"<color=green>[ObstacleStudio]</color> Configured {prefab.name} with BoxCollider, Obstacle component (Damage: {damage}), and rotation rules.");
+        }
+
+        #endregion
     }
 }

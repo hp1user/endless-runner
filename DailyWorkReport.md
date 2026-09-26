@@ -199,3 +199,15 @@ Use this document to track daily progress, features implemented, and bugs fixed.
     - Debris and clutter on the visual road are generated at $2\times$ the rate of the playable highway (`visualObstacleMultiplier = 2.0f`).
     - Visual highway vehicle traffic spawn rate increased (`visualVehicleSpawnChance = 0.95f`, `minVisualVehicles = 3`, `maxVisualVehicles = 6`) with multi-lane spread across 5 visual lanes and randomized crash/parking angles to simulate a dense, abandoned highway gridlock.
     - Added dedicated **`Spawn On Playable Road`** toggles to both Debris and Vehicle rules (default: `false`), allowing the playable runner highway to remain 100% clean for dynamic obstacle/enemy spawn managers while the visual background highway populates full 2x traffic and clutter.
+- **Dedicated Obstacle Manager & Pool Tab (`ProceduralChunkEditorWindow.cs`)**:
+  - Added a second tab **"🚧 Obstacle Manager & Pool"** to the Procedural Studio tool.
+  - Features:
+    - Auto-detection and direct target binding to the scene's active `ObstacleManager`.
+    - **1-Click "Add All Detected"**: Scans project assets and populates candidate obstacle prefabs (`Obstrucle1`, `Obstrucle2`, `Bus`, `Car`, `SUV`, `Van`, `Debris`, etc.) with 1 click.
+    - **Active Pool Management**: Visual list with component validation badges (`✓ Ready` / `⚠️ Setup Req`), damage amounts, slot reordering, individual removal buttons (`✕`), and a 1-click **`✨ Deduplicate`** button to eliminate repeated entries.
+    - **Smart Candidate Deduplication & Dismiss Filter**: Automatically filters out unconfigured raw models and visual chunk duplicates by asset name (prioritizing ready-to-use prefabs in `Assets/Prefabs/Obstrucle/`), with dedicated `⊘ Dismiss` buttons to hide unwanted candidates from the detection list.
+    - **Dynamic Obstacle Rotation System (`Obstacle.cs`, `ObstacleManager.cs`)**:
+      - Added configurable spawn rotation rules to `Obstacle.cs` (`baseRotation`, `randomizeYaw`, `allowFlip180`, `maxRandomYawVariation`, `fullRandom360`).
+      - Vehicles (`Bus`, `Car`, `SUV`, `Van`) spawn with dynamic traffic alignment (flipping between forward $0^\circ$ and oncoming $180^\circ \pm 15^\circ$ swerve angles).
+      - Debris and road clutter spawn with full $360^\circ$ randomized rotations.
+      - Integrated rotation settings and toggles directly into the Studio Setup Helper.

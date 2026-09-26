@@ -11,11 +11,50 @@ public class Obstacle : MonoBehaviour
     [Header("Movement")]
     public float worldMoveSpeed = 15f;
 
+    [Header("Rotation Settings")]
+    [Tooltip("Base Euler rotation for this obstacle")]
+    public Vector3 baseRotation = Vector3.zero;
+    [Tooltip("If true, randomizes Y rotation (Yaw) on spawn")]
+    public bool randomizeYaw = true;
+    [Tooltip("If true, randomly flips between forward (0 deg) and reverse (180 deg)")]
+    public bool allowFlip180 = true;
+    [Tooltip("Max random angle deviation added to yaw (e.g. 15 deg for slight angle)")]
+    public float maxRandomYawVariation = 15f;
+    [Tooltip("If true, spawns with full random 0-360 degree rotation (best for debris/rubble)")]
+    public bool fullRandom360 = false;
+
     // Hidden variables managed by the ObstacleManager
     private MoveDirection currentDirection;
     private float currentDespawnThreshold;
     private GameObject originalPrefab;
     private bool isHit = false;
+
+    /// <summary>
+    /// Calculates the randomized spawn rotation for this obstacle based on its rules.
+    /// </summary>
+    public Quaternion GetSpawnRotation()
+    {
+        float yaw = baseRotation.y;
+
+        if (fullRandom360)
+        {
+            yaw = Random.Range(0f, 360f);
+        }
+        else
+        {
+            if (allowFlip180 && Random.value > 0.5f)
+            {
+                yaw += 180f;
+            }
+
+            if (randomizeYaw && maxRandomYawVariation > 0f)
+            {
+                yaw += Random.Range(-maxRandomYawVariation, maxRandomYawVariation);
+            }
+        }
+
+        return Quaternion.Euler(baseRotation.x, yaw, baseRotation.z);
+    }
 
     // Called by ObstacleManager right after spawning from the pool
     public void Initialize(GameObject prefab, MoveDirection dir, float despawnDist)

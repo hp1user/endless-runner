@@ -69,6 +69,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Obstacle
   damageAmount: 5
   worldMoveSpeed: 2
+  baseRotation: {x: 0, y: 0, z: 0}
+  randomizeYaw: 1
+  allowFlip180: 1
+  maxRandomYawVariation: 15
+  fullRandom360: 1
 --- !u!1001 &271493603001727812
 PrefabInstance:
   m_ObjectHideFlags: 0

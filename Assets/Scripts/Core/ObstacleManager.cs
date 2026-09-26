@@ -87,8 +87,16 @@ public class ObstacleManager : MonoBehaviour
 
         Vector3 spawnPos = new Vector3(chosenLaneX, spawnYPosition, transform.position.z);
 
-        // 3. Spawn and initialize
-        GameObject spawnedObstacle = PoolManager.Instance.SpawnFromPool(prefabToSpawn, spawnPos, Quaternion.identity);
+        // 3. Calculate randomized rotation from prefab settings
+        Quaternion spawnRot = Quaternion.identity;
+        Obstacle prefabObstacle = prefabToSpawn.GetComponent<Obstacle>();
+        if (prefabObstacle != null)
+        {
+            spawnRot = prefabObstacle.GetSpawnRotation();
+        }
+
+        // 4. Spawn and initialize
+        GameObject spawnedObstacle = PoolManager.Instance.SpawnFromPool(prefabToSpawn, spawnPos, spawnRot);
 
         Obstacle obstacleScript = spawnedObstacle.GetComponent<Obstacle>();
         if (obstacleScript != null)
