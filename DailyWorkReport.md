@@ -211,3 +211,16 @@ Use this document to track daily progress, features implemented, and bugs fixed.
       - Vehicles (`Bus`, `Car`, `SUV`, `Van`) spawn with dynamic traffic alignment (flipping between forward $0^\circ$ and oncoming $180^\circ \pm 15^\circ$ swerve angles).
       - Debris and road clutter spawn with full $360^\circ$ randomized rotations.
       - Integrated rotation settings and toggles directly into the Studio Setup Helper.
+    - **Divider & Street Light Rotation Fixes (`ProceduralChunk.cs`)**:
+      - Fixed Right Side Railings / Dividers so they no longer flip $180^\circ$ and stay cleanly aligned at $0^\circ$.
+      - Corrected Street Light orientations so their horizontal lamp arms overhang perpendicular towards the roadway ($+90^\circ$ on outer left shoulder and $-90^\circ / 270^\circ$ on outer right shoulder) rather than pointing straight down the road.
+      - Fixed Center Median Lights so they strictly use their configured `rotationOffset` without double-adding $+90^\circ$, eliminating unwanted $180^\circ$ spins.
+    - **Obstacle Classification & Lane Restriction System (`Obstacle.cs`, `ObstacleManager.cs`, `ProceduralChunkEditorWindow.cs`)**:
+      - Added `ObstacleCategory` (`Standard` vs `HeavyWide`) and `ObstacleLaneRestriction` (`AnyLane`, `SidesOnly`, `CenterOnly`, `LeftOnly`, `RightOnly`) to `Obstacle.cs`.
+      - Restricted heavy & wide obstacles (`Bus`, `Van`) to `SidesOnly` (Left lane $X = -2.0$ or Right lane $X = +2.0$), strictly preventing them from spawning in the Center lane ($X = 0.0$) so the player is never boxed in without an escape route.
+      - Updated `ObstacleManager.SpawnObstacle()` with intelligent candidate retry logic and `IsLaneAllowed()` filtering that guarantees restricted obstacles only spawn in valid, safe lanes.
+      - Enhanced the Obstacle Studio Editor tab with inline lane restriction dropdowns (`[Sides Only]`, `[Any Lane]`), category tags, and preset auto-assignment for large vehicles.
+    - **Broken Divider Spacing & Anti-Clustering Rule (`ProceduralEnvironmentProfile.cs`, `ProceduralChunk.cs`)**:
+      - Added `isBroken` boolean to `CategorizedAssetItem` so individual divider and railing prefabs (`Divider 2`, `Divider 3`, etc.) can be marked as damaged/broken variants.
+      - Added configurable `minIntactBetweenBroken` (default: `2`) to `CenterDividerRule` and `SideRailingRule`.
+      - Updated `ProceduralChunk.cs` and `ProceduralEnvironmentProfile.PickWeightedItem()` so that once a broken divider spawns, at least $N$ (default: 2) intact/normal dividers (`Divider 1`) MUST spawn before another broken piece is permitted, preventing two broken pieces from ever generating consecutively side-by-side.

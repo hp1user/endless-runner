@@ -151,23 +151,35 @@ namespace EndlessRunner.LevelGen
                 if (Random.value <= profile.sideRailings.spawnChance)
                 {
                     float segmentLen = Mathf.Max(profile.sideRailings.segmentLength, 2f);
+                    int minIntact = Mathf.Max(0, profile.sideRailings.minIntactBetweenBroken);
+                    int leftIntactCount = minIntact; // Start allowed to pick broken
+                    int rightIntactCount = minIntact;
+
                     for (float z = -halfLength + (segmentLen * 0.5f); z < halfLength; z += segmentLen)
                     {
                         // Outer Left Railing
-                        var leftItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.sideRailings.railingPrefabs);
+                        bool allowLeftBroken = leftIntactCount >= minIntact;
+                        var leftItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.sideRailings.railingPrefabs, allowLeftBroken);
                         if (leftItem != null && leftItem.prefab != null)
                         {
+                            if (leftItem.isBroken) leftIntactCount = 0;
+                            else leftIntactCount++;
+
                             Vector3 pos = new Vector3(outerLeftRailX, 0f, z) + leftItem.offset;
                             Quaternion rot = Quaternion.Euler(leftItem.rotationOffset);
                             InstantiateProp(leftItem.prefab, pos, rot, leftRailContainer, leftItem.scaleMultiplier);
                         }
 
-                        // Outer Right Railing
-                        var rightItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.sideRailings.railingPrefabs);
+                        // Outer Right Railing (Keep rotation aligned with 0 deg)
+                        bool allowRightBroken = rightIntactCount >= minIntact;
+                        var rightItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.sideRailings.railingPrefabs, allowRightBroken);
                         if (rightItem != null && rightItem.prefab != null)
                         {
+                            if (rightItem.isBroken) rightIntactCount = 0;
+                            else rightIntactCount++;
+
                             Vector3 pos = new Vector3(outerRightRailX, 0f, z) + new Vector3(-rightItem.offset.x, rightItem.offset.y, rightItem.offset.z);
-                            Quaternion rot = Quaternion.Euler(rightItem.rotationOffset.x, rightItem.rotationOffset.y + 180f, rightItem.rotationOffset.z);
+                            Quaternion rot = Quaternion.Euler(rightItem.rotationOffset);
                             InstantiateProp(rightItem.prefab, pos, rot, rightRailContainer, rightItem.scaleMultiplier);
                         }
                     }
@@ -180,11 +192,18 @@ namespace EndlessRunner.LevelGen
                 if (Random.value <= profile.centerDividers.spawnChance)
                 {
                     float segLen = Mathf.Max(profile.centerDividers.segmentLength, 2f);
+                    int minIntact = Mathf.Max(0, profile.centerDividers.minIntactBetweenBroken);
+                    int intactCount = minIntact; // Start allowed to pick broken
+
                     for (float z = -halfLength + (segLen * 0.5f); z < halfLength; z += segLen)
                     {
-                        var dividerItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.centerDividers.dividerPrefabs);
+                        bool allowBroken = intactCount >= minIntact;
+                        var dividerItem = ProceduralEnvironmentProfile.PickWeightedItem(profile.centerDividers.dividerPrefabs, allowBroken);
                         if (dividerItem != null && dividerItem.prefab != null)
                         {
+                            if (dividerItem.isBroken) intactCount = 0;
+                            else intactCount++;
+
                             Vector3 pos = new Vector3(medianX, 0f, z) + dividerItem.offset;
                             Quaternion rot = Quaternion.Euler(dividerItem.rotationOffset);
                             InstantiateProp(dividerItem.prefab, pos, rot, centerContainer, dividerItem.scaleMultiplier);
@@ -246,7 +265,8 @@ namespace EndlessRunner.LevelGen
                         if (item != null && item.prefab != null)
                         {
                             Vector3 pos = new Vector3(outerLeftLightX, 0f, z) + item.offset;
-                            Quaternion rot = Quaternion.Euler(item.rotationOffset);
+                            // Rotate +90 deg so lamp arm overhangs inwards toward +X (the road)
+                            Quaternion rot = Quaternion.Euler(item.rotationOffset.x, item.rotationOffset.y + 90f, item.rotationOffset.z);
                             InstantiateProp(item.prefab, pos, rot, lightsContainer, item.scaleMultiplier);
                         }
                     }
@@ -257,7 +277,8 @@ namespace EndlessRunner.LevelGen
                         if (item != null && item.prefab != null)
                         {
                             Vector3 pos = new Vector3(outerRightLightX, 0f, z) + new Vector3(-item.offset.x, item.offset.y, item.offset.z);
-                            Quaternion rot = Quaternion.Euler(item.rotationOffset.x, item.rotationOffset.y + 180f, item.rotationOffset.z);
+                            // Rotate -90 deg so lamp arm overhangs inwards toward -X (the road)
+                            Quaternion rot = Quaternion.Euler(item.rotationOffset.x, item.rotationOffset.y - 90f, item.rotationOffset.z);
                             InstantiateProp(item.prefab, pos, rot, lightsContainer, item.scaleMultiplier);
                         }
                     }

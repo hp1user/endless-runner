@@ -142,6 +142,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16690691bd2be114383afedcc183a0b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Obstacle
+  category: 1
+  laneRestriction: 1
   damageAmount: 25
   worldMoveSpeed: 2
   baseRotation: {x: 0, y: 0, z: 0}

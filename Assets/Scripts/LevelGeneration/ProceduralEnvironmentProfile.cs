@@ -11,17 +11,20 @@ namespace EndlessRunner.LevelGen
         public GameObject prefab;
         [Range(0.01f, 10f)]
         public float weight = 1f;
+        [Tooltip("Marks this item as damaged/broken so the generator maintains spacing between broken pieces")]
+        public bool isBroken = false;
         public Vector3 offset = Vector3.zero;
         public Vector3 rotationOffset = Vector3.zero;
         public Vector3 scaleMultiplier = Vector3.one;
 
         public CategorizedAssetItem() { }
 
-        public CategorizedAssetItem(GameObject prefab, float weight = 1f, Vector3? offset = null, Vector3? rot = null)
+        public CategorizedAssetItem(GameObject prefab, float weight = 1f, Vector3? offset = null, Vector3? rot = null, bool isBroken = false)
         {
             this.prefab = prefab;
             this.assetName = prefab != null ? prefab.name : "Asset";
             this.weight = weight;
+            this.isBroken = isBroken;
             this.offset = offset ?? Vector3.zero;
             this.rotationOffset = rot ?? Vector3.zero;
             this.scaleMultiplier = Vector3.one;
@@ -33,6 +36,9 @@ namespace EndlessRunner.LevelGen
     {
         public bool enabled = true;
         public List<CategorizedAssetItem> railingPrefabs = new List<CategorizedAssetItem>();
+        [Tooltip("Minimum number of intact/normal pieces required between broken pieces")]
+        [Range(0, 10)]
+        public int minIntactBetweenBroken = 2;
         [Tooltip("Length of each railing segment along the Z axis (e.g. 5m or 10m)")]
         public float segmentLength = 8f;
         [Tooltip("Left side X position")]
@@ -48,6 +54,9 @@ namespace EndlessRunner.LevelGen
     {
         public bool enabled = true;
         public List<CategorizedAssetItem> dividerPrefabs = new List<CategorizedAssetItem>();
+        [Tooltip("Minimum number of intact/normal pieces required between broken pieces")]
+        [Range(0, 10)]
+        public int minIntactBetweenBroken = 2;
         [Tooltip("Spacing between consecutive divider segments")]
         public float segmentLength = 6f;
         public float centerX = 0f;
@@ -175,28 +184,46 @@ namespace EndlessRunner.LevelGen
         public VehicleObstacleRule vehicles = new VehicleObstacleRule();
 
         /// <summary>
-        /// Picks a random item from a list based on weighted distribution.
+        /// Picks a random item from a list based on weighted distribution, with optional broken-item filtering.
         /// </summary>
-        public static CategorizedAssetItem PickWeightedItem(List<CategorizedAssetItem> items)
+        public static CategorizedAssetItem PickWeightedItem(List<CategorizedAssetItem> items, bool allowBroken = true)
         {
             if (items == null || items.Count == 0) return null;
 
             float totalWeight = 0f;
-            foreach (var item in items)
+            for (int i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 if (item != null && item.prefab != null)
+                {
+                    if (!allowBroken && item.isBroken) continue;
                     totalWeight += item.weight;
+                }
             }
 
-            if (totalWeight <= 0f) return null;
+            if (totalWeight <= 0f)
+            {
+                // Fallback: Pick first non-broken item if allowBroken is false, otherwise first available item
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i] != null && items[i].prefab != null)
+                    {
+                        if (!allowBroken && items[i].isBroken) continue;
+                        return items[i];
+                    }
+                }
+                return items[0];
+            }
 
             float randomValue = UnityEngine.Random.Range(0f, totalWeight);
             float currentSum = 0f;
 
-            foreach (var item in items)
+            for (int i = 0; i < items.Count; i++)
             {
+                var item = items[i];
                 if (item != null && item.prefab != null)
                 {
+                    if (!allowBroken && item.isBroken) continue;
                     currentSum += item.weight;
                     if (randomValue <= currentSum) return item;
                 }

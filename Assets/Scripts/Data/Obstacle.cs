@@ -5,6 +5,27 @@ public class Obstacle : MonoBehaviour
 {
     public enum MoveDirection { Backward, Forward }
 
+    public enum ObstacleCategory
+    {
+        Standard,   // Normal size (Cars, Debris, Concrete Blocks, Cones, etc.)
+        HeavyWide   // Large/Wide vehicles (Bus, Van, Heavy Trucks, etc.)
+    }
+
+    public enum ObstacleLaneRestriction
+    {
+        AnyLane = 0,     // Can spawn in any lane (Left, Center, Right)
+        SidesOnly = 1,   // Can ONLY spawn in Left or Right side lanes (NEVER Center lane)
+        CenterOnly = 2,  // Can ONLY spawn in Center lane
+        LeftOnly = 3,    // Can ONLY spawn in Left lane (-X)
+        RightOnly = 4    // Can ONLY spawn in Right lane (+X)
+    }
+
+    [Header("Classification & Lane Rules")]
+    [Tooltip("Obstacle category classification")]
+    public ObstacleCategory category = ObstacleCategory.Standard;
+    [Tooltip("Allowed lanes for this obstacle. SidesOnly prevents spawning in the center lane so the player always has an escape path.")]
+    public ObstacleLaneRestriction laneRestriction = ObstacleLaneRestriction.AnyLane;
+
     [Header("Obstacle Settings")]
     public float damageAmount = 15f;
 

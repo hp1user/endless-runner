@@ -31,16 +31,26 @@ MonoBehaviour:
     railingPrefabs:
     - assetName: Divider 1
       prefab: {fileID: 7579522069654299132, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
-      weight: 1
+      weight: 4
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Divider 2
       prefab: {fileID: 1251275565171080785, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
       weight: 1
+      isBroken: 1
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Divider 3
+      prefab: {fileID: 1030708920400864097, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      weight: 1
+      isBroken: 1
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    minIntactBetweenBroken: 2
     segmentLength: 4.16
     leftX: -5.5
     rightX: 5.5
@@ -51,21 +61,25 @@ MonoBehaviour:
     - assetName: Divider 1
       prefab: {fileID: 7579522069654299132, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
       weight: 4
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Divider 2
       prefab: {fileID: 1251275565171080785, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
       weight: 1
+      isBroken: 1
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Divider 3
       prefab: {fileID: 1030708920400864097, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
       weight: 1
+      isBroken: 1
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
+    minIntactBetweenBroken: 2
     segmentLength: 4.2
     centerX: 0
     spawnChance: 1
@@ -114,7 +128,7 @@ MonoBehaviour:
     intervalZ: 20
     leftX: -5.8
     rightX: 5.8
-    placementMode: 1
+    placementMode: 0
     spawnChance: 0.9
   overheadSigns:
     enabled: 1

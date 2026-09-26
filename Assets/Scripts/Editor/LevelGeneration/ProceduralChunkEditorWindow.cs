@@ -430,11 +430,12 @@ namespace EndlessRunner.LevelGen.Editor
             // 3. Dividers
             profile.centerDividers.centerX = 0f;
             profile.centerDividers.segmentLength = 5.5f;
+            profile.centerDividers.minIntactBetweenBroken = 2;
             profile.centerDividers.dividerPrefabs.Clear();
-            AddPrefabIfFound("Divider 1", profile.centerDividers.dividerPrefabs, 1f);
-            AddPrefabIfFound("Divider 2", profile.centerDividers.dividerPrefabs, 1f);
-            AddPrefabIfFound("Divider 3", profile.centerDividers.dividerPrefabs, 1f);
-            AddPrefabIfFound("Divider 4", profile.centerDividers.dividerPrefabs, 1f);
+            AddPrefabIfFound("Divider 1", profile.centerDividers.dividerPrefabs, 4f, null, null, false);
+            AddPrefabIfFound("Divider 2", profile.centerDividers.dividerPrefabs, 1f, null, null, true);
+            AddPrefabIfFound("Divider 3", profile.centerDividers.dividerPrefabs, 1f, null, null, true);
+            AddPrefabIfFound("Divider 4", profile.centerDividers.dividerPrefabs, 1f, null, null, true);
 
             // Center Lights
             profile.centerDividers.centerLightPrefabs.Clear();
@@ -475,7 +476,7 @@ namespace EndlessRunner.LevelGen.Editor
             Debug.Log("<color=green>[ChunkStudio]</color> Auto-populated profile with Highway environment assets!");
         }
 
-        private void AddPrefabIfFound(string nameSearch, List<CategorizedAssetItem> targetList, float weight = 1f, Vector3? offset = null, Vector3? rot = null)
+        private void AddPrefabIfFound(string nameSearch, List<CategorizedAssetItem> targetList, float weight = 1f, Vector3? offset = null, Vector3? rot = null, bool isBroken = false)
         {
             string[] guids = AssetDatabase.FindAssets($"{nameSearch} t:Prefab");
             if (guids.Length == 0) guids = AssetDatabase.FindAssets($"{nameSearch} t:Model");
@@ -486,7 +487,7 @@ namespace EndlessRunner.LevelGen.Editor
                 GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (go != null)
                 {
-                    targetList.Add(new CategorizedAssetItem(go, weight, offset, rot));
+                    targetList.Add(new CategorizedAssetItem(go, weight, offset, rot, isBroken));
                 }
             }
         }
@@ -617,18 +618,22 @@ namespace EndlessRunner.LevelGen.Editor
                     bool alreadyInPool = sceneObstacleManager.obstaclePool != null && sceneObstacleManager.obstaclePool.Contains(prefab);
 
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.ObjectField(prefab, typeof(GameObject), false, GUILayout.Width(190));
+                    EditorGUILayout.ObjectField(prefab, typeof(GameObject), false, GUILayout.Width(180));
 
                     Obstacle obs = prefab.GetComponent<Obstacle>();
                     Collider col = prefab.GetComponent<Collider>();
 
                     if (obs != null && col != null)
                     {
-                        GUILayout.Label($"Damage: {obs.damageAmount} HP", EditorStyles.miniLabel, GUILayout.Width(95));
+                        string restLabel = obs.laneRestriction == Obstacle.ObstacleLaneRestriction.SidesOnly ? "Sides Only (L/R)" : obs.laneRestriction.ToString();
+                        Color badgeCol = obs.laneRestriction == Obstacle.ObstacleLaneRestriction.SidesOnly ? new Color(0.3f, 0.8f, 1f) : new Color(0.8f, 0.8f, 0.8f);
+                        GUI.color = badgeCol;
+                        GUILayout.Label($"[{restLabel}]", EditorStyles.miniBoldLabel, GUILayout.Width(100));
+                        GUI.color = Color.white;
                     }
                     else
                     {
-                        GUILayout.Label("⚠️ Needs Setup", EditorStyles.miniLabel, GUILayout.Width(95));
+                        GUILayout.Label("⚠️ Needs Setup", EditorStyles.miniLabel, GUILayout.Width(100));
                     }
 
                     if (alreadyInPool)
@@ -735,14 +740,30 @@ namespace EndlessRunner.LevelGen.Editor
 
                         if (obs != null && col != null)
                         {
+                            // Lane Restriction Badge / Quick Selector
+                            Obstacle.ObstacleLaneRestriction newRest = (Obstacle.ObstacleLaneRestriction)EditorGUILayout.EnumPopup(obs.laneRestriction, GUILayout.Width(95));
+                            if (newRest != obs.laneRestriction)
+                            {
+                                string path = AssetDatabase.GetAssetPath(updated);
+                                if (!string.IsNullOrEmpty(path))
+                                {
+                                    using (var scope = new PrefabUtility.EditPrefabContentsScope(path))
+                                    {
+                                        Obstacle rootObs = scope.prefabContentsRoot.GetComponent<Obstacle>();
+                                        if (rootObs != null) rootObs.laneRestriction = newRest;
+                                    }
+                                    AssetDatabase.SaveAssets();
+                                }
+                            }
+
                             GUI.color = Color.green;
-                            GUILayout.Label("✓ Ready", EditorStyles.miniLabel, GUILayout.Width(55));
+                            GUILayout.Label("✓", EditorStyles.boldLabel, GUILayout.Width(16));
                             GUI.color = Color.white;
                         }
                         else
                         {
                             GUI.color = new Color(1f, 0.7f, 0.2f);
-                            GUILayout.Label("⚠️ Setup Req", EditorStyles.miniLabel, GUILayout.Width(75));
+                            GUILayout.Label("⚠️ Setup", EditorStyles.miniLabel, GUILayout.Width(50));
                             GUI.color = Color.white;
 
                             if (GUILayout.Button("Fix", GUILayout.Width(40)))
@@ -793,16 +814,23 @@ namespace EndlessRunner.LevelGen.Editor
         private bool setupAllowFlip180 = true;
         private bool setupFullRandom360 = false;
         private float setupMaxYawVariation = 15f;
+        private Obstacle.ObstacleCategory setupCategory = Obstacle.ObstacleCategory.Standard;
+        private Obstacle.ObstacleLaneRestriction setupLaneRestriction = Obstacle.ObstacleLaneRestriction.AnyLane;
 
         private void DrawConvertObstaclePrefabSection()
         {
             EditorGUILayout.BeginVertical("box");
             GUILayout.Label("🛠️ 1-Click Obstacle Prefab Setup Helper", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Drop any 3D model or prefab here to automatically configure a BoxCollider trigger and Obstacle component with custom damage & rotation rules.", MessageType.None);
+            EditorGUILayout.HelpBox("Drop any 3D model or prefab here to automatically configure a BoxCollider trigger, classification, and lane restriction rules.", MessageType.None);
 
             EditorGUILayout.BeginHorizontal();
             dropPrefabToSetup = (GameObject)EditorGUILayout.ObjectField("Source Prefab / Model", dropPrefabToSetup, typeof(GameObject), false);
-            newObstacleDamage = EditorGUILayout.FloatField("Damage Amount", newObstacleDamage, GUILayout.Width(130));
+            newObstacleDamage = EditorGUILayout.FloatField("Damage", newObstacleDamage, GUILayout.Width(110));
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            setupCategory = (Obstacle.ObstacleCategory)EditorGUILayout.EnumPopup("Category", setupCategory);
+            setupLaneRestriction = (Obstacle.ObstacleLaneRestriction)EditorGUILayout.EnumPopup("Lane Rule", setupLaneRestriction);
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -817,7 +845,7 @@ namespace EndlessRunner.LevelGen.Editor
                 GUI.backgroundColor = new Color(0.4f, 0.9f, 0.4f);
                 if (GUILayout.Button($"✨ Configure '{dropPrefabToSetup.name}' as Obstacle & Add to Pool", GUILayout.Height(30)))
                 {
-                    SetupPrefabAsObstacle(dropPrefabToSetup, newObstacleDamage, setupRandomizeYaw, setupAllowFlip180, setupFullRandom360, setupMaxYawVariation);
+                    SetupPrefabAsObstacle(dropPrefabToSetup, newObstacleDamage, setupRandomizeYaw, setupAllowFlip180, setupFullRandom360, setupMaxYawVariation, setupCategory, setupLaneRestriction);
                     AddPrefabToObstaclePool(dropPrefabToSetup);
                     dropPrefabToSetup = null;
                 }
@@ -981,12 +1009,16 @@ namespace EndlessRunner.LevelGen.Editor
             Debug.Log($"<color=green>[ObstacleStudio]</color> Added {count} obstacle prefabs into ObstacleManager pool!");
         }
 
-        private void SetupPrefabAsObstacle(GameObject prefab, float damage, bool randomizeYaw = true, bool allowFlip180 = true, bool full360 = false, float maxYawVariation = 15f)
+        private void SetupPrefabAsObstacle(GameObject prefab, float damage, bool randomizeYaw = true, bool allowFlip180 = true, bool full360 = false, float maxYawVariation = 15f, Obstacle.ObstacleCategory? categoryOverride = null, Obstacle.ObstacleLaneRestriction? restrictionOverride = null)
         {
             if (prefab == null) return;
 
             string path = AssetDatabase.GetAssetPath(prefab);
             if (string.IsNullOrEmpty(path)) return;
+
+            bool isHeavy = prefab.name.ToLower().Contains("bus") || prefab.name.ToLower().Contains("van");
+            Obstacle.ObstacleCategory cat = categoryOverride ?? (isHeavy ? Obstacle.ObstacleCategory.HeavyWide : Obstacle.ObstacleCategory.Standard);
+            Obstacle.ObstacleLaneRestriction restriction = restrictionOverride ?? (isHeavy ? Obstacle.ObstacleLaneRestriction.SidesOnly : Obstacle.ObstacleLaneRestriction.AnyLane);
 
             using (var scope = new PrefabUtility.EditPrefabContentsScope(path))
             {
@@ -1014,6 +1046,8 @@ namespace EndlessRunner.LevelGen.Editor
                 {
                     obs = root.AddComponent<Obstacle>();
                 }
+                obs.category = cat;
+                obs.laneRestriction = restriction;
                 obs.damageAmount = damage;
                 obs.worldMoveSpeed = 15f;
                 obs.randomizeYaw = randomizeYaw;
@@ -1024,7 +1058,7 @@ namespace EndlessRunner.LevelGen.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"<color=green>[ObstacleStudio]</color> Configured {prefab.name} with BoxCollider, Obstacle component (Damage: {damage}), and rotation rules.");
+            Debug.Log($"<color=green>[ObstacleStudio]</color> Configured {prefab.name} as {cat} [{restriction}] (Damage: {damage}).");
         }
 
         #endregion
