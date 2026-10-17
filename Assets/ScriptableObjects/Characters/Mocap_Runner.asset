@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8c2133d60d23e14a9778a82b6e33cd4, type: 3}
+  m_Name: Mocap_Runner
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.Data.CharacterData
+  characterID: mocap_runner
+  characterName: Mocap Veteran
+  characterTitle: Combat Specialist
+  description: Seasoned combat runner with balanced health, standard tactical gear,
+    and versatile firearm handling.
+  characterIcon: {fileID: 0}
+  modelPrefab: {fileID: 919132149155446097, guid: 72f06720f23a5254893393f0a7e48d0a, type: 3}
+  customAnimatorController: {fileID: 0}
+  baseHealth: 100
+  baseArmor: 0
+  movementSpeed: 10
+  moveSpeedMultiplier: 1
+  strafeAnimationSmoothing: 8
+  laneDistance: 2
+  activeSkill: {fileID: 11400000, guid: e0f70518c9adc5444b03af8c46711ac7, type: 2}
+  activeUltimate: {fileID: 11400000, guid: eb82dfaa8704255469b579da1404a1cd, type: 2}
+  starterWeaponID: D Eagle

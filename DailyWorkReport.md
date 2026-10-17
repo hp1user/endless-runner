@@ -238,3 +238,37 @@ Use this document to track daily progress, features implemented, and bugs fixed.
     - Bound `Animator` with `Ch15_nonPBRAvatar` and existing `Man Controller` (all 9 layers: Base, Aim, Rifle, Pistol, SMG, Shotgun, Sniper, Rocket, LMG working seamlessly).
     - Bound `PlayerController` (`weaponSocket`, `aimTarget`), `AimTargetController` (`targetTransform`, `rayOriginOverride`), and `CapsuleCollider`.
   - Updated the active scene `GameView_EndlessRunner.unity` where the player instance `Man_Rig` immediately displays `Ch15_nonPBR` with 0 console errors.
+- **Character Creation & Testing Studio Tool Window (`CharacterStudioWindow.cs`)**:
+  - Created a comprehensive editor tool accessible via `Tools > Endless Runner > Character Studio` and `Window > Character Studio`.
+  - Designed with an intuitive two-pane layout adhering to the aesthetic and workflow standards of `DataManagerWindow` and `ProceduralChunkEditorWindow`.
+  - **Interactive Character Roster Sidebar**:
+    - Scans and lists all `CharacterData` ScriptableObjects in `Assets/ScriptableObjects/Characters/`.
+    - Live search filter across character name, role/title, and ID.
+    - Visual list entries featuring 3D model asset preview thumbnails, role labels, and color-coded stat badges (HP, Armor, Speed).
+    - 1-click clone (`⎘`) and delete (`✕`) actions with confirmation dialogs.
+    - Toolbar with `➕ New Character`, `🔄 Refresh`, and `Preload Defaults` buttons.
+  - **Hero Preview & Tabbed Configuration Panel**:
+    - **Hero Preview Card**: Displays real-time 3D model render via `AssetPreview`, title, description, and active skill badge chips.
+    - **Tab 1: 👤 Identity & Visuals**:
+      - Name, ID, Title, Bio, and UI Portrait Icon.
+      - 3D Model / Prefab slot with automatic Humanoid Avatar detection.
+      - Integrated 1-click **`⚡ Auto-Fix to Humanoid`** button for newly imported FBXs.
+      - Optional custom Animator Controller slot (defaults to `Man Controller`).
+    - **Tab 2: ⚔️ Combat Stats**:
+      - Sliders for Base Health (50-1000 HP), Base Armor (0-200), Movement Speed (5-30 m/s), Speed Multiplier, Strafe Smoothing, and Lane Distance.
+      - 1-click Archetype Presets: `🛡️ Tank` (220 HP, 50 Arm, 8.5 Spd), `⚡ Scout / Runner` (90 HP, 10 Arm, 13.5 Spd), `🎯 Balanced` (120 HP, 25 Arm, 10 Spd).
+    - **Tab 3: ⚡ Skills & Loadout**:
+      - Primary Tactical Skill & Ultimate Ability object fields with 1-click quick-assign buttons (`Rapid Fire`, `AOE Bomb`, `Clear`).
+      - Inline skill summary cards rendering icon, type, cooldown/kill recharge requirement, base damage, boss damage, and duration.
+      - Starting Weapon ID selector (default: `D Eagle`).
+    - **Tab 4: 🎮 Live Scene Test & Standalone Export**:
+      - Scene Player detection with 1-click lock and `🎯 Ping in Hierarchy`.
+      - **`🎮 Assign to Current Player (Test Now)`**: Immediately hot-swaps the character model, automatically re-parents `Weapon_socket` under `mixamorig:RightHand`, rebinds `AimTargetController`, updates avatar/animator, and updates player stats/skills in real-time with full Undo support.
+      - **`📦 Export Standalone Prefab`**: Automatically compiles and bakes a complete, game-ready character prefab to `Assets/Prefabs/Characters/` with all required runtime components (`PlayerController`, `CapsuleCollider`, `Rigidbody`, `AimTargetController`, `Animator`).
+- **Core Runtime Architecture (`CharacterData.cs`, `PlayerController.cs`)**:
+  - Created `CharacterData.cs` ScriptableObject holding character identity, model prefab, animator controller, stats, skill slots, and `GetAvatar()` helper.
+  - Extended `PlayerController.cs` with `currentCharacterData`, `ApplyCharacterData()`, and `SwapCharacterModel()` with automatic prefab instance unpacking in Edit Mode.
+- **Preconfigured Character Profiles**:
+  - `Ch15_Agent.asset`: Ch15 Cyber Agent (Vanguard Infiltrator, 125 HP, 30 Armor, 11 Speed, Rapid Fire + AOE, `Ch15_nonPBR.fbx`).
+  - `Mocap_Runner.asset`: Mocap Veteran (Combat Specialist, 100 HP, 0 Armor, 10 Speed, Rapid Fire + AOE, `Man_T.fbx`).
+

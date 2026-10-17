@@ -5,12 +5,16 @@ using UnityEngine.InputSystem;
 #endif
 using Enemy.Control;
 using UI.Control;
+using EndlessRunner.Data;
 
 namespace Player.Control
 {
     public class PlayerController : MonoBehaviour
     {
         private Animator animator;
+
+        [Header("Character Profile")]
+        public CharacterData currentCharacterData;
 
         [Header("Stat Configuration")]
         public PlayerDatabase playerStats;
@@ -148,7 +152,14 @@ namespace Player.Control
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-            if (playerStats != null) InitializeStats();
+            if (currentCharacterData != null)
+            {
+                ApplyCharacterData(currentCharacterData, false, false);
+            }
+            else if (playerStats != null)
+            {
+                InitializeStats();
+            }
             else
             {
                 laneDistance = 2.0f;
@@ -181,8 +192,9 @@ namespace Player.Control
             }
         }
 
-        private void InitializeStats()
+        public void InitializeStats()
         {
+            if (playerStats == null) return;
             currentHealth = playerStats.baseHealth;
             runtimeMaxHealth = playerStats.baseHealth;
             currentArmor = playerStats.baseArmor;
@@ -190,6 +202,190 @@ namespace Player.Control
             runtimeMovementSpeed = playerStats.movementSpeed * playerStats.moveSpeedMultiplier;
             runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
             UpdatePlayerUI();
+        }
+
+        /// <summary>
+        /// Applies all attributes from a CharacterData profile (stats, skills, and model) to this PlayerController.
+        /// </summary>
+        public void ApplyCharacterData(CharacterData character, bool updateModel = true, bool respawnWeapon = true)
+        {
+            if (character == null) return;
+            currentCharacterData = character;
+
+            // 1. Assign Skills
+            equippedSkill = character.activeSkill;
+            equippedUltimate = character.activeUltimate;
+
+            // 2. Assign Stats
+            if (playerStats != null)
+            {
+                playerStats.baseHealth = character.baseHealth;
+                playerStats.baseArmor = character.baseArmor;
+                playerStats.movementSpeed = character.movementSpeed;
+                playerStats.moveSpeedMultiplier = character.moveSpeedMultiplier;
+                playerStats.strafeAnimationSmoothing = character.strafeAnimationSmoothing;
+                playerStats.laneDistance = character.laneDistance;
+            }
+
+            laneDistance = character.laneDistance;
+            movementSpeed = character.movementSpeed;
+            runtimeMovementSpeed = character.movementSpeed * character.moveSpeedMultiplier;
+            runtimeStrafeSmoothing = character.strafeAnimationSmoothing;
+            currentHealth = character.baseHealth;
+            runtimeMaxHealth = character.baseHealth;
+            currentArmor = character.baseArmor;
+
+            UpdatePlayerUI();
+
+            // 3. Update 3D Model & Rigging
+            if (updateModel && character.modelPrefab != null)
+            {
+                SwapCharacterModel(character);
+            }
+
+            // 4. Respawn Weapon if playing
+            if (respawnWeapon && currentWeaponData != null)
+            {
+                SpawnWeaponModel();
+            }
+
+            Debug.Log($"<color=green>[PlayerController]</color> Applied character profile '{character.characterName}' (HP: {character.baseHealth}, Armor: {character.baseArmor}, Speed: {character.movementSpeed}).");
+        }
+
+        /// <summary>
+        /// Replaces the current visual 3D model with the one specified in the CharacterData.
+        /// </summary>
+        public void SwapCharacterModel(CharacterData character)
+        {
+            if (character == null || character.modelPrefab == null) return;
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying && UnityEditor.PrefabUtility.IsPartOfPrefabInstance(gameObject))
+            {
+                UnityEditor.PrefabUtility.UnpackPrefabInstance(gameObject, UnityEditor.PrefabUnpackMode.Completely, UnityEditor.InteractionMode.AutomatedAction);
+            }
+#endif
+
+            Transform aimTrans = transform.Find("Aim");
+            if (aimTrans == null)
+            {
+                GameObject aimGo = new GameObject("Aim");
+                aimGo.transform.SetParent(transform, false);
+                aimGo.transform.localPosition = new Vector3(0, 1.618f, 1.144f);
+                aimTrans = aimGo.transform;
+            }
+            aimTarget = aimTrans;
+
+            // Remove existing model children (preserve Aim)
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = transform.GetChild(i);
+                if (child != aimTrans)
+                {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                        DestroyImmediate(child.gameObject);
+                    else
+                        Destroy(child.gameObject);
+#else
+                    Destroy(child.gameObject);
+#endif
+                }
+            }
+
+            GameObject sourceToInstantiate = character.modelPrefab;
+
+            // If modelPrefab is a configured character prefab containing its own PlayerController,
+            // find its visual model child instead of nesting another PlayerController!
+            if (sourceToInstantiate.GetComponent<PlayerController>() != null)
+            {
+                foreach (Transform child in sourceToInstantiate.transform)
+                {
+                    if (child.name != "Aim" && (child.GetComponentInChildren<SkinnedMeshRenderer>() != null || child.Find("mixamorig:Hips") != null))
+                    {
+                        sourceToInstantiate = child.gameObject;
+                        break;
+                    }
+                }
+            }
+
+            // Instantiate new model under player
+            GameObject modelInst = Instantiate(sourceToInstantiate, transform);
+            modelInst.name = "Character_Model";
+            modelInst.transform.localPosition = Vector3.zero;
+            modelInst.transform.localRotation = Quaternion.identity;
+            modelInst.transform.localScale = Vector3.one;
+
+            // Remove nested Animator from model child if present
+            Animator childAnim = modelInst.GetComponent<Animator>();
+            if (childAnim != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying) DestroyImmediate(childAnim);
+                else Destroy(childAnim);
+#else
+                Destroy(childAnim);
+#endif
+            }
+
+            // Find mixamorig:RightHand and create Weapon_socket
+            Transform rHand = null;
+            foreach (Transform t in modelInst.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == "mixamorig:RightHand")
+                {
+                    rHand = t;
+                    break;
+                }
+            }
+
+            if (rHand != null)
+            {
+                GameObject socketGo = new GameObject("Weapon_socket");
+                socketGo.transform.SetParent(rHand, false);
+                socketGo.transform.localPosition = Vector3.zero;
+                socketGo.transform.localRotation = Quaternion.identity;
+                socketGo.transform.localScale = Vector3.one;
+                weaponSocket = socketGo.transform;
+            }
+
+            // Setup Root Animator
+            if (animator == null) animator = GetComponent<Animator>();
+            if (animator != null)
+            {
+                Avatar avatar = character.GetAvatar();
+                if (avatar != null) animator.avatar = avatar;
+
+                if (character.customAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = character.customAnimatorController;
+                }
+                else if (animator.runtimeAnimatorController == null)
+                {
+#if UNITY_EDITOR
+                    var defaultCtrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/3d/Characters/Rough/Animations/Controller/Man Controller.controller");
+                    if (defaultCtrl != null) animator.runtimeAnimatorController = defaultCtrl;
+#endif
+                }
+                animator.applyRootMotion = false;
+                animator.Rebind();
+                animator.Update(0f);
+            }
+
+            // Update AimTargetController
+            var aimCtrl = GetComponent<Animation.Tools.AimTargetController>();
+            if (aimCtrl != null)
+            {
+                aimCtrl.targetTransform = aimTrans;
+                aimCtrl.rayOriginOverride = weaponSocket;
+            }
+
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                UnityEditor.SceneView.RepaintAll();
+            }
+#endif
         }
         private void UpdatePlayerUI()
         {
@@ -252,9 +448,17 @@ namespace Player.Control
             }
         }
 
-        private void SpawnWeaponModel()
+        public void SpawnWeaponModel()
         {
-            if (currentWeaponInstance != null) Destroy(currentWeaponInstance);
+            if (currentWeaponInstance != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying) DestroyImmediate(currentWeaponInstance);
+                else Destroy(currentWeaponInstance);
+#else
+                Destroy(currentWeaponInstance);
+#endif
+            }
             if (currentWeaponData == null || currentWeaponData.weaponPrefab == null || weaponSocket == null) return;
 
             currentWeaponInstance = Instantiate(currentWeaponData.weaponPrefab.gameObject, weaponSocket);
