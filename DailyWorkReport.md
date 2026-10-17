@@ -366,5 +366,18 @@ Use this document to track daily progress, features implemented, and bugs fixed.
       1. Raycast with `QueryTriggerInteraction.Collide` checking `PlayerController`, `"Player"` tag, and player layer.
       2. 0.45m radius `Physics.SphereCastAll` to capture touches around limbs and edges.
       3. Screen-space proximity fallback to the player's screen position.
-    - Added a 0.25s press grace period allowing quick settling touches to be recognized as holds.
-    - Added Tab key hotkey for instant desktop wheel toggling during PC testing.
+- **Portrait Camera Framing & Lane Spacing Calibration (`GameView_EndlessRunner.unity`)**:
+  - **Lane Distance Verification**: Confirmed `laneDistance = 2.0f` is 100% correct across all game systems:
+    - Highway chunks use a 10m roadway width (`-5m` to `+5m`).
+    - Obstacle vehicles spawn across lanes `{-2, 0, 2}` in `ProceduralChunk.cs` and `New Highway Profile.asset`.
+    - Minion runner lanes and Boss attack projectiles use lanes `{-2, 0, 2}` in `EnemyManager.cs` and `EnemyController.cs`.
+  - **Root Cause (Portrait Aspect Frustum Narrowing)**:
+    - Standard camera `Cam` was positioned at `Z = 8.0m`, `Y = 1.49m`, looking completely horizontal (`rot = 0`), with Vertical FOV = `50°`.
+    - In 9:16 portrait orientation (1080x1920), vertical FOV 50° yields a horizontal FOV of only `29.4°`.
+    - At `Z = 8.0m`, the visible screen width was only `4.20m` (half-width `2.10m`).
+    - When moving to the left or right lane (`X = ±2.0m`), the character was positioned at `viewport = 0.023` and `0.977` (pixel 25 and 1055 out of 1080), causing the character's outer body, arm, and weapon to be sliced off by the bezel.
+  - **Camera Tuning & Elevation**:
+    - `Cam` (Standard Front Camera): Pulled back to `pos = (0, 2.20, 10.50)` with natural `5.5°` downward pitch (`rot = 5.5, 180, 0`) and `Lens.FieldOfView = 56°`.
+    - `Cam_1` (Boss Back Camera): Symmetrically updated to `pos = (0, 2.20, -10.50)`, `rot = (5.5, 0, 0)`, and `Lens.FieldOfView = 56°`.
+    - `Main Camera`: Updated to `pos = (0, 2.20, 10.50)`, `rot = (5.5, 180, 0)`, `fieldOfView = 56°`.
+    - Expands the visible road width at the player from `4.20m` to `6.15m`, bringing the left/right lanes to comfortable `18%` and `82%` screen positions (with ~180px safe margin from the screen borders) without clipping the character or overlapping HUD cards.

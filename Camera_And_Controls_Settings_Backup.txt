@@ -1,0 +1,132 @@
+================================================================================
+ENDLESS RUNNER - SETTINGS BACKUP & REVERT REFERENCE
+Date: 2026-10-17
+File: Camera_And_Controls_Settings_Backup.txt
+================================================================================
+
+This document records all camera, movement, touch control, and UI settings
+modified on 2026-10-17. Use this file as a reference to restore previous
+settings if needed in the future.
+
+--------------------------------------------------------------------------------
+1. CAMERA SETTINGS (Scene: Assets/Scenes/GameView_EndlessRunner.unity)
+--------------------------------------------------------------------------------
+
+A. Standard Front Camera ("Cam" under "Camera" GameObject)
+   - Previous Settings:
+       Position:             X = 0.00, Y = 1.49, Z = 8.00
+       Rotation:             X = 0.00, Y = 180.00, Z = 0.00 (flat horizontal)
+       Cinemachine FOV:      50.0 degrees
+   - Current (Tuned) Settings:
+       Position:             X = 0.00, Y = 2.20, Z = 10.50
+       Rotation:             X = 5.50, Y = 180.00, Z = 0.00 (5.5 deg down tilt)
+       Cinemachine FOV:      56.0 degrees
+   - Reason for change:
+       In 9:16 portrait orientation (1080x1920), 50 vertical FOV produced a narrow
+       29.4 deg horizontal FOV (only 4.2m width at Z=8). When moving to left/right
+       lanes (X = +/- 2.0m), the character model was sliced in half by the screen edge.
+       The tuned settings expand visible width to 6.15m, giving 180px safe margins.
+
+B. Boss Back Camera ("Cam_1" under "Camera" GameObject)
+   - Previous Settings:
+       Position:             X = 0.00, Y = 1.49, Z = -8.00
+       Rotation:             X = 0.00, Y = 0.00, Z = 0.00
+       Cinemachine FOV:      50.0 degrees
+   - Current (Tuned) Settings:
+       Position:             X = 0.00, Y = 2.20, Z = -10.50
+       Rotation:             X = 5.50, Y = 0.00, Z = 0.00
+       Cinemachine FOV:      56.0 degrees
+
+C. Main Camera ("Main Camera" under "Camera" GameObject)
+   - Previous Settings:
+       Position:             X = 0.00, Y = 1.49, Z = 8.00
+       Rotation:             X = 0.00, Y = 180.00, Z = 0.00
+       Camera Field of View: 50.0 degrees
+   - Current (Tuned) Settings:
+       Position:             X = 0.00, Y = 2.20, Z = 10.50
+       Rotation:             X = 5.50, Y = 180.00, Z = 0.00
+       Camera Field of View: 56.0 degrees
+
+HOW TO REVERT CAMERAS:
+   In Unity Hierarchy, select "Cam", "Cam_1", and "Main Camera".
+   Set Z position back to 8.0 (or -8.0 for Cam_1), Y back to 1.49,
+   X rotation back to 0, and Field of View back to 50.
+
+--------------------------------------------------------------------------------
+2. PLAYER MOVEMENT & LANE TRANSITION
+--------------------------------------------------------------------------------
+
+A. PlayerController.cs (Component on "Man_Rig" GameObject)
+   - Previous Settings:
+       movementSpeed:        10.0f (in script default) / 11.0f (on scene instance)
+       lane transition:      Linear Mathf.MoveTowards (abrupt 0.18s lane snap)
+       useSmoothLaneChange:  false
+   - Current (Tuned) Settings:
+       movementSpeed:        6.0f
+       lane transition:      Mathf.SmoothDamp ease-in/ease-out (~0.30s - 0.35s)
+       useSmoothLaneChange:  true
+       Desktop hotkey:       Tab key toggles Weapon Wheel on PC
+
+B. ScriptableObjects & Character Presets:
+   - Assets/ScriptableObjects/Player/PlayerDatabase.asset:
+       movementSpeed:        6.0 (was 2.0)
+       laneDistance:         2.0 (was 1.4)
+   - Assets/ScriptableObjects/Characters/Ch15_Agent.asset:
+       movementSpeed:        6.0 (was 10.0 or 11.0)
+       laneDistance:         2.0
+   - Assets/ScriptableObjects/Characters/Mocap_Runner.asset:
+       movementSpeed:        6.0 (was 10.0)
+       laneDistance:         2.0
+
+HOW TO REVERT MOVEMENT:
+   - On "Man_Rig" in Inspector, uncheck "Use Smooth Lane Change" to restore linear snapping.
+   - Set "Movement Speed" from 6 back to 10 or 11.
+
+--------------------------------------------------------------------------------
+3. TOUCH CONTROLS & WEAPON WHEEL
+--------------------------------------------------------------------------------
+
+A. TouchManager.cs (Component on "GameManger" GameObject)
+   - Previous Settings:
+       requireTouchOnBottomHalf: true (hard-rejected any taps on torso/head above 50% screen)
+       holdTimeToOpenWheel:      0.50f
+       detection method:         Single point raycast against collider only
+   - Current (Fixed) Settings:
+       requireTouchOnBottomHalf: false (allows tapping anywhere on character body)
+       holdTimeToOpenWheel:      0.35f (more responsive long-press hold)
+       detection method:         3-tier detection:
+                                 1. Raycast with QueryTriggerInteraction.Collide
+                                 2. 0.45m SphereCastAll (forgiving around limbs/edges)
+                                 3. Screen-space proximity fallback to character bounds
+                                 + 0.25s press grace window
+
+B. WeaponWheelToolkitManager.cs / UIToolkit GameObject
+   - Previous State:
+       "UIToolkit" GameObject in scene was INACTIVE (m_IsActive: 0).
+       Because the GameObject was disabled, Awake() never ran and
+       WeaponWheelToolkitManager.Instance was NULL, throwing NullReferenceException
+       in TouchManager.Update() line 98 whenever a touch hold was completed.
+   - Current (Fixed) State:
+       "UIToolkit" GameObject is ACTIVE (m_IsActive: 1).
+       WeaponWheelToolkitManager.Instance property now includes auto-recovery
+       to automatically find and activate itself even if accidentally disabled.
+       EnsureInitialized() added to safely build UI Toolkit visual elements.
+
+C. UIManager.cs / HUD Graphic Raycasts
+   - Previous State:
+       67 UI graphics under Canvas/UIManager had raycastTarget = true,
+       intercepting touches and clicks across the screen.
+   - Current (Fixed) State:
+       UIManager.MakeHUDClickThrough() automatically disables raycastTarget on
+       all decorative HUD cards, fills, tracks, and text, leaving only
+       interactive buttons enabled (2 targets remaining).
+
+D. Man_Rig GameObject Tag
+   - Previous: Untagged
+   - Current:  "Player"
+
+HOW TO REVERT TOUCH & WHEEL:
+   - On "GameManger" -> TouchManager component in Inspector:
+       Set "Require Touch On Bottom Half" = true
+       Set "Hold Time To Open Wheel" = 0.5
+================================================================================
