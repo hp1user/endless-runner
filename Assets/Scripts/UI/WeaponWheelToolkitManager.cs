@@ -5,7 +5,31 @@ using System.Collections.Generic;
 
 public class WeaponWheelToolkitManager : MonoBehaviour
 {
-    public static WeaponWheelToolkitManager Instance;
+    private static WeaponWheelToolkitManager _instance;
+    public static WeaponWheelToolkitManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = UnityEngine.Object.FindAnyObjectByType<WeaponWheelToolkitManager>(FindObjectsInactive.Include);
+                if (_instance != null)
+                {
+                    if (!_instance.gameObject.activeInHierarchy)
+                    {
+                        if (_instance.transform.parent != null && !_instance.transform.parent.gameObject.activeSelf)
+                        {
+                            _instance.transform.parent.gameObject.SetActive(true);
+                        }
+                        _instance.gameObject.SetActive(true);
+                    }
+                    _instance.EnsureInitialized();
+                }
+            }
+            return _instance;
+        }
+        set => _instance = value;
+    }
 
     [Header("UI Document")]
     public UIDocument document;
@@ -43,13 +67,22 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     // 0: SMG, 1: Heavy, 2: Ultimate, 3: Skill, 4: Pistol, 5: AR
     
     private WeaponData[] weaponSlots = new WeaponData[6];
+    private bool isInitialized = false;
 
     public bool IsOpen => wheelContainer != null && wheelContainer.style.display == DisplayStyle.Flex;
 
     private void Awake()
     {
-        Instance = this;
+        _instance = this;
+        EnsureInitialized();
+    }
+
+    public void EnsureInitialized()
+    {
+        if (isInitialized && wheelContainer != null) return;
+
         if (document == null) document = GetComponent<UIDocument>();
+        if (document == null || document.rootVisualElement == null) return;
         
         var root = document.rootVisualElement;
         wheelContainer = root.Q<VisualElement>("wheel-container");
@@ -100,11 +133,14 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
         if (baseLinesLayer != null)
         {
+            baseLinesLayer.generateVisualContent -= DrawBaseWheel;
             baseLinesLayer.generateVisualContent += DrawBaseWheel;
         }
 
         if (highlightLayer != null)
         {
+            highlightLayer.generateVisualContent -= DrawHighlightSlice;
+            highlightLayer.generateVisualContent -= DrawCooldownSlices;
             highlightLayer.generateVisualContent += DrawHighlightSlice;
             highlightLayer.generateVisualContent += DrawCooldownSlices;
         }
@@ -113,6 +149,8 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         {
             wheelContainer.style.display = DisplayStyle.None; // Hide on start
         }
+
+        isInitialized = true;
     }
 
     private void Start()
@@ -190,7 +228,12 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
     public void OpenWheel()
     {
-        if (wheelContainer == null) return;
+        EnsureInitialized();
+        if (wheelContainer == null)
+        {
+            Debug.LogWarning("<color=yellow>[WeaponWheelToolkit]</color> wheelContainer not found in UIDocument!");
+            return;
+        }
         SyncUnlockedWeapons();
         wheelContainer.style.display = DisplayStyle.Flex;
         Time.timeScale = 0.1f;

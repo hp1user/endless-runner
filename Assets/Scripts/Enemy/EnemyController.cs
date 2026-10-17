@@ -533,6 +533,12 @@ namespace Enemy.Control
             currentHealth -= damage;
             Debug.Log($"<color=orange>[Boss]</color> {partType} took {damage:F1} DMG! Boss Remaining Total HP: {Mathf.Max(0f, currentHealth):F1}");
 
+            if (isBoss && UI.Control.UIManager.Instance != null)
+            {
+                float totalMax = (bossHeadHealth + (bossLegHealth * 2f));
+                UI.Control.UIManager.Instance.UpdateBossHealth(currentHealth, totalMax > 0f ? totalMax : 1000f);
+            }
+
             if (currentHealth <= 0f)
             {
                 currentHealth = 0f;
@@ -663,6 +669,10 @@ namespace Enemy.Control
 
             if (isBoss)
             {
+                if (UI.Control.UIManager.Instance != null)
+                {
+                    UI.Control.UIManager.Instance.ShowBossHealth(false);
+                }
                 if (GameManager.Instance != null) GameManager.Instance.BossDefeated();
             }
             else

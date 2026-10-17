@@ -272,3 +272,99 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - `Ch15_Agent.asset`: Ch15 Cyber Agent (Vanguard Infiltrator, 125 HP, 30 Armor, 11 Speed, Rapid Fire + AOE, `Ch15_nonPBR.fbx`).
   - `Mocap_Runner.asset`: Mocap Veteran (Combat Specialist, 100 HP, 0 Armor, 10 Speed, Rapid Fire + AOE, `Man_T.fbx`).
 
+## Date: 2026-10-17 (Part 2)
+
+### Features & UI Overhaul
+- **Stylized Sci-Fi Health, Armor & Ammo UI HUD**:
+  - Replaced legacy plain TextMeshPro HUD text with a sleek, futuristic high-tech HUD inspired by modern sci-fi shooter aesthetics and user reference.
+  - **Custom High-Resolution Vector/2D UI Sprites (`Assets/UI/Sprite/HUD/`)**:
+    - `HUD_Panel_Bg.png`: Dark translucent glassmorphism container with rounded cyber-corners and neon cyan perimeter glow. 9-sliced (`border: 20`) for responsive mobile layouts.
+    - `HUD_Bar_Track.png`: Dark sunken channel track with beveled edges and subtle sci-fi border framing.
+    - `HUD_Bar_Fill.png`: Rounded glowing capsule bar fill used for smooth horizontal fill effects.
+    - `Icon_Heart.png`: Neon emerald green heart icon with ambient drop-glow for the Health system.
+    - `Icon_Shield.png`: Electric cyan tech crest shield icon with highlight bevel for the Armor system.
+    - `HUD_Ammo_Panel.png`: Chamfered high-tech ammo card container for top-right weapon HUD.
+    - `Icon_Bullet.png`: Stylized angled kinetic bullet icon.
+    - All textures configured with `textureType: 8` (Sprite 2D and UI), 9-slice borders, and alpha transparency.
+  - **Top-Left Player Status HUD Card (`PlayerStatusCard`)**:
+    - **Health Row**: Glowing emerald heart icon, background track, red damage-lag / ghost bar, bright neon green health bar fill, and right-aligned bold numeric HP counter (`100`).
+    - **Armor Row**: Electric cyan shield icon, background track, light cyan ghost bar, bright cyan armor fill, and right-aligned bold numeric armor counter (`100`).
+    - Automatically hides or dims the armor row when the player has 0 armor.
+  - **Top-Right Weapon & Ammo HUD Card (`AmmoHUDCard`)**:
+    - **Weapon Display**: Dynamically displays currently equipped gun silhouette/icon (`WeaponData.icon`), along with stylized weapon category header (e.g., `ASSAULT RIFLE`, `D EAGLE`, `SHOTGUN`).
+    - **Dynamic Ammo Counter**:
+      - Current loaded ammo in prominent 34pt bold white text.
+      - Sleek divider `/`.
+      - Reserve ammo in 26pt amber/gold accent text (`∞` for infinite weapons).
+    - **Combat Feedback & Warnings**:
+      - Turns current ammo amber on low magazine (≤ 25%).
+      - Turns ammo red and flashes a pulsing `⚡ RELOAD` indicator when the magazine is empty.
+      - Heart icon pulses rhythmically when player health is critical (≤ 25%).
+  - **Juice & AAA Combat Game-Feel (`UIManager.cs`)**:
+    - Smooth horizontal bar animations using delta-time lerping.
+    - Dual-layer Damage Lag ("Ghost Bar"): Upon taking damage, the primary bar shrinks instantly, while a red ghost bar holds for `0.4s` before smoothly catching up, providing punchy and readable damage feedback.
+  - **Dynamic Player Integration (`PlayerController.cs`)**:
+    - Wired `UpdatePlayerUI()` to feed current health, max health, current armor, and max armor from `currentCharacterData` or `playerStats`.
+    - Wired `UpdateAmmoUI()` to automatically feed active weapon loaded ammo, reserve ammo, and `UpdateWeapon(currentWeaponData)` upon switching or firing.
+  - **Automated HUD Builder Tool (`SciFiHUDBuilder.cs`)**:
+    - 1-Click Builder tool accessible via `Tools > Endless Runner > HUD > Build All HUD Variants`.
+    - Equipped with `[InitializeOnLoad]` and automatic scene verification, seamlessly instantiating the UI hierarchy, adjusting `CanvasScaler` to 1080x1920 portrait reference resolution, binding all component references to `UIManager`, and saving the scene.
+
+- **Dual-Variant HUD System & Top-Center Boss Health Bar**:
+  - **Fixed Top Bar HUD Ammo Misalignment**:
+    - Corrected local coordinate anchors and offsets in `AmmoHUDCard_Top`.
+    - Dedicated left column for weapon silhouette (`84x50`) and weapon title badge.
+    - Dedicated right column for big current ammo (`38pt`), divider, reserve ammo (`26pt`), and centered reload prompt (`⚡ RELOAD`), eliminating any overflow below the card boundary.
+  - **New Side Wings HUD Layout (`SideWings_HUD`)**:
+    - Created a sleek side-docked HUD layout aligned with the left and right screen borders, keeping the entire top center open.
+    - **Left Wing (`PlayerStatusCard_Side` - Vertical Vitals)**:
+      - Redesigned into a sleek vertical capsule panel (`160x490`) at `(32, -80)` with cyan glowing border (`HUD_Vertical_Panel.png`).
+      - Centered `VITALS` header badge at the top.
+      - **Side-by-side vertical meters** with sunken channel tracks (`HUD_Vertical_Track.png`, `32x335`) and vertical fills (`HUD_Vertical_Fill.png`, bottom-to-top):
+        - Left meter: Emerald Heart icon (`32x32`), red damage-lag ghost bar, neon green health fill, and horizontal `100` numeric text below.
+        - Right meter: Cyan Shield icon (`32x32`), cyan ghost bar, electric cyan armor fill, and horizontal `100` numeric text below.
+      - Reoriented numeric text to clean horizontal orientation under each respective bar for instant readability.
+    - **Right Wing (`AmmoHUDCard_Side` - Amber Weapon Card)**:
+      - Positioned at `(-32, -80)` (`300x190`) with amber border (`HUD_Ammo_Card.png`).
+      - Gold `ASSAULT RIFLE` header right-aligned in top corner.
+      - Centered weapon silhouette (`120x60`).
+      - High-contrast ammo row at bottom: `42pt` bold white current ammo, divider, and `28pt` gold reserve ammo (`30 / 120`).
+      - Pulsing red `⚡ RELOAD` indicator centered underneath.
+  - **Top-Center Boss Health Bar (`Boss_HUD`)**:
+    - Centered at `(0.5, 1)` at `(0, -32)` (`620x108`) fitting into the top center header (blue box in reference).
+    - 9-sliced crimson/obsidian hazard frame (`HUD_Boss_Panel.png`) and glowing cyber-skull crest (`Icon_Boss_Skull.png`).
+    - Glowing Boss Name header (`⚠️ BUG BOSS [LEVEL 5]`), real-time HP percentage readout (`1000 / 1000 (100%)`).
+    - Fiery crimson health fill and yellow-gold damage lag ghost bar.
+    - Seamlessly hooked into `EnemyManager.SpawnBossRoutine()`, `EnemyController.OnPartDamaged()`, `EnemyController.Die()`, and `GameManager.SkipBossPhase()`. Automatically appears when boss arrives on the bridge and vanishes when defeated.
+  - **Instant 1-Click Variant Switcher**:
+    - Users can toggle between **Side Wings HUD (Vertical Vitals)** and **Top Bar HUD** anytime without losing either setup!
+    - Available via top menu:
+      - `Tools > Endless Runner > HUD > Switch to Side Wings HUD (Vertical)`
+      - `Tools > Endless Runner > HUD > Switch to Top Bar HUD`
+      - `Tools > Endless Runner > HUD > Toggle Test Boss Health Bar`
+
+## Date: 2026-10-17
+
+### Bugs Fixed & Improvements
+- **Smooth & Natural Lane Changing (`PlayerController.cs`)**:
+  - Replaced abrupt linear lane snap (`Mathf.MoveTowards`) with natural ease-in / ease-out smooth damping (`Mathf.SmoothDamp`) tuned to ~0.30s–0.35s duration.
+  - Balanced `movementSpeed` default from `10f`/`11f` down to `6.0f` across `PlayerController.cs`, `CharacterData.cs`, `PlayerDatabase.cs`, `PlayerDatabase.asset`, `Ch15_Agent.asset`, `Mocap_Runner.asset`, and `GameView_EndlessRunner.unity`.
+  - Lane change now allows the character's strafe blend tree tilting animation to cleanly blend in and out during movement without abrupt snapping.
+
+- **Weapon Wheel Hold & UI Raycast Overlap Fixes (`TouchManager.cs`, `WeaponWheelToolkitManager.cs`, `UIManager.cs`)**:
+  - **Root Cause 1 (`UIToolkit` Hierarchy Disabled)**: The `UIToolkit` root GameObject in `GameView_EndlessRunner.unity` had been deactivated (`m_IsActive: 0`), preventing `UIDocument` and `WeaponWheelToolkitManager` from executing `Awake()`. As a result, `WeaponWheelToolkitManager.Instance` was `null`, throwing `NullReferenceException` inside `TouchManager.Update()`.
+    - **Fix**: Re-activated `UIToolkit` GameObject and children in `GameView_EndlessRunner.unity`.
+    - **Resilience**: Added lazy discovery and hierarchy auto-activation to `WeaponWheelToolkitManager.Instance` property getter and `EnsureInitialized()` guard so the wheel can never fail to initialize even if disabled in the scene.
+  - **Root Cause 2 (Hard Reject on Upper Body)**: `TouchManager.requireTouchOnBottomHalf` was `true`, rejecting any click on the player character's chest, arms, shoulders, or head (above $Y = 50\%$).
+    - **Fix**: Set `requireTouchOnBottomHalf = false` in both code and scene serialization.
+    - Lowered `holdTimeToOpenWheel` from `0.5f` to `0.35f` for responsive long-press feel.
+  - **Root Cause 3 (UI Raycast Blockers)**: 67 UI graphics under `UIManager` had `raycastTarget = true`, blocking touch inputs from reaching the 3D scene.
+    - **Fix**: Implemented `UIManager.MakeHUDClickThrough()`, disabling `raycastTarget` on all decorative HUD images, tracks, cards, and texts while leaving only interactive buttons enabled (2 targets remaining).
+  - **Root Cause 4 (Trigger Collider & Tagging)**: Player GameObject `Man_Rig` was `Untagged` and used a narrow trigger capsule collider ($r = 0.29\text{m}$).
+    - **Fix**: Tagged `Man_Rig` with `"Player"`.
+    - Upgraded `TouchManager.DidTouchPlayer()` to a 3-tier detection system:
+      1. Raycast with `QueryTriggerInteraction.Collide` checking `PlayerController`, `"Player"` tag, and player layer.
+      2. 0.45m radius `Physics.SphereCastAll` to capture touches around limbs and edges.
+      3. Screen-space proximity fallback to the player's screen position.
+    - Added a 0.25s press grace period allowing quick settling touches to be recognized as holds.
+    - Added Tab key hotkey for instant desktop wheel toggling during PC testing.

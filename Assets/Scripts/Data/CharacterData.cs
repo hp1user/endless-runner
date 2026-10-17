@@ -27,8 +27,8 @@ namespace EndlessRunner.Data
         public float baseArmor = 25f;
 
         [Header("Locomotion Stats")]
-        [Range(5f, 30f)]
-        public float movementSpeed = 10f;
+        [Range(2f, 20f)]
+        public float movementSpeed = 6.0f;
         [Range(0.5f, 3.0f)]
         public float moveSpeedMultiplier = 1.0f;
         [Range(1f, 20f)]

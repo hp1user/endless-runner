@@ -263,6 +263,11 @@ public class EnemyManager : MonoBehaviour
         // Initialize the Boss!
         controller.Initialize(bossData, player.transform, this, bossData.prefab.gameObject);
 
+        if (UI.Control.UIManager.Instance != null)
+        {
+            UI.Control.UIManager.Instance.ShowBossHealth(true, bossData.enemyName, controller.CurrentHealth, controller.CurrentHealth);
+        }
+
         Debug.Log($"<color=magenta>[EnemyManager]</color> The {bossData.enemyName} has arrived!");
     }
 

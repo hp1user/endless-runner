@@ -21,8 +21,12 @@ namespace Player.Control
 
         [Header("Movement Settings")]
         public float laneDistance = 2.0f;
-        public float movementSpeed = 10f;
+        [Tooltip("Base speed for lane transitions.")]
+        public float movementSpeed = 6.0f;
         public float strafeAnimationSmoothing = 8f;
+        [Tooltip("If true, uses a smooth ease-in/ease-out transition between lanes instead of an abrupt linear step.")]
+        public bool useSmoothLaneChange = true;
+        private float laneChangeVelocity = 0f;
 
         [Header("Weapon Layer Settings")]
         public int weaponLayerIndex = 1;
@@ -392,9 +396,14 @@ namespace Player.Control
             if (UIManager.Instance != null)
             {
                 float maxHP = (playerStats != null) ? runtimeMaxHealth : 100f;
+                float maxArmor = (playerStats != null) ? playerStats.baseArmor : 50f;
+                if (currentCharacterData != null)
+                {
+                    maxHP = currentCharacterData.baseHealth;
+                    maxArmor = currentCharacterData.baseArmor;
+                }
                 UIManager.Instance.UpdateHealth(currentHealth, maxHP);
-
-                UIManager.Instance.UpdateArmor(currentArmor);
+                UIManager.Instance.UpdateArmor(currentArmor, maxArmor);
             }
         }
 
@@ -482,11 +491,22 @@ namespace Player.Control
         {
             float targetX = currentLane * laneDistance;
             Vector3 pos = transform.position;
-            pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * runtimeMovementSpeed);
+
+            if (useSmoothLaneChange)
+            {
+                // Smooth ease-in / ease-out transition (approx 0.28s - 0.35s)
+                float effectiveSpeed = Mathf.Max(runtimeMovementSpeed, 1f);
+                float smoothTime = Mathf.Clamp(1.8f / effectiveSpeed, 0.18f, 0.38f);
+                pos.x = Mathf.SmoothDamp(pos.x, targetX, ref laneChangeVelocity, smoothTime, effectiveSpeed * 1.5f, Time.deltaTime);
+            }
+            else
+            {
+                pos.x = Mathf.MoveTowards(pos.x, targetX, Time.deltaTime * runtimeMovementSpeed);
+            }
             transform.position = pos;
 
             float moveDelta = targetX - pos.x;
-            float animationTarget = (Mathf.Abs(moveDelta) > 0.01f) ? Mathf.Sign(moveDelta) : 0f;
+            float animationTarget = (Mathf.Abs(moveDelta) > 0.05f) ? Mathf.Sign(moveDelta) : 0f;
             currentStrafeAnim = Mathf.MoveTowards(currentStrafeAnim, animationTarget, Time.deltaTime * runtimeStrafeSmoothing);
             animator.SetFloat(strafeParamHash, currentStrafeAnim);
         }
@@ -919,6 +939,7 @@ namespace Player.Control
                 int currentReserve = reserveAmmo[currentWeaponData.category];
                 // Updates the UI to show: CurrentAmmo / ReserveAmmo
                 UIManager.Instance.UpdateAmmo(currentAmmo, currentReserve);
+                UIManager.Instance.UpdateWeapon(currentWeaponData);
             }
         }
 
@@ -1012,6 +1033,16 @@ namespace Player.Control
             if (Keyboard.current == null) return;
 
             var kb = Keyboard.current;
+            if (kb.tabKey.wasPressedThisFrame)
+            {
+                if (WeaponWheelToolkitManager.Instance != null)
+                {
+                    if (WeaponWheelToolkitManager.Instance.IsOpen)
+                        WeaponWheelToolkitManager.Instance.CloseWheel();
+                    else
+                        WeaponWheelToolkitManager.Instance.OpenWheel();
+                }
+            }
             if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Pistol);
             else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.SMG);
             else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.AssaultRifle);

@@ -158,6 +158,11 @@ public class GameManager : MonoBehaviour
         isBossFightActive = false;
         currentLevel++;
 
+        if (UI.Control.UIManager.Instance != null)
+        {
+            UI.Control.UIManager.Instance.ShowBossHealth(false);
+        }
+
         OnBossDefeated?.Invoke();
         OnLevelCompleted?.Invoke(currentLevel); // Trigger the environment swap!
 
@@ -169,6 +174,11 @@ public class GameManager : MonoBehaviour
         isBossTransitionActive = false;
         isBossFightActive = false;
         currentLevel++; // Jump to next level
+
+        if (UI.Control.UIManager.Instance != null)
+        {
+            UI.Control.UIManager.Instance.ShowBossHealth(false);
+        }
 
         OnBossDefeated?.Invoke(); // Ensures cameras & environment return to normal front view!
         OnLevelCompleted?.Invoke(currentLevel); // Tell the environment to swap

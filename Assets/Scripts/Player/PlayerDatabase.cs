@@ -14,7 +14,7 @@ namespace Player.Control
         public float laneDistance = 2.0f;
         
         [Tooltip("How fast the player physically moves between lanes.")]
-        public float movementSpeed = 10f;
+        public float movementSpeed = 6.0f;
         
         [Tooltip("Smoothing for the lane-change animation.")]
         public float strafeAnimationSmoothing = 8f;
