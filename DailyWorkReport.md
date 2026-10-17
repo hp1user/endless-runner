@@ -224,3 +224,17 @@ Use this document to track daily progress, features implemented, and bugs fixed.
       - Added `isBroken` boolean to `CategorizedAssetItem` so individual divider and railing prefabs (`Divider 2`, `Divider 3`, etc.) can be marked as damaged/broken variants.
       - Added configurable `minIntactBetweenBroken` (default: `2`) to `CenterDividerRule` and `SideRailingRule`.
       - Updated `ProceduralChunk.cs` and `ProceduralEnvironmentProfile.PickWeightedItem()` so that once a broken divider spawns, at least $N$ (default: 2) intact/normal dividers (`Divider 1`) MUST spawn before another broken piece is permitted, preventing two broken pieces from ever generating consecutively side-by-side.
+
+## Date: 2026-10-17
+
+### Features & Model Replacement
+- **Player Character Model Upgrade (`Ch15_nonPBR`)**:
+  - Replaced the placeholder `Man_T` character model with the newly imported high-quality sci-fi character `Ch15_nonPBR`.
+  - Configured `Ch15_nonPBR.fbx` importer with `ModelImporterAnimationType.Human` and `avatarSetup = CreateFromThisModel` to generate a fully validated Humanoid Avatar (`Ch15_nonPBRAvatar`).
+  - Tuned URP Lit materials (`Ch15_body.mat`, `Ch15_body1.mat`) with Specular Workflow (`_WorkflowMode = 1`), assigning Diffuse, Normal, Specular (`Ch15_1001/1002_Specular`), and Emission maps.
+  - Updated player prefab (`Assets/3d/Characters/Rough/Prefab/Man_T.prefab`) and created a dedicated copy (`Assets/3d/Characters/CH15/Ch15_Player.prefab`):
+    - Rigged with `Ch15_nonPBR` SkinnedMeshRenderer (65 Mixamo bones).
+    - Linked `Weapon_socket` to `mixamorig:RightHand` with clean local transforms.
+    - Bound `Animator` with `Ch15_nonPBRAvatar` and existing `Man Controller` (all 9 layers: Base, Aim, Rifle, Pistol, SMG, Shotgun, Sniper, Rocket, LMG working seamlessly).
+    - Bound `PlayerController` (`weaponSocket`, `aimTarget`), `AimTargetController` (`targetTransform`, `rayOriginOverride`), and `CapsuleCollider`.
+  - Updated the active scene `GameView_EndlessRunner.unity` where the player instance `Man_Rig` immediately displays `Ch15_nonPBR` with 0 console errors.
