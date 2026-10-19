@@ -18,6 +18,7 @@ public class TouchManager : MonoBehaviour
     private Vector2 startTouchPos;
     private bool isSwiping;
     private bool isHoldingOnPlayer;
+    private bool isCommittedToShooting;
     private float touchStartTime;
     private float actualSwipeThreshold;
 
@@ -27,13 +28,14 @@ public class TouchManager : MonoBehaviour
     public static event Action OnSwipeUp; // Reload Event
 
     public static bool IsShooting { get; private set; }
-    private static float shootBufferTimer = 0f;
+    public static bool IsSwiping { get; private set; }
+    public static bool WasTapThisFrame { get; private set; }
     public static Vector2 CurrentTouchPosition { get; private set; }
     public static float TouchHoldTime { get; private set; }
 
     void Start()
     {
-        actualSwipeThreshold = Screen.width * swipeScreenPercentage;
+        actualSwipeThreshold = Mathf.Clamp(Screen.width * swipeScreenPercentage, 35f, 160f);
     }
 
     void Update()
@@ -61,16 +63,22 @@ public class TouchManager : MonoBehaviour
         CurrentTouchPosition = position;
 
         float swipeThreshold = Mathf.Clamp(Screen.width * swipeScreenPercentage, 35f, 160f);
+        actualSwipeThreshold = swipeThreshold;
 
         // Check if the wheel is currently open
         bool isWheelOpen = WeaponWheelToolkitManager.Instance != null && WeaponWheelToolkitManager.Instance.IsOpen;
         bool shouldShoot = false;
+        WasTapThisFrame = false;
+        bool isSwipeInProgress = false;
 
         // --- 1. TOUCH BEGAN ---
         if (pressedThisFrame)
         {
             startTouchPos = position;
             isSwiping = false;
+            isHoldingOnPlayer = false;
+            isCommittedToShooting = false;
+            IsSwiping = false;
             touchStartTime = Time.unscaledTime;
             TouchHoldTime = 0f;
 
@@ -78,12 +86,7 @@ public class TouchManager : MonoBehaviour
             {
                 isHoldingOnPlayer = true;
             }
-            else
-            {
-                isHoldingOnPlayer = false;
-                // Instant firing responsiveness on tap/click!
-                shouldShoot = true;
-            }
+            // First frame of touch down: never fire immediately to allow gesture detection
         }
         // --- 2. TOUCH HELD / MOVED ---
         else if (isPressed)
@@ -98,7 +101,7 @@ public class TouchManager : MonoBehaviour
             else
             {
                 // Grace window: if touch began near player and settled within 0.25s, acquire player hold
-                if (!isSwiping && !isHoldingOnPlayer && TouchHoldTime < 0.25f && currentDelta.magnitude < 35f)
+                if (!isSwiping && !isHoldingOnPlayer && !isCommittedToShooting && TouchHoldTime < 0.25f && currentDelta.magnitude < 35f)
                 {
                     if (DidTouchPlayer(position))
                     {
@@ -106,14 +109,23 @@ public class TouchManager : MonoBehaviour
                     }
                 }
 
-                // Check if the gesture moved far enough to be a swipe (even if the touch started over the player model)
+                // 1. SWIPE DETECTION (Always checked first! If user swipes, swiping takes priority everywhere on screen)
                 if (!isSwiping && TouchHoldTime <= 0.45f && currentDelta.magnitude > swipeThreshold)
                 {
                     isSwiping = true;
-                    isHoldingOnPlayer = false; // Cancel holding on player since player swiped
+                    isHoldingOnPlayer = false; // Cancel player hold since user swiped
+                    isCommittedToShooting = false;
                     DetectSwipeDirection(currentDelta);
                 }
-                else if (isHoldingOnPlayer)
+                else if (!isSwiping && !isCommittedToShooting && TouchHoldTime <= 0.45f && currentDelta.magnitude > 20f)
+                {
+                    // Active drag/swipe in progress before crossing swipeThreshold
+                    isSwipeInProgress = true;
+                    isHoldingOnPlayer = false; // Finger is moving across screen, not holding still on player
+                }
+
+                // 2. WEAPON WHEEL HOLD (Requires holding stationary on/near player for holdTimeToOpenWheel)
+                if (isHoldingOnPlayer && !isSwiping && !isSwipeInProgress)
                 {
                     if (TouchHoldTime >= holdTimeToOpenWheel)
                     {
@@ -121,22 +133,44 @@ public class TouchManager : MonoBehaviour
                         {
                             WeaponWheelToolkitManager.Instance.OpenWheel();
                         }
-                        isSwiping = true;
+                        isSwiping = true; // Lock out further gestures while wheel is open
                         isHoldingOnPlayer = false;
                     }
                 }
-
-                // If not swiping and not holding to open wheel, continuous shoot/aim
-                if (!isSwiping && !isHoldingOnPlayer)
+                // 3. SHOOTING LOGIC WHILE HOLDING (Stationary hold not on player)
+                else if (!isHoldingOnPlayer)
                 {
-                    shouldShoot = true;
+                    if (!isSwiping && !isSwipeInProgress)
+                    {
+                        // Stationary hold without swiping: commit to shooting after 0.10s
+                        if (TouchHoldTime >= 0.10f)
+                        {
+                            isCommittedToShooting = true;
+                            shouldShoot = true;
+                        }
+                    }
+                    else if (isCommittedToShooting && !isSwiping)
+                    {
+                        shouldShoot = true;
+                    }
                 }
             }
         }
         // --- 3. TOUCH ENDED ---
         else if (releasedThisFrame)
         {
+            Vector2 finalDelta = position - startTouchPos;
+            if (!isSwiping && finalDelta.magnitude < 25f)
+            {
+                // Confirmed tap release without swiping!
+                WasTapThisFrame = true;
+                shouldShoot = true;
+            }
+
             isHoldingOnPlayer = false;
+            isSwiping = false;
+            isCommittedToShooting = false;
+            IsSwiping = false;
 
             if (isWheelOpen)
             {
@@ -144,7 +178,9 @@ public class TouchManager : MonoBehaviour
             }
         }
 
-        IsShooting = shouldShoot && !isSwiping;
+        bool anySwiping = isSwiping || isSwipeInProgress;
+        IsShooting = (shouldShoot || WasTapThisFrame) && !anySwiping;
+        IsSwiping = anySwiping;
     }
 
     private bool DidTouchPlayer(Vector2 screenPos)

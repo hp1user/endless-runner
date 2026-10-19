@@ -46,9 +46,34 @@ namespace Enemy.Control
         private EnemyManager myManager;
         private GameObject myOriginalPrefab;
 
+        public GameObject OriginalPrefab => myOriginalPrefab;
         public bool IsDead => isDead;
         public bool IsBoss => isBoss;
         public float CurrentHealth => currentHealth;
+
+        /// <summary>
+        /// Cleanly despawns an active enemy and returns it to PoolManager if pooled.
+        /// </summary>
+        public void ForceDespawn()
+        {
+            if (isDead) return;
+            isDead = true;
+            StopAllCoroutines();
+
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+            Collider[] childCols = GetComponentsInChildren<Collider>();
+            foreach (var c in childCols) c.enabled = false;
+
+            if (myOriginalPrefab != null && PoolManager.Instance != null)
+            {
+                PoolManager.Instance.ReturnToPool(this.gameObject, myOriginalPrefab);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
 
         [Header("Boss Body Parts & Animation")]
         [SerializeField] private float bossHeadHealth = 600f;

@@ -381,3 +381,31 @@ Use this document to track daily progress, features implemented, and bugs fixed.
     - `Cam_1` (Boss Back Camera): Symmetrically updated to `pos = (0, 2.20, -10.50)`, `rot = (5.5, 0, 0)`, and `Lens.FieldOfView = 56°`.
     - `Main Camera`: Updated to `pos = (0, 2.20, 10.50)`, `rot = (5.5, 180, 0)`, `fieldOfView = 56°`.
     - Expands the visible road width at the player from `4.20m` to `6.15m`, bringing the left/right lanes to comfortable `18%` and `82%` screen positions (with ~180px safe margin from the screen borders) without clipping the character or overlapping HUD cards.
+
+## Date: 2026-10-19
+
+### Features Added
+- **Weapon Wheel Sprite Customizer Tool (`WeaponWheelSpriteCustomizerWindow.cs`)**:
+  - Built an Editor Tool window (`Tools > Endless Runner > Weapon Wheel > Sprite Customizer`) using UI Toolkit.
+  - Allows quick previewing, assigning, and swapping of weapon category silhouettes, icons, and wheel slice assets without having to inspect raw ScriptableObjects.
+
+### Bugs Fixed & Improvements
+- **Level Transition Spawn Delay (`EnemyManager.cs`)**:
+  - Resolved the lack of delay when transitioning into new levels.
+  - Added a paced delay window between wave completions so that enemies no longer spawn instantly on top of the player when a new level starts.
+
+- **Assault Rifle Tap Fire vs. Auto-Fire Hold (`PlayerController.cs`, `TouchManager.cs`)**:
+  - **Single Tap Accuracy**: Single tap/touch on Assault Rifle now fires strictly 1 single round on release, eliminating ammo wastage (previously fired 2–3 rounds or failed to register single taps).
+  - **Auto-Fire Hold Delay**: Continuous automatic fire now engages only when the touch/hold is held past `autoFireHoldDelay` (0.22s).
+  - Maintained full weapon fire-rate capability once auto-fire is engaged.
+
+- **Instant Lane Switching & Shooting in Transit (`PlayerController.cs`, `TouchManager.cs`)**:
+  - **Restored Previous Fast & Fluid Feel**: Removed distance transit locks (`Mathf.Abs(targetX - transform.position.x) > 0.15f`) and cooldown timers (`laneChangeCooldownTimer = 0.35f`) in `MoveLeft()` and `MoveRight()`. Rapid consecutive swipes and quick dodges against boss orbs/obstacles are instant once again.
+  - **Shooting While Changing Lanes**: Decoupled physical character movement from trigger lockout by removing `IsChangingLane` from blocking weapon fire. Players can now freely tap or hold to shoot enemies while their character is sliding across lanes.
+  - **Zero Fire on Swipe**: Active swipe gestures (`TouchManager.IsSwiping`) strictly block weapon firing so that flicks to change lanes or reload never discharge accidental shots during drag or upon finger release.
+
+- **Character Proximity Swipe Deadzone Fix (`TouchManager.cs`)**:
+  - **Root Cause**: `DidTouchPlayer()` previously assigned `isHoldingOnPlayer = true` when touch began on or near the player's 3D model, causing the hold logic to intercept and ignore all swipe gesture evaluations in that screen area.
+  - **Fix**: Re-architected gesture prioritization so swipe detection is evaluated first across the entire screen.
+  - Swiping left or right to switch lanes, or swiping up to reload, now works seamlessly even when starting directly on or near the player character.
+  - Stationary long-press (0.35s) on the character continues to open the Weapon Wheel smoothly.

@@ -23,6 +23,16 @@ public class EnemyManager : MonoBehaviour
     [Tooltip("Maximum number of enemies allowed in the scene at once.")]
     public int maxEnemies = 5;
 
+    [Header("Spawn Delays & Wave Transitions")]
+    [Tooltip("Delay in seconds before the first enemy spawns at the start of the game (Level 1).")]
+    public float initialSpawnDelay = 3.5f;
+
+    [Tooltip("Grace period delay in seconds before enemies start spawning when entering a new level.")]
+    public float newLevelSpawnDelay = 5.0f;
+
+    [Tooltip("If true, all active regular enemies from the previous wave will be cleared when a new level starts.")]
+    public bool clearEnemiesOnLevelComplete = true;
+
     [Header("Boss Settings")]
     [Tooltip("How far behind the player should the boss spawn? (Negative number)")]
     public float bossSpawnZOffset = -25f;
@@ -40,6 +50,8 @@ public class EnemyManager : MonoBehaviour
     private int activeEnemyCount = 0;
     public int enemiesSpawnedThisLevel = 0;
     private float timer;
+    private float levelDelayTimer = 0f;
+    private bool isWaitingForLevelDelay = false;
 
     private bool isGameOver = false;
 
@@ -73,6 +85,17 @@ public class EnemyManager : MonoBehaviour
     private void HandleLevelCompleted(int newLevel)
     {
         enemiesSpawnedThisLevel = 0;
+        timer = 0f;
+
+        if (clearEnemiesOnLevelComplete)
+        {
+            ClearAllActiveEnemies();
+        }
+
+        levelDelayTimer = newLevelSpawnDelay;
+        isWaitingForLevelDelay = (newLevelSpawnDelay > 0f);
+
+        Debug.Log($"<color=cyan>[EnemyManager]</color> New Level {newLevel} entered! Spawn delay of {newLevelSpawnDelay:F1}s active before enemies spawn.");
     }
 
     private void Start()
@@ -87,6 +110,10 @@ public class EnemyManager : MonoBehaviour
         {
             Debug.LogWarning("[EnemyManager] No spawn points assigned. Enemies will spawn at (0,0,0).");
         }
+
+        timer = 0f;
+        levelDelayTimer = initialSpawnDelay;
+        isWaitingForLevelDelay = (initialSpawnDelay > 0f);
     }
 
     private void Update()
@@ -95,11 +122,26 @@ public class EnemyManager : MonoBehaviour
 
         if (GameManager.Instance != null && (GameManager.Instance.isBossFightActive || GameManager.Instance.isBossTransitionActive)) return;
 
+        // Grace period delay between new levels or at initial game start
+        if (isWaitingForLevelDelay)
+        {
+            levelDelayTimer -= Time.deltaTime;
+            if (levelDelayTimer <= 0f)
+            {
+                isWaitingForLevelDelay = false;
+                timer = 0f;
+                TrySpawnEnemy(); // Spawn first enemy of the new level as soon as the delay completes
+            }
+            else
+            {
+                return; // Wait out the delay before spawning any enemies
+            }
+        }
+
         timer += Time.deltaTime;
 
         float currentSpawnRate = spawnInterval / (GameManager.Instance != null ? GameManager.Instance.currentLevel : 1);
 
-        // FIXED: Using currentSpawnRate here instead of spawnInterval!
         if (timer >= currentSpawnRate)
         {
             timer = 0f;
@@ -302,7 +344,7 @@ public class EnemyManager : MonoBehaviour
         {
             if (enemy != null && !enemy.IsBoss && !enemy.IsDead)
             {
-                Destroy(enemy.gameObject);
+                enemy.ForceDespawn();
             }
         }
         activeEnemyCount = 0;
