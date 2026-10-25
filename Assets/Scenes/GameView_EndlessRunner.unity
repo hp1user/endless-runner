@@ -11440,18 +11440,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponWheelToolkitManager
   document: {fileID: 1676175790}
-  highlightColor: {r: 1, g: 1, b: 1, a: 0.8}
-  weaponSliceColor: {r: 1, g: 0.2, b: 0.2, a: 0.5}
-  skillSliceColor: {r: 0.2, g: 1, b: 0.2, a: 0.5}
-  ultimateSliceColor: {r: 0.2, g: 0.2, b: 1, a: 0.5}
-  baseLineColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.8}
-  wheelBackgroundImage: {fileID: 2800000, guid: 296663dc5d2e54c4cae3018ae560c022, type: 3}
-  defaultPistolIcon: {fileID: 2800000, guid: 0bd894cdbe5a35a4886041217f51f233, type: 3}
-  defaultARIcon: {fileID: 0}
-  defaultSMGIcon: {fileID: 0}
-  defaultHeavyIcon: {fileID: 0}
-  defaultSkillIcon: {fileID: 0}
-  defaultUltimateIcon: {fileID: 0}
+  weapon01Normal: {fileID: 2800000, guid: fefe8b6670c2c614eb4a30af043a1dd9, type: 3}
+  weapon02Normal: {fileID: 2800000, guid: 2454be4a79cf7b44d9ba8114e240aab1, type: 3}
+  weapon03Normal: {fileID: 2800000, guid: d6af2165d7c24de4aabaa00904552182, type: 3}
+  weapon04Normal: {fileID: 2800000, guid: 0d476febbedca4e4dbbc6d383329b085, type: 3}
+  skillNormal: {fileID: 2800000, guid: 345017274a1f7464c914706e231eb783, type: 3}
+  ultimateNormal: {fileID: 2800000, guid: 276f974f58ded2943b7c96d81d35b835, type: 3}
+  centerPlate: {fileID: 2800000, guid: 1864a7dbac9721d4f81012482a3617de, type: 3}
+  weapon01Selected: {fileID: 2800000, guid: 16e7c6b476dfaf043a3b07a4df756b0f, type: 3}
+  weapon02Selected: {fileID: 2800000, guid: 06b9599d900b4004caabd6388dcb75f4, type: 3}
+  weapon03Selected: {fileID: 2800000, guid: 61a9e5d07f898744da574c3964218e39, type: 3}
+  weapon04Selected: {fileID: 2800000, guid: 689b895cd68c5924cb76eff4aeaa685b, type: 3}
+  skillSelected: {fileID: 2800000, guid: a1e88a7a9df271b4cbf1b0bba233b808, type: 3}
+  ultimateSelected: {fileID: 2800000, guid: 05f455a158f75a8429c2101f9894df90, type: 3}
+  defaultPistolIcon: {fileID: 2800000, guid: 55892e7096de7e74f8cd5a4305093140, type: 3}
+  defaultARIcon: {fileID: 2800000, guid: e4c1fa15929671a4490a367c297db8bd, type: 3}
+  defaultShotgunIcon: {fileID: 2800000, guid: c4599a1d938b0be4591993009fc227f6, type: 3}
+  defaultHeavyIcon: {fileID: 2800000, guid: 2c7a26800ce4bf14ab1bc6ad513853b7, type: 3}
 --- !u!1 &1696955634
 GameObject:
   m_ObjectHideFlags: 0

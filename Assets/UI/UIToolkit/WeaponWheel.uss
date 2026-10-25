@@ -1,78 +1,185 @@
+/* Weapon Wheel Sci-Fi HUD Styling with User Modular Sprite Sheet */
+
 .wheel-container {
     width: 100%;
     height: 100%;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
-.wheel-background {
+.wheel-backdrop {
     position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background-color: rgba(30, 30, 35, 0.95);
-    border-width: 4px;
-    border-color: rgba(100, 100, 100, 0.8);
-    -unity-background-scale-mode: scale-to-fit;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(6, 8, 12, 0.65);
 }
 
-.highlight-layer {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-}
-
-.center-label {
-    position: absolute;
-    color: white;
-    font-size: 40px;
-    -unity-font-style: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-.slot-container {
-    position: absolute;
-    width: 120px;
-    height: 120px;
+.wheel-root {
+    position: relative;
+    width: 680px;
+    height: 680px;
     align-items: center;
     justify-content: center;
 }
 
-/* Base positions relative to center, assuming radius of ~200px */
-.top-mid-right { translate: 80px -180px; }
-.top-right { translate: 180px -80px; }
-.bottom-right { translate: 150px 150px; }
-.bottom-left { translate: -150px 150px; }
-.top-left { translate: -180px -80px; }
-.top-mid-left { translate: -80px -180px; }
-
-.slot-icon {
-    width: 70%;
-    height: 70%;
+/* Slices & Layers (each is 680x680 mapped from 1024x1024 sprite sheet) */
+.wheel-slice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 680px;
+    height: 680px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
+#slice-slot-1 {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/weapon_01_normal.png");
+}
 
+#slice-slot-2 {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/weapon_02_normal.png");
+}
 
-.slot-name-label {
-    color: white;
+#slice-slot-3 {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/weapon_03_normal.png");
+}
+
+#slice-slot-4 {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/weapon_04_normal.png");
+}
+
+#slice-skill {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/skill_normal.png");
+}
+
+#slice-ultimate {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/ultimate_normal.png");
+}
+
+#slice-center {
+    background-image: url("project:/Assets/UI/Sprite/WeaponWheel/center_plate.png");
+}
+
+/* Slot Containers (anchored at exact sector centroids) */
+.slot-container {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-1-pos {
+    width: 120px;
+    height: 80px;
+    translate: -215px -89px;
+}
+
+.slot-2-pos {
+    width: 120px;
+    height: 80px;
+    translate: -89px -215px;
+}
+
+.slot-3-pos {
+    width: 120px;
+    height: 80px;
+    translate: 89px -215px;
+}
+
+.slot-4-pos {
+    width: 120px;
+    height: 80px;
+    translate: 215px -89px;
+}
+
+.slot-skill-pos {
+    width: 160px;
+    height: 60px;
+    translate: -152px 151px;
+}
+
+.slot-ultimate-pos {
+    width: 160px;
+    height: 60px;
+    translate: 151px 151px;
+}
+
+.slot-weapon-icon {
+    width: 90%;
+    height: 90%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Ability Subtext Labels inside bottom segments */
+.ability-title {
     font-size: 14px;
     -unity-font-style: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    margin-top: -15px;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
 }
 
-.large-slot-label {
-    color: white;
-    font-size: 28px;
+.ability-subtext {
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+}
+
+.skill-title-color {
+    color: #6CE8FF;
+    text-shadow: 0px 0px 8px rgba(0, 200, 255, 0.7);
+}
+
+.skill-subtext-color {
+    color: #D4F4FF;
+}
+
+.ult-title-color {
+    color: #FF8855;
+    text-shadow: 0px 0px 8px rgba(255, 80, 0, 0.7);
+}
+
+.ult-subtext-color {
+    color: #FFE0D0;
+}
+
+/* Center Info Hub */
+.center-hub {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 130px;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border-width: 0px;
+    padding: 10px;
+}
+
+.center-hero-icon {
+    width: 100px;
+    height: 60px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-top: -4px;
+}
+
+.center-title {
+    color: #FFFFFF;
+    font-size: 24px;
     -unity-font-style: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.9);
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
-.skill-label {
-    color: rgb(100, 255, 100); /* Neon Green */
-}
-
-.ultimate-label {
-    color: rgb(100, 150, 255); /* Neon Blue */
+.center-desc {
+    color: #A0B0C0;
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    max-width: 200px;
+    white-space: normal;
+    margin-top: 0px;
+    padding: 0;
 }

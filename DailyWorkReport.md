@@ -409,3 +409,36 @@ Use this document to track daily progress, features implemented, and bugs fixed.
   - **Fix**: Re-architected gesture prioritization so swipe detection is evaluated first across the entire screen.
   - Swiping left or right to switch lanes, or swiping up to reload, now works seamlessly even when starting directly on or near the player character.
   - Stationary long-press (0.35s) on the character continues to open the Weapon Wheel smoothly.
+
+## Date: 2026-10-25
+
+### Features Added & UI Overhaul
+- **Modular Weapon Wheel Sprite Sheet Integration (`WeaponWheelToolkitManager.cs`, `WeaponWheel.uxml`, `WeaponWheel.uss`)**:
+  - Fully integrated user's custom modular 1024x1024 sprite sheet from `Assets/UI/Sprite/WeaponWheel/`.
+  - Replaced procedural canvas vector highlight arcs with 6 independent slice layers (`slice-slot-1` through `slice-slot-4`, `slice-skill`, `slice-ultimate`) and `slice-center` (`center_plate.png`).
+  - Seamlessly swaps each slice's background between its `_normal.png` texture and `_selected.png` texture (with built-in neon amber/cyan/orange glow) on hover with zero arc bleeding, distortion, or seam issues.
+  - Symmetrical 8-slot angular mapping:
+    - Slot 1 (Pistol): 270° – 315° (45° span, top-left)
+    - Slot 2 (Assault Rifle / SMG): 315° – 360° (45° span, top-center-left)
+    - Slot 3 (Shotgun): 0° – 45° (45° span, top-center-right)
+    - Slot 4 (Minigun / Heavy): 45° – 90° (45° span, mid-right)
+    - Ultimate: 90° – 180° (90° span, bottom-right)
+    - Skill: 180° – 270° (90° span, bottom-left)
+  - Anchored weapon icons and ability labels to mathematically exact sector centroids.
+
+### Bugs Fixed & Improvements
+- **Typo Fix (`Pistal.asset`)**:
+  - Corrected `weaponName: Pistal` to `weaponName: Pistol` in `Pistal.asset`.
+- **Eliminated Highlight Bleed & Arc Overlap**:
+  - Replaced `LineCap.Round` procedural arc with native sprite slices, eliminating highlight overflow into adjacent Skill/Ultimate slots.
+- **Removed Baked Icons & Duplicate Text from Abilities**:
+  - Cleaned up duplicate dynamic text overlays (`RapidFire`, `AOE`) over baked icons on Skill and Ultimate segments.
+- **Center Info Hub UI**:
+  - Enhanced center hub styling with high-contrast weapon preview title, category styling, and weapon descriptions.
+- **Weapon Pickup-Only Visibility in Weapon Wheel**:
+  - **Unpicked Weapons Hidden**: Removed default fallback icons from empty slots. Slices for unacquired weapons now remain completely empty without showing gun icons until the player physically collects that weapon.
+  - **Empty Slot Dimming & Lock**: Slices for unpicked weapons are dimmed (`opacity: 0.35`) and cannot be selected or equipped.
+  - **Center Hub Lock Status**: Hovering over an empty weapon slot displays "Locked" / "No weapon acquired yet." without previewing unowned guns.
+  - **Dynamic Unlock**: When a new weapon is picked up via loot drops (`PlayerController.ApplyWeaponPickup()`), the corresponding slot immediately activates, brightens to full opacity, displays the weapon's icon, and allows equipping.
+
+

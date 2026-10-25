@@ -1088,6 +1088,7 @@ namespace Player.Control
             Debug.Log($"<color=cyan>[Weapon]</color> Equipped: {selectedWeapon.weaponName}");
         }
 
+        public WeaponData CurrentWeaponData => currentWeaponData;
         public List<WeaponData> GetUnlockedWeapons() => unlockedWeapons;
 
         private void HandleWeaponHotkeys()
