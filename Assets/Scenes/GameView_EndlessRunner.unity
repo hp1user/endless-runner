@@ -10683,7 +10683,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 435b2a1d734d79145bf6815df802f064, type: 2}
   - {fileID: 11400000, guid: ad6546bd5062fc54caba360ee2d6c440, type: 2}
   - {fileID: 11400000, guid: 31f976cde04bf7e4ab46de7b1633aa1a, type: 2}
-  - {fileID: 11400000, guid: 1af6c5792c714b943a2e7f445874c787, type: 2}
   - {fileID: 11400000, guid: 0608111b895f7464bb8f7f11cbf25402, type: 2}
   - {fileID: 11400000, guid: 5f206f932b01d1a43bf39c37c15a18d6, type: 2}
   - {fileID: 11400000, guid: 06aacea8b86e77648b49def925a7aad2, type: 2}
@@ -10692,7 +10691,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 33f677de5c685e1408a01091071e5ae3, type: 2}
   - {fileID: 11400000, guid: ff1b10e0f6854eb49b466d9fa96cf0fd, type: 2}
   - {fileID: 11400000, guid: ff13bb24c73ce2f458bedd591c8b53a4, type: 2}
-  bossDropPool: []
+  - {fileID: 11400000, guid: 24f4c2b0177022f448c86a14e8e71de9, type: 2}
+  - {fileID: 11400000, guid: 071eeb6449706cf4ab43397747ab2690, type: 2}
+  bossDropPool:
+  - {fileID: 11400000, guid: 31ce551c7b56276459c11b574b2a9fe0, type: 2}
+  - {fileID: 11400000, guid: 16cd7a3f1ebb7db46bd71a29007a64b6, type: 2}
+  - {fileID: 11400000, guid: 071eeb6449706cf4ab43397747ab2690, type: 2}
   bossMythicChance: 5
   bossLegendaryChance: 30
   cardSelectionPanel: {fileID: 513705537}
@@ -11327,12 +11331,21 @@ MonoBehaviour:
   itemDespawnThreshold: 20
   itemLootPool:
   - {fileID: 2909380799309048936, guid: bcd765c05225a6f438c271b176c740ee, type: 3}
-  - {fileID: 2909380799309048936, guid: bcd765c05225a6f438c271b176c740ee, type: 3}
+  - {fileID: 5280417135850950478, guid: 98fca62d27a43eb4a955ee1692058f1f, type: 3}
   ammoLootPool:
   - {fileID: 684689663696028547, guid: 911be95631977954ebde92a80bb163f9, type: 3}
-  - {fileID: 2625143843978302469, guid: 8601ef62360a86e4baaf62d50aae1315, type: 3}
+  - {fileID: 7694541863667766859, guid: c223d93d975d4f644955c65f88126d69, type: 3}
+  - {fileID: 2942181715533663983, guid: 89005969f53d6384fb54db88ce9e3c11, type: 3}
+  - {fileID: 5152588693831131088, guid: c28fb050bb3069e43aed4b6ed42199ef, type: 3}
+  - {fileID: 5326514821874659875, guid: d01fd51a5380ba649a995507c43cd98b, type: 3}
+  - {fileID: 2386112658806058734, guid: 3ceec7faa0ca96f4f89645a2ba6fbd67, type: 3}
+  - {fileID: 215953072544630825, guid: 4e29c2d011ccade43a01ec9eec709c35, type: 3}
   weaponLootPool:
   - {fileID: 8215985703135719342, guid: e761175524de71948868b37fa06e9477, type: 3}
+  - {fileID: 3390857905162650679, guid: ce14b6d24e75adf4c966914f409cf79c, type: 3}
+  - {fileID: 434363012403784196, guid: 288f81d2ce4488945b73bf0ab726c88b, type: 3}
+  - {fileID: 5813622984434979675, guid: 8ad7563d9cee84a4e8017776bdf7e15a, type: 3}
+  - {fileID: 384531726870941863, guid: beb98519f4599c74bbe0557772c4b19d, type: 3}
   weaponDropChance: 59.4
 --- !u!1 &1472922692
 GameObject:

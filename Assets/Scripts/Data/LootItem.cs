@@ -21,6 +21,11 @@ public class LootItem : MonoBehaviour
     private GameObject originalPrefab;
     private bool isCollected = false;
 
+    private void OnEnable()
+    {
+        isCollected = false;
+    }
+
     // UPDATED: Now accepts the direction and threshold from the Manager
     public void Initialize(GameObject prefab, MoveDirection dir, float despawnDist)
     {
@@ -37,9 +42,16 @@ public class LootItem : MonoBehaviour
         // Clamp deltaTime to prevent huge jumps when unpausing from the Level Up screen
         float dt = Mathf.Min(Time.deltaTime, 0.1f);
 
+        // Dynamically match track speed with LevelManager if active, else use worldMoveSpeed
+        float speed = worldMoveSpeed;
+        if (LevelManager.Instance != null)
+        {
+            speed = LevelManager.Instance.isTransitioningToBridge ? LevelManager.Instance.transitionSpeed : LevelManager.Instance.worldMoveSpeed;
+        }
+
         // Move based on the Manager's direction
         Vector3 dir = (currentDirection == MoveDirection.Backward) ? Vector3.back : Vector3.forward;
-        transform.position += dir * worldMoveSpeed * dt;
+        transform.position += dir * speed * dt;
 
         // Despawn based on the Manager's direction
         if (currentDirection == MoveDirection.Backward && transform.position.z < -currentDespawnThreshold)
@@ -56,12 +68,13 @@ public class LootItem : MonoBehaviour
     {
         if (isCollected) return;
 
-        if (((1 << other.gameObject.layer) & LayerMask.GetMask("Player")) != 0)
-        {
-            PlayerController player = other.GetComponent<PlayerController>();
-            if (player == null) player = other.GetComponentInParent<PlayerController>();
+        PlayerController player = other.GetComponent<PlayerController>() 
+            ?? other.GetComponentInParent<PlayerController>()
+            ?? (PlayerController.Instance != null && (other.transform.root == PlayerController.Instance.transform || other.transform.IsChildOf(PlayerController.Instance.transform)) ? PlayerController.Instance : null);
 
-            if (player != null) CollectLoot(player);
+        if (player != null)
+        {
+            CollectLoot(player);
         }
     }
 
@@ -85,6 +98,7 @@ public class LootItem : MonoBehaviour
                 break;
         }
 
+        Debug.Log($"<color=cyan>[LootItem]</color> Collected {type}! (amount: {amount}, category: {ammoCategory}, weaponID: {specificWeaponID})");
         Recycle();
     }
 

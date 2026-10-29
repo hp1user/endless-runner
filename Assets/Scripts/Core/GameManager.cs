@@ -84,11 +84,14 @@ public class GameManager : MonoBehaviour
     // Enemies will call this method right before they die
     public void RegisterEnemyKill()
     {
-        // Don't count normal kills if we are currently fighting a boss or transitioning
-        if (isBossFightActive || isBossTransitionActive || PlayerController.Instance.isDead) return;
+        if (PlayerController.Instance != null && PlayerController.Instance.isDead) return;
+
+        OnEnemyKilled?.Invoke(); // Announce that an enemy was killed for kill-based mechanics
+
+        // Don't count normal kills toward level completion if we are currently fighting a boss or transitioning
+        if (isBossFightActive || isBossTransitionActive) return;
 
         enemiesKilledThisLevel++;
-        OnEnemyKilled?.Invoke(); // Announce that an enemy was killed
 
         // Calculate the quota for this specific level
         int requiredKills = GetRequiredKillsForCurrentLevel();

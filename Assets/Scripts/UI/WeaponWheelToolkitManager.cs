@@ -235,22 +235,23 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         UpdateSliceVisuals();
     }
 
-    private int GetSlotIndexForCategory(WeaponCategory category)
+    public static int GetSlotIndexForCategory(WeaponCategory category)
     {
         switch (category)
         {
-            case WeaponCategory.Pistol: return 0; // Slot 1: Top-Left
+            case WeaponCategory.Pistol: return 0; // Slot 1: Sidearm (Top-Left)
             case WeaponCategory.AssaultRifle:
             case WeaponCategory.SMG:
             case WeaponCategory.Sniper:
-                return 1; // Slot 2: Top Center-Left
+                return 1; // Slot 2: Rapid / Rifles (Top Center-Left)
             case WeaponCategory.Shotgun:
-                return 2; // Slot 3: Top Center-Right
+                return 2; // Slot 3: CQB / Shotguns (Top Center-Right)
             case WeaponCategory.Minigun:
             case WeaponCategory.RocketLauncher:
-                return 3; // Slot 4: Mid-Right
+            case WeaponCategory.Grenade:
+                return 3; // Slot 4: Heavy Weapons (Mid-Right)
             default:
-                return 0;
+                return 1;
         }
     }
 

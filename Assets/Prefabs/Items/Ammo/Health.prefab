@@ -53,8 +53,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.5, y: 1.5, z: 2}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &2635568605369439354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,7 +71,7 @@ MonoBehaviour:
   amount: 20
   ammoCategory: 3
   specificWeaponID: 
-  worldMoveSpeed: 2
+  worldMoveSpeed: 15
 --- !u!1001 &5995400015959478005
 PrefabInstance:
   m_ObjectHideFlags: 0

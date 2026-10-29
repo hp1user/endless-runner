@@ -501,5 +501,115 @@ Use this document to track daily progress, features implemented, and bugs fixed.
     - **Headers & Icons**: "VITALS" header and "AMMO" header matched to muted metallic slate (`#B3C7DC` and `#D1B899`); Heart and Shield icons tinted to match the emerald green and tactical sapphire blue.
   - **Backups Preserved**: `Default_SciFi_Cyan.asset.backup2`, `SciFiHUDBuilder.cs.backup2`, `UIManager.cs.backup2`.
 
+- **First Test Gameplay Mechanics: Armor on Kill, Droppable Weapons, and Smart Ammo System (`UpgradeCard.cs`, `PlayerController.cs`, `GameManager.cs`, `LootManager.cs`, Scene Prefabs)**:
+  - **1. Armor Gain on Kill System**:
+    - **Enum Extension**: Added `ArmorPerKill` to `UpgradeType` in `UpgradeCard.cs`.
+    - **Player Logic**: Added `armorPerKill` tracking field to `PlayerController.cs`. Updated `ApplyUpgrade` to accumulate armor-per-kill bonuses and wired `HandleEnemyKilled()` to invoke `AddArmor(armorPerKill)` on every enemy defeat.
+    - **GameManager Event Decoupling**: Updated `GameManager.RegisterEnemyKill()` so that `OnEnemyKilled?.Invoke()` broadcasts across all combat states (including during boss fights and minions) while preserving quota checks.
+    - **2 New Armor Upgrade Cards**:
+      - `Armor Siphon.asset` (**Rare**): Grants **+2 Armor per kill** (`upgradeType = ArmorPerKill`, `upgradeValue = 2`).
+      - `Armor Matrix.asset` (**Epic**): Grants **+5 Armor per kill** (`upgradeType = ArmorPerKill`, `upgradeValue = 5`).
+      - Registered both cards into `UpgradeManager.allAvailableCards` and added `Armor Matrix` to `bossDropPool`.
+  - **2. Universal Weapon Drops & Rare Weapon Unlock Cards**:
+    - **Full Weapon Drop Prefab Suite**: Created drop prefabs with triggers, pooling, and `LootItem` (`type: Weapon`):
+      - `Weapon_SMG.prefab` (SMG, ID `smg1`, 30 rounds)
+      - `Weapon_Shotgun.prefab` (Shotgun, ID `shotgun1`, 16 rounds)
+      - `Weapon_Sniper.prefab` (Sniper, ID `AWM`, 10 rounds)
+      - `Weapon_RPG.prefab` (Rocket Launcher, ID `GrandeLauncher`, 4 rounds)
+      - `Weapon_Minigun.prefab` (Minigun, ID `machineGun`, 60 rounds)
+      - `Weapon_Grenade.prefab` (Grenade, ID `Grenade`, 8 rounds)
+      - Plus existing `AR.prefab` (Assault Rifle, ID `M4`, 30 rounds).
+    - Added all 7 weapon prefabs to `LootManager.weaponLootPool` on `ItemManager` in `GameView_EndlessRunner.unity`.
+    - **Rare Weapon Unlock Upgrade Cards**:
+      - `WeaponUnlock_Minigun.asset` (**Epic**): Unlocks Minigun (`machineGun`) into arsenal and weapon wheel.
+      - `WeaponUnlock_RPG.asset` (**Legendary**): Unlocks Rocket Launcher (`GrandeLauncher`).
+      - `WeaponUnlock_Sniper.asset` (**Rare**): Unlocks Sniper (`AWM`).
+      - `WeaponUnlock_Shotgun.asset` (**Rare**): Unlocks Shotgun (`shotgun1`).
+      - `WeaponUnlock_SMG.asset` (**Uncommon**): Unlocks SMG (`smg1`).
+      - Registered cards in `UpgradeManager.allAvailableCards` and `bossDropPool`.
+    - **Weapon Unlock Starting Ammo**: Updated `PlayerController.UnlockWeapon()` so newly unlocked weapons automatically receive 2 full magazines of starting reserve ammo upon first acquisition.
+  - **3. Smart Ammo Drops for Unlocked Weapon Wheel Weapons**:
+    - **Excluded Pistol Ammo**: In `LootManager.DropSupplyCrate()`, explicitly excluded `WeaponCategory.Pistol` from drop rolls until pistol variants are implemented.
+    - **Dynamic Owned Weapon Detection**: Integrated `PlayerController.Instance.GetOwnedWeaponCategories()` so ammo only drops for weapons currently unlocked in the player's Weapon Wheel (e.g., if player only has AR and SMG, only AR and SMG ammo will drop).
+    - **Complete Ammo Prefab Suite**: Created ammo prefabs for all weapon categories:
+      - `Ammo_SMG.prefab` (SMG, 45 rounds)
+      - `Ammo_Shotgun.prefab` (Shotgun, 16 shells)
+      - `Ammo_Sniper.prefab` (Sniper, 10 rounds)
+      - `Ammo_Rocket.prefab` (Rocket Launcher, 4 rockets)
+      - `Ammo_Minigun.prefab` (Minigun, 60 rounds)
+      - `Ammo_Grenade.prefab` (Grenade, 8 grenades)
+      - Plus existing `Ammo_AR.prefab` (Assault Rifle, 30 rounds).
+    - **Armor Consumable Drop**: Created `Armor.prefab` (+25 Armor) and populated `LootManager.itemLootPool` alongside `Health.prefab`.
+    - Populated all 7 ammo prefabs into `LootManager.ammoLootPool` in `GameView_EndlessRunner.unity`.
+  - **Backups Preserved**: `UpgradeCard.cs.backup`, `PlayerController.cs.backup`, `GameManager.cs.backup`, `LootManager.cs.backup`.
+
+- **Boss-Exclusive Rare Weapon Card Drops & Weighted Chance System (`UpgradeManager.cs`, `PlayerController.cs`, `GameView_EndlessRunner.unity`)**:
+  - **Card Deck Segregation**:
+    - Completely removed all `WeaponUnlock` cards from `allAvailableCards` on `UpgradeManager`. Normal level-ups now strictly offer stat progression cards (Health, Damage, Speed, ArmorPerKill, etc.) and will never drop weapon unlock cards.
+  - **Boss Drop Pool Configuration (`bossDropPool`)**:
+    - Rare weapon unlock cards are now exclusively acquired from Boss kills:
+      - `WeaponUnlock_Sniper.asset` (**Rare**, AWM, Weight: 25)
+      - `WeaponUnlock_Minigun.asset` (**Epic**, Machine Gun, Weight: 10)
+      - `WeaponUnlock_RPG.asset` (**Legendary**, GrandeLauncher, Weight: 4)
+      - Plus `Armor Matrix.asset` (**Epic**, +5 Armor/kill, Weight: 10)
+  - **Weighted Chance & Duplicate Prevention**:
+    - Preserved existing weighted boss drop math in `GetWeightedBossDrop()`, allowing chance-based selection where Legendary (RPG) is rarest, followed by Epic (Minigun / Armor Matrix) and Rare (Sniper).
+    - Added duplicate card prevention in `DrawCards()`, ensuring the 3 cards offered on level up or boss defeat are distinct.
+  - **Smart Unowned Weapon Prioritization**:
+    - Added `HasWeapon(string weaponID)` in `PlayerController.cs`.
+    - Added `IsWeaponCardAlreadyOwned(UpgradeCard card)` in `UpgradeManager.cs`. When rolling `GetWeightedBossDrop()`, already-owned weapon cards are filtered out in favor of unowned boss rewards so players don't receive duplicate weapon unlock offers while unearned weapons remain.
+  - **Backups Preserved**: `UpgradeManager.cs.backup`, `PlayerController.cs.backup`.
+
+- **Bug Fix: Compilation Namespace & Camera Viewport Rendering (`UpgradeManager.cs`, `GameView_EndlessRunner.unity`)**:
+  - **Namespace Resolution (`CS0103`)**: Resolved compiler error in `UpgradeManager.cs` lines 308/318 by fully qualifying `Player.Control.PlayerController.Instance` without conflicting with existing root namespace references.
+  - **Camera Viewport Restoration**: Fixed a YAML formatting anomaly in `GameView_EndlessRunner.unity` where extraneous CRLF empty lines disrupted component deserialization. Cleanly re-applied `LootManager` and `UpgradeManager` pool serializations.
+  - **Verification**: Verified Unity console is at **0 errors**, and captured live Game View screenshot confirming the main camera, highway environment, skybox, and character are rendering cleanly.
 
 
+
+
+
+
+- **Bug Fix: Moving Weapon Supply Crates & Reliable Ammo Pickup Trigger Detection (LootItem.cs, Weapon Prefabs, Ammo Prefabs)**:
+  - **1. Moving Weapon Supply Crates (Fixed Frozen Horizon Spawns)**:
+    - **Root Cause**: In Weapon_SMG.prefab, Weapon_Shotgun.prefab, Weapon_Sniper.prefab, Weapon_RPG.prefab, Weapon_Minigun.prefab, and Weapon_Grenade.prefab, LootItem and BoxCollider were attached to child GameObjects rather than root. In LootManager.DropSupplyCrate(), droppedItem.GetComponent<LootItem>() returned 
+ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back), and LootItem.Update() moved only the child transform while the root object (with the crate mesh) stayed permanently anchored at  = -20$.
+    - **Prefab Architecture Standardization**: Rebuilt all 6 weapon prefabs to duplicate the exact root component architecture of AR.prefab:
+      - Root GameObject holds Transform, BoxCollider (isTrigger = true, .5\text{m} \times 2.5\text{m} \times 2.5\text{m}$), and LootItem (	ype = 3 Weapon, with respective weapon IDs and ammo categories).
+      - Visual crate mesh (AmmoBoxLarge) is attached cleanly as a child Transform without conflicting colliders.
+    - **Dynamic Track Speed Synchronization**: Updated LootItem.Update() to dynamically match LevelManager.Instance speed (worldMoveSpeed = 15f, or 	ransitionSpeed = 4.5f during bridge approach). Crates now travel synchronously with the road and obstacles towards the player without sliding or stalling.
+    - **Pool Reactivation Safety**: Added OnEnable() { isCollected = false; } in LootItem.cs so pooled crates and items cleanly reset their state when retrieved from PoolManager.
+  - **2. Reliable Ammo & Item Pickup Collection**:
+    - **Root Cause**: In all Ammo_*.prefab files, BoxCollider had m_Size: {x: 1, y: 1, z: 1} with root scale (0.2, 0.2, 0.1). The resulting world trigger was only .2\text{m} \times 0.2\text{m} \times 0.1\text{m}$ resting at  = 0$. Player capsule collider starts at  = +0.055\text{m}$, creating a minuscule vertical intersection zone (< 4.5 cm) easily missed during runner gameplay. Furthermore, at 15 m/s, discrete physics detection could tunnel past the 10 cm depth slice between frames.
+    - **Generous Trigger Dimensions**: Updated BoxCollider on all 7 ammo prefabs to m_Size: {x: 10, y: 10, z: 10} and m_Center: {x: 0, y: 5, z: 0}. In world coordinates, this creates a generous .0\text{m} \times 2.0\text{m} \times 1.0\text{m}$ trigger centered at  = 1.0\text{m}$, fully encompassing the running lane and character height.
+    - **Armor & Health Pickup Triggers**: Configured Armor.prefab and Health.prefab to m_Size: {x: 1.5, y: 1.5, z: 2} and m_Center: {x: 0, y: 0.5, z: 0} (.0\text{m} \times 3.0\text{m} \times 2.0\text{m}$ world trigger).
+    - **Bulletproof Trigger Detection**: Enhanced LootItem.OnTriggerEnter to check other.GetComponent<PlayerController>() ?? other.GetComponentInParent<PlayerController>() ?? (PlayerController.Instance != null && (other.transform.root == PlayerController.Instance.transform || other.transform.IsChildOf(PlayerController.Instance.transform)) ? PlayerController.Instance : null), completely eliminating layer-mask and child-collider detection failures.
+  - **Backups Preserved**: LootItem.cs.backup.
+
+- **Drop Pool Refinement: Removed RPG and Grenade from Drop Lists (LootManager, UpgradeManager, GameView_EndlessRunner.unity)**:
+  - **LootManager Weapon Crate Pool**: Removed Weapon_RPG.prefab and Weapon_Grenade.prefab from weaponLootPool. Active drop pool now focuses on core combat weapons: Assault Rifle (AR.prefab), Submachine Gun (Weapon_SMG.prefab), Shotgun (Weapon_Shotgun.prefab), Sniper Rifle (Weapon_Sniper.prefab), and Minigun (Weapon_Minigun.prefab).
+  - **UpgradeManager Boss Drop Pool**: Removed WeaponUnlock_RPG.asset from ossDropPool. Boss kills now offer WeaponUnlock_Sniper.asset, WeaponUnlock_Minigun.asset, and Armor Matrix.asset.
+  - **Verification**: Verified Unity console has 0 errors.
+
+- **Weapon Slot Architecture & Option C (Direct Category / Slot Replacement) Implemented (PlayerController.cs, WeaponWheelToolkitManager.cs)**:
+  - **4-Slot Weapon Wheel Alignment**:
+    - **Slot 1 (Index 0)**: Sidearm / Pistol (starterPistol - Desert Eagle).
+    - **Slot 2 (Index 1)**: Rapid-Fire / Precision Rifles (AssaultRifle, SMG, Sniper).
+    - **Slot 3 (Index 2)**: CQB / Scatter (Shotgun).
+    - **Slot 4 (Index 3)**: Heavy Ordnance (Minigun, RocketLauncher, Grenade).
+  - **Direct Slot Replacement Logic (PlayerController.UnlockWeapon)**:
+    - When acquiring a new weapon:
+      1. **Duplicate Gun Check**: If the player already owns the exact weapon, converts drop to ammo (+2 full reserve magazines).
+      2. **Occupied Slot Detection**: Identifies target slot using WeaponWheelToolkitManager.GetSlotIndexForCategory(). If a weapon already occupies that slot (e.g., Slot 2 already has an SMG, and player picks up an Assault Rifle), the old weapon is cleanly discarded and replaced by the new weapon.
+      3. **Empty Slot Acquisition**: If the slot is empty, the new weapon fills the slot directly without discarding anything.
+      4. **Starting Ammo & UI Refresh**: Grants at least 2 full magazines of starting reserve ammo for the new weapon category, updates WeaponWheelToolkitManager slice visuals, and automatically equips the newly acquired weapon.
+  - **1:1 Slot Keyboard Hotkey Alignment**:
+    - Added SwitchToSlot(int slotIndex) in PlayerController.cs.
+    - Key 1: Slot 1 (Pistol)
+    - Key 2: Slot 2 (Rifle / SMG / Sniper)
+    - Key 3: Slot 3 (Shotgun)
+    - Key 4: Slot 4 (Heavy)
+    - Q / E: Cycle through currently active weapons.
+  - **Smart Ammo Drop Harmony**:
+    - Discarded weapons are removed from unlockedWeapons, so GetOwnedWeaponCategories() immediately stops dropping ammo for the old weapon and starts dropping ammo for the new weapon.
+  - **Backups Preserved**: PlayerController.cs.backup3, WeaponWheelToolkitManager.cs.backup.

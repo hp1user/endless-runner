@@ -50,6 +50,7 @@ namespace Player.Control
 
         [Header("Roguelike Upgrades")]
         public float damageMultiplier = 1.0f;
+        public float armorPerKill = 0f;
 
         [Header("Skills and Ultimates")]
         public SkillData equippedSkill;
@@ -148,6 +149,12 @@ namespace Player.Control
 
         private void HandleEnemyKilled()
         {
+            if (armorPerKill > 0f && !isDead)
+            {
+                AddArmor(armorPerKill);
+                if (debugMode) Debug.Log($"<color=cyan>[Armor Siphon]</color> +{armorPerKill} Armor on kill! Current Armor: {currentArmor}");
+            }
+
             if (equippedUltimate != null && equippedUltimate.isKillBasedRecharge)
             {
                 if (currentUltimateKillCount < equippedUltimate.rechargeRequirement)
@@ -1090,6 +1097,11 @@ namespace Player.Control
 
         public WeaponData CurrentWeaponData => currentWeaponData;
         public List<WeaponData> GetUnlockedWeapons() => unlockedWeapons;
+        public bool HasWeapon(string weaponID)
+        {
+            if (unlockedWeapons == null || string.IsNullOrEmpty(weaponID)) return false;
+            return unlockedWeapons.Exists(w => w != null && w.weaponID == weaponID);
+        }
 
         private void HandleWeaponHotkeys()
         {
@@ -1107,14 +1119,23 @@ namespace Player.Control
                         WeaponWheelToolkitManager.Instance.OpenWheel();
                 }
             }
-            if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Pistol);
-            else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.SMG);
-            else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.AssaultRifle);
-            else if (kb.digit4Key.wasPressedThisFrame || kb.numpad4Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Shotgun);
-            else if (kb.digit5Key.wasPressedThisFrame || kb.numpad5Key.wasPressedThisFrame) SwitchToCategory(WeaponCategory.Sniper);
+            if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) SwitchToSlot(0);
+            else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) SwitchToSlot(1);
+            else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) SwitchToSlot(2);
+            else if (kb.digit4Key.wasPressedThisFrame || kb.numpad4Key.wasPressedThisFrame) SwitchToSlot(3);
+            else if (kb.digit5Key.wasPressedThisFrame || kb.numpad5Key.wasPressedThisFrame) SwitchToSlot(1);
             else if (kb.qKey.wasPressedThisFrame) CycleUnlockedWeapons(-1);
             else if (kb.eKey.wasPressedThisFrame) CycleUnlockedWeapons(1);
 #endif
+        }
+
+        public void SwitchToSlot(int slotIndex)
+        {
+            var match = unlockedWeapons.Find(w => w != null && WeaponWheelToolkitManager.GetSlotIndexForCategory(w.category) == slotIndex);
+            if (match != null && match != currentWeaponData)
+            {
+                EquipWeaponFromWheel(match);
+            }
         }
 
         public void SwitchToCategory(WeaponCategory category)
@@ -1261,6 +1282,7 @@ namespace Player.Control
 
         public void AddAmmo(WeaponCategory category, int amount)
         {
+            if (!reserveAmmo.ContainsKey(category)) reserveAmmo[category] = 0;
             // 1. Add the bullets to the backpack
             reserveAmmo[category] += amount;
 
@@ -1283,6 +1305,7 @@ namespace Player.Control
             WeaponData newGun = WeaponDatabase.Instance.GetWeaponByID(incomingWeaponID);
             if (newGun == null) return;
 
+            // 1. If player already owns this exact gun, convert drop to ammo
             if (unlockedWeapons.Contains(newGun))
             {
                 if (debugMode) Debug.Log($"<color=magenta>[Loot]</color> You already own the {newGun.weaponName}! Converting to ammo...");
@@ -1290,13 +1313,38 @@ namespace Player.Control
                 return;
             }
 
+            // 2. Option C: Direct Category / Slot Replacement
+            int targetSlot = WeaponWheelToolkitManager.GetSlotIndexForCategory(newGun.category);
+
+            // Find if any currently owned weapon already occupies this slot
+            WeaponData oldWeaponInSlot = unlockedWeapons.Find(w => w != null && WeaponWheelToolkitManager.GetSlotIndexForCategory(w.category) == targetSlot);
+
+            if (oldWeaponInSlot != null)
+            {
+                Debug.Log($"<color=yellow>[Weapon Upgrade]</color> Slot {targetSlot + 1} ({oldWeaponInSlot.weaponName}) replaced with {newGun.weaponName}!");
+                unlockedWeapons.Remove(oldWeaponInSlot);
+            }
+            else
+            {
+                Debug.Log($"<color=green>[Weapon Unlock]</color> Unlocked new {newGun.weaponName} into Slot {targetSlot + 1}!");
+            }
+
             unlockedWeapons.Add(newGun);
 
+            // 3. Grant starting reserve ammo for the newly unlocked/upgraded weapon (at least 2 full magazines)
+            if (!reserveAmmo.ContainsKey(newGun.category) || reserveAmmo[newGun.category] == 0)
+            {
+                reserveAmmo[newGun.category] = newGun.magSize * 2;
+            }
+
+            // 4. Update the Weapon Wheel UI
             if (WeaponWheelToolkitManager.Instance != null)
             {
                 WeaponWheelToolkitManager.Instance.AddWeaponToWheel(newGun);
+                WeaponWheelToolkitManager.Instance.SyncUnlockedWeapons();
             }
 
+            // 5. Equip the newly unlocked weapon
             EquipWeaponFromWheel(newGun);
         }
 
@@ -1331,6 +1379,11 @@ namespace Player.Control
                         {
                             Debug.LogWarning("WeaponUnlock card effect is missing a Weapon ID!");
                         }
+                        break;
+
+                    case UpgradeType.ArmorPerKill:
+                        armorPerKill += effect.upgradeValue;
+                        if (debugMode) Debug.Log($"<color=cyan>[Upgrade]</color> Armor Per Kill increased by +{effect.upgradeValue}! Total: {armorPerKill}/kill");
                         break;
                 }
             }
