@@ -1,0 +1,580 @@
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using Player.Control;
+
+namespace UI.Control
+{
+    public enum HUDLayoutVariant
+    {
+        SideWings = 0,
+        TopBar = 1
+    }
+
+    [System.Serializable]
+    public class HUDElementBinding
+    {
+        public GameObject root;
+
+        [Header("Health")]
+        public Image healthBarFill;
+        public Image healthBarGhost;
+        public TextMeshProUGUI healthText;
+        public Image healthIcon;
+
+        [Header("Armor")]
+        public GameObject armorContainer;
+        public Image armorBarFill;
+        public Image armorBarGhost;
+        public RectTransform armorCap;
+        public TextMeshProUGUI armorText;
+        public Image armorIcon;
+
+        [Header("Weapon & Ammo")]
+        public Image weaponIcon;
+        public TextMeshProUGUI weaponNameText;
+        public Image ammoBarFill;
+        public Image ammoBarGhost;
+        public Image ammoReserveBarFill;
+        public RectTransform ammoCap;
+        public TextMeshProUGUI ammoCurrentText;
+        public TextMeshProUGUI ammoReserveText;
+        public TextMeshProUGUI ammoDividerText;
+        public GameObject reloadPrompt;
+    }
+
+    public class UIManager : MonoBehaviour
+    {
+        public static UIManager Instance { get; private set; }
+
+        [Header("Screens & Panels")]
+        public GameObject gameOverPanel;
+
+        [Header("HUD Variant Mode")]
+        public HUDLayoutVariant activeVariant = HUDLayoutVariant.SideWings;
+
+        [Header("Variant 1: Side Wings HUD (Left/Right Wings)")]
+        public HUDElementBinding sideWingsHUD = new HUDElementBinding();
+
+        [Header("Variant 2: Top Bar HUD (Classic Top-Left / Top-Right)")]
+        public HUDElementBinding topBarHUD = new HUDElementBinding();
+
+        [Header("Boss Health HUD (Top Center)")]
+        public GameObject bossHealthContainer;
+        public Image bossBarFill;
+        public Image bossBarGhost;
+        public TextMeshProUGUI bossNameText;
+        public TextMeshProUGUI bossHealthText;
+        public Image bossSkullIcon;
+
+        [Header("Active Direct HUD Fallbacks")]
+        public Image healthBarFill;
+        public Image healthBarGhost;
+        public TextMeshProUGUI healthText;
+        public Image healthIcon;
+        public GameObject armorContainer;
+        public Image armorBarFill;
+        public Image armorBarGhost;
+        public RectTransform armorCap;
+        public TextMeshProUGUI armorText;
+        public Image armorIcon;
+        public Image weaponIcon;
+        public TextMeshProUGUI weaponNameText;
+        public Image ammoBarFill;
+        public Image ammoBarGhost;
+        public Image ammoReserveBarFill;
+        public RectTransform ammoCap;
+        public TextMeshProUGUI ammoCurrentText;
+        public TextMeshProUGUI ammoReserveText;
+        public TextMeshProUGUI ammoDividerText;
+        public GameObject reloadPrompt;
+
+        [Header("Legacy Text Fallbacks")]
+        [SerializeField] private TextMeshProUGUI legacyHealthText;
+        [SerializeField] private TextMeshProUGUI legacyArmorText;
+        [SerializeField] private TextMeshProUGUI legacyAmmoText;
+
+        [Header("Animation Settings")]
+        [SerializeField] private float barLerpSpeed = 10f;
+        [SerializeField] private float ghostLagDelay = 0.4f;
+        [SerializeField] private float ghostLerpSpeed = 5f;
+
+        private float targetHealthRatio = 1f;
+        private float targetArmorRatio = 1f;
+        private float currentHealthRatio = 1f;
+        private float currentArmorRatio = 1f;
+        private float ghostHealthRatio = 1f;
+        private float ghostArmorRatio = 1f;
+
+        private float healthDamageTimer = 0f;
+        private float armorDamageTimer = 0f;
+
+        private float targetBossRatio = 1f;
+        private float currentBossRatio = 1f;
+        private float ghostBossRatio = 1f;
+        private float bossDamageTimer = 0f;
+        private float bossMaxHp = 1000f;
+
+        private float targetAmmoRatio = 1f;
+        private float currentAmmoRatio = 1f;
+        private float ghostAmmoRatio = 1f;
+        private float ammoFireTimer = 0f;
+        private float targetReserveRatio = 1f;
+        private float currentReserveRatio = 1f;
+
+        private int currentLoadedAmmo = 30;
+        private int currentReserveAmmo = 120;
+        private int currentMagSize = 30;
+
+        private void OnEnable()
+        {
+            PlayerController.OnPlayerDeath += ShowGameOverScreen;
+        }
+
+        private void OnDisable()
+        {
+            PlayerController.OnPlayerDeath -= ShowGameOverScreen;
+        }
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+                MakeHUDClickThrough();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        public void MakeHUDClickThrough()
+        {
+            // Ensure HUD graphics are click-through so they never intercept player touch or weapon wheel
+            foreach (var graphic in GetComponentsInChildren<Graphic>(true))
+            {
+                // Preserve raycast targeting only for interactable controls (Buttons, Selectables)
+                if (graphic.GetComponent<Button>() == null && 
+                    graphic.GetComponent<Selectable>() == null &&
+                    graphic.GetComponentInParent<Button>() == null)
+                {
+                    graphic.raycastTarget = false;
+                }
+            }
+        }
+
+        private void Start()
+        {
+            ApplyVariantActiveState();
+        }
+
+        private void OnValidate()
+        {
+            ApplyVariantActiveState();
+        }
+
+        public void SwitchVariant(HUDLayoutVariant variant)
+        {
+            activeVariant = variant;
+            ApplyVariantActiveState();
+        }
+
+        public void ApplyVariantActiveState()
+        {
+            if (sideWingsHUD != null && sideWingsHUD.root != null)
+            {
+                sideWingsHUD.root.SetActive(activeVariant == HUDLayoutVariant.SideWings);
+            }
+
+            if (topBarHUD != null && topBarHUD.root != null)
+            {
+                topBarHUD.root.SetActive(activeVariant == HUDLayoutVariant.TopBar);
+            }
+        }
+
+        [ContextMenu("Switch to Side Wings HUD")]
+        public void SwitchToSideWings() => SwitchVariant(HUDLayoutVariant.SideWings);
+
+        [ContextMenu("Switch to Top Bar HUD")]
+        public void SwitchToTopBar() => SwitchVariant(HUDLayoutVariant.TopBar);
+
+        [ContextMenu("Toggle Boss Health Bar (Test)")]
+        public void ToggleTestBossHealth()
+        {
+            bool isCurrentlyActive = (bossHealthContainer != null && bossHealthContainer.activeSelf);
+            ShowBossHealth(!isCurrentlyActive, "BUG BOSS", 750f, 1000f);
+        }
+
+        private void Update()
+        {
+            AnimateBars();
+            AnimateAmmoWarning();
+            AnimateBossBar();
+        }
+
+        private void AnimateBars()
+        {
+            // Health Fill
+            currentHealthRatio = Mathf.Lerp(currentHealthRatio, targetHealthRatio, Time.deltaTime * barLerpSpeed);
+            UpdateFillAmount(healthBarFill, currentHealthRatio);
+            if (topBarHUD != null) UpdateFillAmount(topBarHUD.healthBarFill, currentHealthRatio);
+            if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.healthBarFill, currentHealthRatio);
+
+            // Health Ghost Lag
+            if (healthDamageTimer > 0f)
+            {
+                healthDamageTimer -= Time.deltaTime;
+            }
+            else
+            {
+                ghostHealthRatio = Mathf.Lerp(ghostHealthRatio, targetHealthRatio, Time.deltaTime * ghostLerpSpeed);
+                UpdateFillAmount(healthBarGhost, ghostHealthRatio);
+                if (topBarHUD != null) UpdateFillAmount(topBarHUD.healthBarGhost, ghostHealthRatio);
+                if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.healthBarGhost, ghostHealthRatio);
+            }
+
+            // Armor Fill & Cap Indicator (Wuthering Waves style)
+            currentArmorRatio = Mathf.Lerp(currentArmorRatio, targetArmorRatio, Time.deltaTime * barLerpSpeed);
+            UpdateFillAmount(armorBarFill, currentArmorRatio);
+            UpdateCapPosition(armorCap, currentArmorRatio, armorBarFill);
+            if (topBarHUD != null) UpdateFillAmount(topBarHUD.armorBarFill, currentArmorRatio);
+            if (sideWingsHUD != null)
+            {
+                UpdateFillAmount(sideWingsHUD.armorBarFill, currentArmorRatio);
+                UpdateCapPosition(sideWingsHUD.armorCap, currentArmorRatio, sideWingsHUD.armorBarFill);
+            }
+
+            // Armor Ghost Lag
+            if (armorDamageTimer > 0f)
+            {
+                armorDamageTimer -= Time.deltaTime;
+            }
+            else
+            {
+                ghostArmorRatio = Mathf.Lerp(ghostArmorRatio, targetArmorRatio, Time.deltaTime * ghostLerpSpeed);
+                UpdateFillAmount(armorBarGhost, ghostArmorRatio);
+                if (topBarHUD != null) UpdateFillAmount(topBarHUD.armorBarGhost, ghostArmorRatio);
+                if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.armorBarGhost, ghostArmorRatio);
+            }
+
+            // Low health pulsing on icons
+            float heartPulse = 1f;
+            if (targetHealthRatio <= 0.25f && targetHealthRatio > 0f)
+            {
+                heartPulse = 0.88f + 0.12f * Mathf.Sin(Time.time * 8f);
+            }
+            ApplyIconScale(healthIcon, heartPulse);
+            if (topBarHUD != null) ApplyIconScale(topBarHUD.healthIcon, heartPulse);
+            if (sideWingsHUD != null) ApplyIconScale(sideWingsHUD.healthIcon, heartPulse);
+
+            // Ammo Magazine Fill & Cap Indicator (Wuthering Waves style)
+            currentAmmoRatio = Mathf.Lerp(currentAmmoRatio, targetAmmoRatio, Time.deltaTime * barLerpSpeed);
+            UpdateFillAmount(ammoBarFill, currentAmmoRatio);
+            UpdateCapPosition(ammoCap, currentAmmoRatio, ammoBarFill);
+            if (topBarHUD != null) UpdateFillAmount(topBarHUD.ammoBarFill, currentAmmoRatio);
+            if (sideWingsHUD != null)
+            {
+                UpdateFillAmount(sideWingsHUD.ammoBarFill, currentAmmoRatio);
+                UpdateCapPosition(sideWingsHUD.ammoCap, currentAmmoRatio, sideWingsHUD.ammoBarFill);
+            }
+
+            if (ammoFireTimer > 0f)
+            {
+                ammoFireTimer -= Time.deltaTime;
+            }
+            else
+            {
+                ghostAmmoRatio = Mathf.Lerp(ghostAmmoRatio, targetAmmoRatio, Time.deltaTime * ghostLerpSpeed);
+                if (topBarHUD != null) UpdateFillAmount(topBarHUD.ammoBarGhost, ghostAmmoRatio);
+                if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.ammoBarGhost, ghostAmmoRatio);
+            }
+
+            // Ammo Reserve Fill
+            currentReserveRatio = Mathf.Lerp(currentReserveRatio, targetReserveRatio, Time.deltaTime * barLerpSpeed);
+            if (topBarHUD != null) UpdateFillAmount(topBarHUD.ammoReserveBarFill, currentReserveRatio);
+            if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.ammoReserveBarFill, currentReserveRatio);
+        }
+
+        private void UpdateFillAmount(Image img, float amount)
+        {
+            if (img != null) img.fillAmount = amount;
+        }
+
+        private void UpdateCapPosition(RectTransform cap, float ratio, Image fillImage)
+        {
+            if (cap == null) return;
+            if (ratio <= 0.005f)
+            {
+                if (cap.gameObject.activeSelf) cap.gameObject.SetActive(false);
+                return;
+            }
+            if (!cap.gameObject.activeSelf) cap.gameObject.SetActive(true);
+
+            float trackHeight = 340f;
+            if (fillImage != null && fillImage.rectTransform != null)
+            {
+                trackHeight = fillImage.rectTransform.rect.height;
+                if (trackHeight <= 0f && fillImage.transform.parent != null)
+                {
+                    var parentRt = fillImage.transform.parent.GetComponent<RectTransform>();
+                    if (parentRt != null) trackHeight = parentRt.rect.height;
+                }
+            }
+            float yPos = Mathf.Clamp(trackHeight * ratio, 0f, trackHeight);
+            cap.anchoredPosition = new Vector2(0f, yPos);
+        }
+
+        private void ApplyIconScale(Image icon, float scale)
+        {
+            if (icon != null) icon.transform.localScale = Vector3.one * scale;
+        }
+
+        private void AnimateAmmoWarning()
+        {
+            bool isLowAmmo = (currentLoadedAmmo <= 0 || (currentMagSize > 0 && currentLoadedAmmo <= Mathf.CeilToInt(currentMagSize * 0.25f)));
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 6f);
+            Color warningColor = Color.Lerp(new Color(1f, 0.3f, 0.3f, 0.4f), new Color(1f, 0.2f, 0.2f, 1f), pulse);
+            Color ammoNumColor = (currentLoadedAmmo == 0) ? new Color(1f, 0.35f, 0.35f, 1f) :
+                                 (isLowAmmo) ? new Color(1f, 0.75f, 0.2f, 1f) : Color.white;
+
+            // Direct fallback
+            ApplyAmmoVisuals(reloadPrompt, ammoCurrentText, isLowAmmo, warningColor, ammoNumColor);
+
+            // Both variants
+            if (topBarHUD != null) ApplyAmmoVisuals(topBarHUD.reloadPrompt, topBarHUD.ammoCurrentText, isLowAmmo, warningColor, ammoNumColor);
+            if (sideWingsHUD != null) ApplyAmmoVisuals(sideWingsHUD.reloadPrompt, sideWingsHUD.ammoCurrentText, isLowAmmo, warningColor, ammoNumColor);
+        }
+
+        private void ApplyAmmoVisuals(GameObject promptGo, TextMeshProUGUI curText, bool isLow, Color warnColor, Color numColor)
+        {
+            if (promptGo != null)
+            {
+                if (promptGo.activeSelf != isLow) promptGo.SetActive(isLow);
+                if (isLow)
+                {
+                    var txt = promptGo.GetComponent<TextMeshProUGUI>();
+                    if (txt != null) txt.color = warnColor;
+                }
+            }
+            if (curText != null)
+            {
+                curText.color = numColor;
+            }
+        }
+
+        private void AnimateBossBar()
+        {
+            if (bossHealthContainer == null || !bossHealthContainer.activeInHierarchy) return;
+
+            currentBossRatio = Mathf.Lerp(currentBossRatio, targetBossRatio, Time.deltaTime * barLerpSpeed);
+            if (bossBarFill != null) bossBarFill.fillAmount = currentBossRatio;
+
+            if (bossDamageTimer > 0f)
+            {
+                bossDamageTimer -= Time.deltaTime;
+            }
+            else
+            {
+                ghostBossRatio = Mathf.Lerp(ghostBossRatio, targetBossRatio, Time.deltaTime * ghostLerpSpeed);
+                if (bossBarGhost != null) bossBarGhost.fillAmount = ghostBossRatio;
+            }
+        }
+
+        /// <summary>
+        /// Updates the health display and bar fill across active HUD variants.
+        /// </summary>
+        public void UpdateHealth(float current, float max)
+        {
+            float safeMax = Mathf.Max(max, 1f);
+            float newRatio = Mathf.Clamp01(current / safeMax);
+
+            if (newRatio < targetHealthRatio)
+            {
+                healthDamageTimer = ghostLagDelay;
+            }
+
+            targetHealthRatio = newRatio;
+            string hpStr = $"{Mathf.CeilToInt(current)}";
+
+            if (healthText != null) healthText.text = hpStr;
+            if (topBarHUD != null && topBarHUD.healthText != null) topBarHUD.healthText.text = hpStr;
+            if (sideWingsHUD != null && sideWingsHUD.healthText != null) sideWingsHUD.healthText.text = hpStr;
+
+            if (legacyHealthText != null)
+            {
+                legacyHealthText.text = $"HP: {Mathf.CeilToInt(current)} / {Mathf.CeilToInt(safeMax)}";
+            }
+        }
+
+        /// <summary>
+        /// Updates the armor display and bar fill across active HUD variants.
+        /// </summary>
+        public void UpdateArmor(float current, float max = 50f)
+        {
+            float safeMax = Mathf.Max(max, 1f);
+            float newRatio = Mathf.Clamp01(current / safeMax);
+
+            if (newRatio < targetArmorRatio)
+            {
+                armorDamageTimer = ghostLagDelay;
+            }
+
+            targetArmorRatio = newRatio;
+            string armStr = $"{Mathf.CeilToInt(current)}";
+
+            if (armorText != null) armorText.text = armStr;
+            if (topBarHUD != null && topBarHUD.armorText != null) topBarHUD.armorText.text = armStr;
+            if (sideWingsHUD != null && sideWingsHUD.armorText != null) sideWingsHUD.armorText.text = armStr;
+
+            if (legacyArmorText != null)
+            {
+                legacyArmorText.text = $"Armor: {Mathf.CeilToInt(current)}";
+            }
+
+            float alpha = (current > 0f || max > 0f) ? 1.0f : 0.5f;
+            SetArmorContainerAlpha(armorContainer, alpha);
+            if (topBarHUD != null) SetArmorContainerAlpha(topBarHUD.armorContainer, alpha);
+            if (sideWingsHUD != null) SetArmorContainerAlpha(sideWingsHUD.armorContainer, alpha);
+        }
+
+        private void SetArmorContainerAlpha(GameObject container, float alpha)
+        {
+            if (container != null)
+            {
+                var cg = container.GetComponent<CanvasGroup>();
+                if (cg != null) cg.alpha = alpha;
+            }
+        }
+
+        /// <summary>
+        /// Updates the ammo display and reserve across active HUD variants.
+        /// </summary>
+        public void UpdateAmmo(int current, int reserve)
+        {
+            currentLoadedAmmo = current;
+            currentReserveAmmo = reserve;
+
+            float magRatio = (currentMagSize > 0) ? Mathf.Clamp01((float)current / currentMagSize) : 1f;
+            if (magRatio < targetAmmoRatio)
+            {
+                ammoFireTimer = ghostLagDelay;
+            }
+            targetAmmoRatio = magRatio;
+
+            targetReserveRatio = (reserve >= 9999) ? 1.0f : Mathf.Clamp01((float)reserve / 180f);
+
+            string curStr = $"{current}";
+            string resStr = (reserve >= 9999) ? "∞" : $"{reserve}";
+
+            ApplyAmmoText(ammoCurrentText, ammoReserveText, curStr, resStr);
+            if (topBarHUD != null) ApplyAmmoText(topBarHUD.ammoCurrentText, topBarHUD.ammoReserveText, curStr, resStr);
+            if (sideWingsHUD != null) ApplyAmmoText(sideWingsHUD.ammoCurrentText, sideWingsHUD.ammoReserveText, curStr, resStr);
+
+            if (legacyAmmoText != null)
+            {
+                legacyAmmoText.text = $"{current} / {resStr}";
+            }
+        }
+
+        private void ApplyAmmoText(TextMeshProUGUI cur, TextMeshProUGUI res, string curStr, string resStr)
+        {
+            if (cur != null) cur.text = curStr;
+            if (res != null) res.text = resStr;
+        }
+
+        /// <summary>
+        /// Updates weapon silhouette icon and name in active HUD variants.
+        /// </summary>
+        public void UpdateWeapon(WeaponData weapon)
+        {
+            if (weapon == null) return;
+            currentMagSize = weapon.magSize;
+
+            string wName = weapon.weaponName.ToUpper();
+            ApplyWeaponVisuals(weaponIcon, weaponNameText, weapon.icon, wName);
+            if (topBarHUD != null) ApplyWeaponVisuals(topBarHUD.weaponIcon, topBarHUD.weaponNameText, weapon.icon, wName);
+            if (sideWingsHUD != null) ApplyWeaponVisuals(sideWingsHUD.weaponIcon, sideWingsHUD.weaponNameText, weapon.icon, wName);
+        }
+
+        private void ApplyWeaponVisuals(Image icon, TextMeshProUGUI nameTxt, Sprite spr, string nameStr)
+        {
+            if (icon != null)
+            {
+                if (spr != null)
+                {
+                    icon.sprite = spr;
+                    icon.enabled = true;
+                }
+                else
+                {
+                    icon.enabled = false;
+                }
+            }
+            if (nameTxt != null)
+            {
+                nameTxt.text = nameStr;
+            }
+        }
+
+        /// <summary>
+        /// Controls the Top-Center Boss Health Bar visibility and initial state.
+        /// </summary>
+        public void ShowBossHealth(bool show, string bossName = "BUG BOSS", float currentHp = 1000f, float maxHp = 1000f)
+        {
+            if (bossHealthContainer != null)
+            {
+                bossHealthContainer.SetActive(show);
+            }
+
+            if (show)
+            {
+                bossMaxHp = Mathf.Max(maxHp, 1f);
+                if (bossNameText != null)
+                {
+                    bossNameText.text = $"⚠️ {bossName.ToUpper()}";
+                }
+                UpdateBossHealth(currentHp, maxHp);
+            }
+        }
+
+        /// <summary>
+        /// Updates the Top-Center Boss Health Bar smoothly.
+        /// </summary>
+        public void UpdateBossHealth(float currentHp, float maxHp)
+        {
+            if (bossHealthContainer == null) return;
+            bossMaxHp = Mathf.Max(maxHp, 1f);
+            float newRatio = Mathf.Clamp01(currentHp / bossMaxHp);
+
+            if (newRatio < targetBossRatio)
+            {
+                bossDamageTimer = ghostLagDelay;
+            }
+
+            targetBossRatio = newRatio;
+
+            if (bossHealthText != null)
+            {
+                int curInt = Mathf.Max(0, Mathf.CeilToInt(currentHp));
+                int maxInt = Mathf.CeilToInt(bossMaxHp);
+                int pct = Mathf.CeilToInt(newRatio * 100f);
+                bossHealthText.text = $"{curInt} / {maxInt} ({pct}%)";
+            }
+        }
+
+        private void ShowGameOverScreen()
+        {
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.SetActive(true);
+            }
+        }
+
+        public void RestartGame()
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+}

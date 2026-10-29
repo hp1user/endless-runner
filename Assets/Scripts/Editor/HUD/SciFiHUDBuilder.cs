@@ -149,6 +149,8 @@ namespace EndlessRunner.Editor
             Sprite slimFill = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITES_PATH}/HUD_Bar_Fill_Slim.png");
             Sprite bulletIcon = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITES_PATH}/Icon_Bullet.png");
             Sprite ammoBoxIcon = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITES_PATH}/Icon_Ammo_Box.png");
+            Sprite barBracket = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITES_PATH}/HUD_Bar_Bracket.png");
+            if (barBracket == null) barBracket = slimTrack;
             Sprite bossTrack = barTrack;
             Sprite bossFill = barFill;
 
@@ -204,7 +206,7 @@ namespace EndlessRunner.Editor
             StretchFull(sideWingsRt);
             Undo.RegisterCreatedObjectUndo(sideWingsRootGo, "Create Side Wings HUD");
 
-            HUDElementBinding sideBinding = BuildVerticalSideWingsLayout(sideWingsRootGo.transform, dockLeft, dockRight, slimTrack, slimFill, heartIcon, shieldIcon, bulletIcon, ammoBoxIcon, defaultGunIcon, font, theme);
+            HUDElementBinding sideBinding = BuildVerticalSideWingsLayout(sideWingsRootGo.transform, dockLeft, dockRight, slimTrack, slimFill, barBracket, heartIcon, shieldIcon, bulletIcon, ammoBoxIcon, defaultGunIcon, font, theme);
 
             // 5. Build Variant 2: Top Bar HUD Root (Classic Top-Left / Top-Right)
             DestroyChildIfFound(canvasTrans, "TopBar_HUD");
@@ -245,10 +247,17 @@ namespace EndlessRunner.Editor
             uiManager.armorContainer = sideBinding.armorContainer;
             uiManager.armorBarFill = sideBinding.armorBarFill;
             uiManager.armorBarGhost = sideBinding.armorBarGhost;
+            uiManager.armorCap = sideBinding.armorCap;
+            uiManager.armorFrame = sideBinding.armorFrame;
             uiManager.armorText = sideBinding.armorText;
             uiManager.armorIcon = sideBinding.armorIcon;
             uiManager.weaponIcon = sideBinding.weaponIcon;
             uiManager.weaponNameText = sideBinding.weaponNameText;
+            uiManager.ammoBarFill = sideBinding.ammoBarFill;
+            uiManager.ammoBarGhost = sideBinding.ammoBarGhost;
+            uiManager.ammoReserveBarFill = sideBinding.ammoReserveBarFill;
+            uiManager.ammoCap = sideBinding.ammoCap;
+            uiManager.ammoFrame = sideBinding.ammoFrame;
             uiManager.ammoCurrentText = sideBinding.ammoCurrentText;
             uiManager.ammoReserveText = sideBinding.ammoReserveText;
             uiManager.ammoDividerText = sideBinding.ammoDividerText;
@@ -356,38 +365,53 @@ namespace EndlessRunner.Editor
                     }
 
                     Transform armorCol = leftCard.Find("ArmorColumn");
+                    if (armorCol == null && hTrack != null) armorCol = hTrack.Find("ArmorColumn");
+
+                    Transform shieldTrans = leftCard.Find("Icon_Shield");
+                    if (shieldTrans == null && armorCol != null) shieldTrans = armorCol.Find("Icon_Shield");
+                    if (shieldTrans != null && theme.shieldIcon != null)
+                    {
+                        var img = shieldTrans.GetComponent<Image>();
+                        if (img != null) img.sprite = theme.shieldIcon;
+                    }
+
                     if (armorCol != null)
                     {
-                        Transform shieldTrans = armorCol.Find("Icon_Shield");
-                        if (shieldTrans != null && theme.shieldIcon != null)
-                        {
-                            var img = shieldTrans.GetComponent<Image>();
-                            if (img != null) img.sprite = theme.shieldIcon;
-                        }
                         Transform aTrack = armorCol.Find("Armor_Track");
-                        if (aTrack != null)
+                        if (aTrack != null && theme.verticalTrack != null)
                         {
-                            if (theme.verticalTrack != null)
+                            var img = aTrack.GetComponent<Image>();
+                            if (img != null) img.sprite = theme.verticalTrack;
+                        }
+                        Transform aFill = armorCol.Find("Armor_Fill");
+                        if (aFill == null && aTrack != null) aFill = aTrack.Find("Armor_Fill");
+                        if (aFill != null)
+                        {
+                            var img = aFill.GetComponent<Image>();
+                            if (img != null)
                             {
-                                var img = aTrack.GetComponent<Image>();
-                                if (img != null) img.sprite = theme.verticalTrack;
+                                if (theme.verticalFill != null) img.sprite = theme.verticalFill;
+                                img.color = new Color(theme.armorColor.r, theme.armorColor.g, theme.armorColor.b, 0.20f);
                             }
-                            Transform aFill = aTrack.Find("Armor_Fill");
-                            if (aFill != null)
-                            {
-                                var img = aFill.GetComponent<Image>();
-                                if (img != null)
-                                {
-                                    if (theme.verticalFill != null) img.sprite = theme.verticalFill;
-                                    img.color = theme.armorColor;
-                                }
-                            }
-                            Transform aGhost = aTrack.Find("Armor_Ghost");
-                            if (aGhost != null)
-                            {
-                                var img = aGhost.GetComponent<Image>();
-                                if (img != null && theme.verticalFill != null) img.sprite = theme.verticalFill;
-                            }
+                        }
+                        Transform aCap = armorCol.Find("Armor_Cap");
+                        if (aCap != null)
+                        {
+                            var img = aCap.GetComponent<Image>();
+                            if (img != null) img.color = new Color(theme.armorColor.r, theme.armorColor.g, theme.armorColor.b, 1.0f);
+                        }
+                        Transform aFrame = armorCol.Find("Armor_Frame");
+                        if (aFrame != null)
+                        {
+                            var img = aFrame.GetComponent<Image>();
+                            if (img != null) img.color = new Color(theme.armorColor.r, theme.armorColor.g, theme.armorColor.b, 1.0f);
+                        }
+                        Transform aGhost = armorCol.Find("Armor_Ghost");
+                        if (aGhost == null && aTrack != null) aGhost = aTrack.Find("Armor_Ghost");
+                        if (aGhost != null)
+                        {
+                            var img = aGhost.GetComponent<Image>();
+                            if (img != null && theme.verticalFill != null) img.sprite = theme.verticalFill;
                         }
                     }
                 }
@@ -433,8 +457,20 @@ namespace EndlessRunner.Editor
                             if (img != null)
                             {
                                 if (theme.verticalFill != null) img.sprite = theme.verticalFill;
-                                img.color = theme.ammoColor;
+                                img.color = new Color(theme.ammoColor.r, theme.ammoColor.g, theme.ammoColor.b, 0.20f);
                             }
+                        }
+                        Transform ammoCap = ammoTrack.Find("Ammo_Cap");
+                        if (ammoCap != null)
+                        {
+                            var img = ammoCap.GetComponent<Image>();
+                            if (img != null) img.color = new Color(theme.ammoColor.r, theme.ammoColor.g, theme.ammoColor.b, 1.0f);
+                        }
+                        Transform ammoFrame = ammoTrack.Find("Ammo_Frame");
+                        if (ammoFrame != null)
+                        {
+                            var img = ammoFrame.GetComponent<Image>();
+                            if (img != null) img.color = new Color(theme.ammoColor.r, theme.ammoColor.g, theme.ammoColor.b, 1.0f);
                         }
                         Transform ammoGhost = ammoTrack.Find("Ammo_Ghost");
                         if (ammoGhost != null)
@@ -452,18 +488,21 @@ namespace EndlessRunner.Editor
                     }
 
                     Transform resTrack = rightCard.Find("Reserve_Track");
-                    if (resTrack != null)
+                    if (resTrack != null && theme.verticalTrack != null)
                     {
-                        if (theme.verticalTrack != null)
+                        var img = resTrack.GetComponent<Image>();
+                        if (img != null) img.sprite = theme.verticalTrack;
+                    }
+
+                    Transform resFill = (ammoTrack != null) ? ammoTrack.Find("Reserve_Fill") : null;
+                    if (resFill == null && resTrack != null) resFill = resTrack.Find("Reserve_Fill");
+                    if (resFill != null)
+                    {
+                        var img = resFill.GetComponent<Image>();
+                        if (img != null)
                         {
-                            var img = resTrack.GetComponent<Image>();
-                            if (img != null) img.sprite = theme.verticalTrack;
-                        }
-                        Transform resFill = resTrack.Find("Reserve_Fill");
-                        if (resFill != null)
-                        {
-                            var img = resFill.GetComponent<Image>();
-                            if (img != null && theme.verticalFill != null) img.sprite = theme.verticalFill;
+                            if (theme.verticalFill != null) img.sprite = theme.verticalFill;
+                            img.color = new Color(theme.ammoColor.r * 0.85f, theme.ammoColor.g * 0.70f, theme.ammoColor.b * 0.35f, 0.85f);
                         }
                     }
                 }
@@ -627,30 +666,42 @@ namespace EndlessRunner.Editor
         }
 
         #region Vertical Side Wings HUD Builder (Flush Edge Bezel Docks)
-        private static HUDElementBinding BuildVerticalSideWingsLayout(Transform parent, Sprite dockLeft, Sprite dockRight, Sprite slimTrack, Sprite slimFill, Sprite heartIcon, Sprite shieldIcon, Sprite bulletIcon, Sprite ammoBoxIcon, Sprite gunIcon, TMP_FontAsset font, HUDThemeProfile theme = null)
+        private static HUDElementBinding BuildVerticalSideWingsLayout(Transform parent, Sprite dockLeft, Sprite dockRight, Sprite slimTrack, Sprite slimFill, Sprite barBracket, Sprite heartIcon, Sprite shieldIcon, Sprite bulletIcon, Sprite ammoBoxIcon, Sprite gunIcon, TMP_FontAsset font, HUDThemeProfile theme = null)
         {
             var binding = new HUDElementBinding();
             binding.root = parent.gameObject;
 
-            float cardWidth = (theme != null && theme.dockWidth > 0) ? theme.dockWidth : 110f;
+            // Compact 80px dock width as requested
+            float cardWidth = (theme != null && theme.dockWidth > 0) ? theme.dockWidth : 80f;
             float cardHeight = (theme != null && theme.dockHeight > 0) ? theme.dockHeight : 490f;
             float dockMarginX = (theme != null) ? theme.dockMarginX : 0f;
             float dockOffsetY = (theme != null) ? theme.dockOffsetY : -80f;
 
-            float colLeftX = cardWidth * 0.33f;
-            float colRightX = cardWidth * 0.67f;
-            float barWidth = 20f;
+            float centerX = cardWidth * 0.5f; // Exactly 40px
+            float barWidth = 24f;             // Sleek centered track (24px)
             float barHeight = Mathf.Clamp(cardHeight - 150f, 150f, 500f);
-            float textPosY = -(barHeight + 98f);
-            float reloadPosY = -(barHeight + 128f);
+            float textPosY = -(barHeight + 96f);
+            float reloadPosY = -(barHeight + 124f);
 
-            Color healthCol = (theme != null) ? theme.healthColor : new Color(0.12f, 0.95f, 0.58f, 1f);
-            Color armorCol = (theme != null) ? theme.armorColor : new Color(0.15f, 0.85f, 1.0f, 1f);
-            Color ammoCol = (theme != null) ? theme.ammoColor : new Color(1.0f, 0.72f, 0.12f, 1f);
-            Color ghostCol = (theme != null) ? theme.ghostDamageColor : new Color(0.95f, 0.22f, 0.22f, 0.75f);
+            // Grounded normal game colors (Calm, non-neon palette)
+            Color healthCol = (theme != null) ? theme.healthColor : new Color(0.15f, 0.68f, 0.38f, 1f); // Rich Emerald/Jade Green (#27AE60)
+            Color ghostCol = (theme != null) ? theme.ghostDamageColor : new Color(0.75f, 0.22f, 0.17f, 0.75f);
+            Color reserveCol = new Color(0.55f, 0.31f, 0.10f, 0.90f); // Grounded Bronze Amber (#8C4F1A)
+
+            // Tactical Armor (Deep Sapphire Blue #3182CE - non-neon)
+            Color armorBase = (theme != null) ? theme.armorColor : new Color(0.19f, 0.51f, 0.81f, 1f);
+            Color armorOverlayCol = new Color(armorBase.r, armorBase.g, armorBase.b, 0.20f); // 20% alpha calm azure glaze
+            Color armorFrameCol = new Color(0.29f, 0.56f, 0.89f, 1.0f);   // Clean steel-blue 2px border (#4A90E2)
+            Color armorCapCol = new Color(0.42f, 0.64f, 0.91f, 1.0f);     // Clean steel-blue cap line
+
+            // Ammo (Warm Golden Brass #D4973B - non-neon)
+            Color ammoBase = (theme != null) ? theme.ammoColor : new Color(0.83f, 0.59f, 0.23f, 1f);
+            Color ammoOverlayCol = new Color(ammoBase.r, ammoBase.g, ammoBase.b, 0.20f); // 20% alpha warm brass glaze
+            Color ammoFrameCol = new Color(ammoBase.r, ammoBase.g, ammoBase.b, 1.0f);    // Clean golden brass border
+            Color ammoCapCol = new Color(0.90f, 0.70f, 0.35f, 1.0f);     // Clean brass cap line
 
             // =========================================================================
-            // 1. LEFT CARD: VERTICAL PLAYER VITALS (Flush with Left Screen Edge)
+            // 1. LEFT CARD: VERTICAL PLAYER VITALS (Wuthering Waves Overlapping Health + Armor)
             // =========================================================================
             GameObject leftCardGo = new GameObject("PlayerStatusCard_Side", typeof(RectTransform), typeof(Image));
             leftCardGo.transform.SetParent(parent, false);
@@ -667,46 +718,66 @@ namespace EndlessRunner.Editor
             leftBg.color = Color.white;
             leftBg.raycastTarget = false;
 
-            // VITALS Header
-            CreateTMPText("Vitals_Header", leftCardGo.transform, font, "VITALS", 10, FontStyles.Bold, new Color(0.4f, 0.85f, 1f, 0.9f),
-                TextAlignmentOptions.Center, new Vector2(cardWidth * 0.5f, -18f), new Vector2(90f, 18f), new Vector2(0.5f, 0.5f));
+            // VITALS Header (Clean metallic steel-slate #B3C7DC matching dock bezel)
+            CreateTMPText("Vitals_Header", leftCardGo.transform, font, "VITALS", 9, FontStyles.Bold, new Color(0.70f, 0.78f, 0.86f, 0.95f),
+                TextAlignmentOptions.Center, new Vector2(centerX, -16f), new Vector2(70f, 16f), new Vector2(0.5f, 0.5f));
 
-            // --- HEALTH COLUMN ---
-            GameObject heartGo = CreateImageObject("Icon_Heart", leftCardGo.transform, heartIcon, new Vector2(colLeftX, -50f), new Vector2(24f, 24f), new Vector2(0.5f, 0.5f));
+            // Dual Icons above the bar: Heart & Shield side-by-side
+            GameObject heartGo = CreateImageObject("Icon_Heart", leftCardGo.transform, heartIcon, new Vector2(centerX - 13f, -46f), new Vector2(20f, 20f), new Vector2(0.5f, 0.5f));
+            heartGo.GetComponent<Image>().color = healthCol;
+            GameObject shieldGo = CreateImageObject("Icon_Shield", leftCardGo.transform, shieldIcon, new Vector2(centerX + 13f, -46f), new Vector2(20f, 20f), new Vector2(0.5f, 0.5f));
+            shieldGo.GetComponent<Image>().color = armorBase;
 
-            GameObject hTrackGo = CreateImageObject("Health_Track", leftCardGo.transform, slimTrack, new Vector2(colLeftX, -72f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
+            // Single Vitals Track (Centered at X = 40)
+            GameObject hTrackGo = CreateImageObject("Health_Track", leftCardGo.transform, slimTrack, new Vector2(centerX, -68f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
             hTrackGo.GetComponent<Image>().type = Image.Type.Sliced;
 
-            GameObject hGhostGo = CreateVerticalFillBar("Health_Ghost", hTrackGo.transform, slimFill, ghostCol);
-            GameObject hFillGo = CreateVerticalFillBar("Health_Fill", hTrackGo.transform, slimFill, healthCol);
+            // BASE LAYER: Health Ghost & Solid Health Fill (Inner 16px width - Green shines clearly through 20% armor!)
+            GameObject hGhostGo = CreateVerticalFillBar("Health_Ghost", hTrackGo.transform, slimFill, ghostCol, insetX: 4f);
+            GameObject hFillGo = CreateVerticalFillBar("Health_Fill", hTrackGo.transform, slimFill, healthCol, insetX: 4f);
 
-            GameObject hTextGo = CreateTMPText("Health_Text", leftCardGo.transform, font, "100", 16, FontStyles.Bold, healthCol,
-                TextAlignmentOptions.Center, new Vector2(colLeftX, textPosY), new Vector2(40f, 22f), new Vector2(0.5f, 0.5f));
-
-            // --- ARMOR COLUMN ---
-            GameObject armorColGo = new GameObject("ArmorColumn", typeof(RectTransform));
-            armorColGo.transform.SetParent(leftCardGo.transform, false);
+            // OVERLAPPING LAYER: Armor Container (Wider 24px width overlapping and framing health bar)
+            GameObject armorColGo = new GameObject("ArmorColumn", typeof(RectTransform), typeof(CanvasGroup));
+            armorColGo.transform.SetParent(hTrackGo.transform, false);
             RectTransform armorColRt = armorColGo.GetComponent<RectTransform>();
             armorColRt.anchorMin = Vector2.zero;
             armorColRt.anchorMax = Vector2.one;
             armorColRt.offsetMin = Vector2.zero;
             armorColRt.offsetMax = Vector2.zero;
-            armorColGo.AddComponent<CanvasGroup>();
 
-            GameObject shieldGo = CreateImageObject("Icon_Shield", armorColGo.transform, shieldIcon, new Vector2(colRightX, -50f), new Vector2(24f, 24f), new Vector2(0.5f, 0.5f));
+            // Armor Fill: Translucent Electric Cyan (20% alpha) covering full 24px width!
+            GameObject aGhostGo = CreateVerticalFillBar("Armor_Ghost", armorColGo.transform, slimFill, new Color(armorBase.r, armorBase.g, armorBase.b, 0.35f), insetX: 0f);
+            GameObject aFillGo = CreateVerticalFillBar("Armor_Fill", armorColGo.transform, slimFill, armorOverlayCol, insetX: 0f);
 
-            GameObject aTrackGo = CreateImageObject("Armor_Track", armorColGo.transform, slimTrack, new Vector2(colRightX, -72f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
-            aTrackGo.GetComponent<Image>().type = Image.Type.Sliced;
+            // Armor Frame Bracket: Wuthering Waves style luminous cyan 2px border highlight dynamically sizing to armor height!
+            GameObject aFrameGo = CreateImageObject("Armor_Frame", armorColGo.transform, barBracket, new Vector2(0f, 0f), new Vector2(barWidth, 0f), new Vector2(0.5f, 0f));
+            RectTransform aFrameRt = aFrameGo.GetComponent<RectTransform>();
+            aFrameRt.anchorMin = new Vector2(0.5f, 0f);
+            aFrameRt.anchorMax = new Vector2(0.5f, 0f);
+            aFrameRt.pivot = new Vector2(0.5f, 0f);
+            Image aFrameImg = aFrameGo.GetComponent<Image>();
+            aFrameImg.type = Image.Type.Sliced;
+            aFrameImg.color = armorFrameCol;
 
-            GameObject aGhostGo = CreateVerticalFillBar("Armor_Ghost", aTrackGo.transform, slimFill, new Color(armorCol.r, armorCol.g, armorCol.b, 0.75f));
-            GameObject aFillGo = CreateVerticalFillBar("Armor_Fill", aTrackGo.transform, slimFill, armorCol);
+            // Armor Cap Indicator: Luminous glowing cyan cap line marking the shield boundary!
+            GameObject aCapGo = CreateImageObject("Armor_Cap", armorColGo.transform, slimFill, new Vector2(0f, 0f), new Vector2(barWidth + 2f, 4f), new Vector2(0.5f, 0.5f));
+            RectTransform aCapRt = aCapGo.GetComponent<RectTransform>();
+            aCapRt.anchorMin = new Vector2(0.5f, 0f);
+            aCapRt.anchorMax = new Vector2(0.5f, 0f);
+            aCapRt.pivot = new Vector2(0.5f, 0.5f);
+            Image aCapImg = aCapGo.GetComponent<Image>();
+            aCapImg.color = armorCapCol;
 
-            GameObject aTextGo = CreateTMPText("Armor_Text", armorColGo.transform, font, "100", 16, FontStyles.Bold, armorCol,
-                TextAlignmentOptions.Center, new Vector2(colRightX, textPosY), new Vector2(40f, 22f), new Vector2(0.5f, 0.5f));
+            // Values below bar: Health (Green) on left, Armor (Cyan) on right
+            GameObject hTextGo = CreateTMPText("Health_Text", leftCardGo.transform, font, "100", 14, FontStyles.Bold, healthCol,
+                TextAlignmentOptions.Center, new Vector2(centerX - 15f, textPosY), new Vector2(30f, 20f), new Vector2(0.5f, 0.5f));
+
+            GameObject aTextGo = CreateTMPText("Armor_Text", leftCardGo.transform, font, "100", 14, FontStyles.Bold, armorBase,
+                TextAlignmentOptions.Center, new Vector2(centerX + 15f, textPosY), new Vector2(30f, 20f), new Vector2(0.5f, 0.5f));
 
 
             // =========================================================================
-            // 2. RIGHT CARD: VERTICAL WEAPON & AMMO (Flush with Right Screen Edge)
+            // 2. RIGHT CARD: VERTICAL WEAPON & AMMO (Wuthering Waves Overlapping Reserve + Mag)
             // =========================================================================
             GameObject rightCardGo = new GameObject("AmmoHUDCard_Side", typeof(RectTransform), typeof(Image));
             rightCardGo.transform.SetParent(parent, false);
@@ -723,41 +794,61 @@ namespace EndlessRunner.Editor
             rightBg.color = Color.white;
             rightBg.raycastTarget = false;
 
-            // AMMO Header
-            GameObject wNameGo = CreateTMPText("Weapon_Name", rightCardGo.transform, font, "AMMO", 10, FontStyles.Bold, new Color(1f, 0.75f, 0.15f, 0.9f),
-                TextAlignmentOptions.Center, new Vector2(cardWidth * 0.5f, -18f), new Vector2(90f, 18f), new Vector2(0.5f, 0.5f));
+            // AMMO Header (Clean warm bronze-slate #D1B899 matching dock bezel)
+            GameObject wNameGo = CreateTMPText("Weapon_Name", rightCardGo.transform, font, "AMMO", 9, FontStyles.Bold, new Color(0.82f, 0.72f, 0.60f, 0.95f),
+                TextAlignmentOptions.Center, new Vector2(centerX, -16f), new Vector2(70f, 16f), new Vector2(0.5f, 0.5f));
 
             // Compact Weapon Silhouette Icon at Top
-            GameObject wIconGo = CreateImageObject("Weapon_Icon", rightCardGo.transform, gunIcon, new Vector2(cardWidth * 0.5f, -34f), new Vector2(48f, 24f), new Vector2(0.5f, 0.5f));
+            GameObject wIconGo = CreateImageObject("Weapon_Icon", rightCardGo.transform, gunIcon, new Vector2(centerX, -32f), new Vector2(38f, 18f), new Vector2(0.5f, 0.5f));
             Image wImg = wIconGo.GetComponent<Image>();
             wImg.preserveAspect = true;
 
-            // --- MAGAZINE COLUMN ---
-            GameObject bIconGo = CreateImageObject("Icon_Bullet", rightCardGo.transform, bulletIcon, new Vector2(colLeftX, -50f), new Vector2(24f, 24f), new Vector2(0.5f, 0.5f));
+            // Dual Icons above the bar: Bullet & Reserve Box side-by-side
+            GameObject bIconGo = CreateImageObject("Icon_Bullet", rightCardGo.transform, bulletIcon, new Vector2(centerX - 13f, -46f), new Vector2(20f, 20f), new Vector2(0.5f, 0.5f));
+            bIconGo.GetComponent<Image>().color = ammoBase;
+            GameObject boxIconGo = CreateImageObject("Icon_Reserve", rightCardGo.transform, ammoBoxIcon, new Vector2(centerX + 13f, -46f), new Vector2(20f, 20f), new Vector2(0.5f, 0.5f));
+            boxIconGo.GetComponent<Image>().color = ammoBase;
 
-            GameObject ammoTrackGo = CreateImageObject("Ammo_Track", rightCardGo.transform, slimTrack, new Vector2(colLeftX, -72f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
+            // Single Ammo Track (Centered at X = 40)
+            GameObject ammoTrackGo = CreateImageObject("Ammo_Track", rightCardGo.transform, slimTrack, new Vector2(centerX, -68f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
             ammoTrackGo.GetComponent<Image>().type = Image.Type.Sliced;
 
-            GameObject ammoGhostGo = CreateVerticalFillBar("Ammo_Ghost", ammoTrackGo.transform, slimFill, new Color(1f, 0.4f, 0.2f, 0.75f));
-            GameObject ammoFillGo = CreateVerticalFillBar("Ammo_Fill", ammoTrackGo.transform, slimFill, ammoCol);
+            // BASE LAYER: Reserve / Max Ammo Bar (Inner 16px width Dark Amber - visible below mag ammo overlay!)
+            GameObject resFillGo = CreateVerticalFillBar("Reserve_Fill", ammoTrackGo.transform, slimFill, reserveCol, insetX: 4f);
 
-            GameObject ammoCurGo = CreateTMPText("Ammo_Current", rightCardGo.transform, font, "30", 16, FontStyles.Bold, Color.white,
-                TextAlignmentOptions.Center, new Vector2(colLeftX, textPosY), new Vector2(40f, 22f), new Vector2(0.5f, 0.5f));
+            // OVERLAPPING LAYER: Magazine Current Ammo (Wider 24px width, 20% alpha translucent gold!)
+            GameObject ammoGhostGo = CreateVerticalFillBar("Ammo_Ghost", ammoTrackGo.transform, slimFill, new Color(1f, 0.4f, 0.2f, 0.35f), insetX: 0f);
+            GameObject ammoFillGo = CreateVerticalFillBar("Ammo_Fill", ammoTrackGo.transform, slimFill, ammoOverlayCol, insetX: 0f);
 
-            // --- RESERVE COLUMN ---
-            GameObject boxIconGo = CreateImageObject("Icon_Reserve", rightCardGo.transform, ammoBoxIcon, new Vector2(colRightX, -50f), new Vector2(24f, 24f), new Vector2(0.5f, 0.5f));
+            // Ammo Frame Bracket: Wuthering Waves style luminous gold 2px border highlight dynamically sizing to ammo height!
+            GameObject ammoFrameGo = CreateImageObject("Ammo_Frame", ammoTrackGo.transform, barBracket, new Vector2(0f, 0f), new Vector2(barWidth, 0f), new Vector2(0.5f, 0f));
+            RectTransform ammoFrameRt = ammoFrameGo.GetComponent<RectTransform>();
+            ammoFrameRt.anchorMin = new Vector2(0.5f, 0f);
+            ammoFrameRt.anchorMax = new Vector2(0.5f, 0f);
+            ammoFrameRt.pivot = new Vector2(0.5f, 0f);
+            Image ammoFrameImg = ammoFrameGo.GetComponent<Image>();
+            ammoFrameImg.type = Image.Type.Sliced;
+            ammoFrameImg.color = ammoFrameCol;
 
-            GameObject resTrackGo = CreateImageObject("Reserve_Track", rightCardGo.transform, slimTrack, new Vector2(colRightX, -72f), new Vector2(barWidth, barHeight), new Vector2(0.5f, 1f));
-            resTrackGo.GetComponent<Image>().type = Image.Type.Sliced;
+            // Ammo Cap Indicator: Luminous glowing gold cap line marking the magazine ammo boundary!
+            GameObject ammoCapGo = CreateImageObject("Ammo_Cap", ammoTrackGo.transform, slimFill, new Vector2(0f, 0f), new Vector2(barWidth + 2f, 4f), new Vector2(0.5f, 0.5f));
+            RectTransform ammoCapRt = ammoCapGo.GetComponent<RectTransform>();
+            ammoCapRt.anchorMin = new Vector2(0.5f, 0f);
+            ammoCapRt.anchorMax = new Vector2(0.5f, 0f);
+            ammoCapRt.pivot = new Vector2(0.5f, 0.5f);
+            Image ammoCapImg = ammoCapGo.GetComponent<Image>();
+            ammoCapImg.color = ammoCapCol;
 
-            GameObject resFillGo = CreateVerticalFillBar("Reserve_Fill", resTrackGo.transform, slimFill, new Color(ammoCol.r * 0.85f, ammoCol.g * 0.75f, ammoCol.b * 0.5f, 0.85f));
+            // Values below bar: Current Mag Ammo (White) on left, Reserve Ammo (Amber) on right
+            GameObject ammoCurGo = CreateTMPText("Ammo_Current", rightCardGo.transform, font, "30", 14, FontStyles.Bold, Color.white,
+                TextAlignmentOptions.Center, new Vector2(centerX - 15f, textPosY), new Vector2(30f, 20f), new Vector2(0.5f, 0.5f));
 
-            GameObject ammoResGo = CreateTMPText("Ammo_Reserve", rightCardGo.transform, font, "120", 16, FontStyles.Bold, ammoCol,
-                TextAlignmentOptions.Center, new Vector2(colRightX, textPosY), new Vector2(40f, 22f), new Vector2(0.5f, 0.5f));
+            GameObject ammoResGo = CreateTMPText("Ammo_Reserve", rightCardGo.transform, font, "120", 14, FontStyles.Bold, ammoBase,
+                TextAlignmentOptions.Center, new Vector2(centerX + 15f, textPosY), new Vector2(30f, 20f), new Vector2(0.5f, 0.5f));
 
             // Reload Prompt at Bottom of Right Dock
-            GameObject reloadGo = CreateTMPText("Reload_Prompt", rightCardGo.transform, font, "⚡ RELOAD", 11, FontStyles.Bold, new Color(1f, 0.25f, 0.25f, 1f),
-                TextAlignmentOptions.Center, new Vector2(cardWidth * 0.5f, reloadPosY), new Vector2(96f, 16f), new Vector2(0.5f, 0.5f));
+            GameObject reloadGo = CreateTMPText("Reload_Prompt", rightCardGo.transform, font, "⚡ RELOAD", 10, FontStyles.Bold, new Color(1f, 0.25f, 0.25f, 1f),
+                TextAlignmentOptions.Center, new Vector2(centerX, reloadPosY), new Vector2(80f, 16f), new Vector2(0.5f, 0.5f));
             reloadGo.SetActive(false);
 
             // Populate Binding
@@ -769,6 +860,8 @@ namespace EndlessRunner.Editor
             binding.armorContainer = armorColGo;
             binding.armorBarFill = aFillGo.GetComponent<Image>();
             binding.armorBarGhost = aGhostGo.GetComponent<Image>();
+            binding.armorCap = aCapRt;
+            binding.armorFrame = aFrameRt;
             binding.armorText = aTextGo.GetComponent<TextMeshProUGUI>();
             binding.armorIcon = shieldGo.GetComponent<Image>();
 
@@ -777,6 +870,8 @@ namespace EndlessRunner.Editor
             binding.ammoBarFill = ammoFillGo.GetComponent<Image>();
             binding.ammoBarGhost = ammoGhostGo.GetComponent<Image>();
             binding.ammoReserveBarFill = resFillGo.GetComponent<Image>();
+            binding.ammoCap = ammoCapRt;
+            binding.ammoFrame = ammoFrameRt;
             binding.ammoCurrentText = ammoCurGo.GetComponent<TextMeshProUGUI>();
             binding.ammoReserveText = ammoResGo.GetComponent<TextMeshProUGUI>();
             binding.ammoDividerText = null;
@@ -784,7 +879,7 @@ namespace EndlessRunner.Editor
 
             return binding;
         }
-        #endregion
+#endregion
 
         #region Top Bar HUD Builder (Fixed Coordinates)
         private static HUDElementBinding BuildTopBarLayout(Transform parent, Sprite panelBg, Sprite ammoPanelBg, Sprite barTrack, Sprite barFill, Sprite heartIcon, Sprite shieldIcon, Sprite gunIcon, TMP_FontAsset font, HUDThemeProfile theme = null)
@@ -1025,7 +1120,7 @@ namespace EndlessRunner.Editor
             return go;
         }
 
-        private static GameObject CreateVerticalFillBar(string name, Transform parent, Sprite sprite, Color color)
+        private static GameObject CreateVerticalFillBar(string name, Transform parent, Sprite sprite, Color color, float insetX = 2f)
         {
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
             go.transform.SetParent(parent, false);
@@ -1034,8 +1129,8 @@ namespace EndlessRunner.Editor
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 0f);
             rt.anchoredPosition = Vector2.zero;
-            rt.offsetMin = new Vector2(2f, 2f);
-            rt.offsetMax = new Vector2(-2f, -2f);
+            rt.offsetMin = new Vector2(insetX, 2f);
+            rt.offsetMax = new Vector2(-insetX, -2f);
 
             Image img = go.GetComponent<Image>();
             img.sprite = sprite;

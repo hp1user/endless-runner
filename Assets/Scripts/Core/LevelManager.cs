@@ -17,6 +17,16 @@ public class LevelManager : MonoBehaviour
     [Tooltip("World movement speed during bridge approach transition (smooth ~12-15s city run)")]
     public float transitionSpeed = 4.5f;
 
+    [Header("Bridge & Boss Arena Settings")]
+    [Tooltip("If true, normal road chunks (chunkVariants or customBossRoadChunk) will be used for the boss fight instead of a separate bridge model.")]
+    public bool useRoadChunksForBridge = true;
+
+    [Tooltip("Optional: Specify a particular road chunk prefab to use during the boss encounter. If null, random road chunks from the current theme's chunkVariants are used.")]
+    public GameObject customBossRoadChunk;
+
+    [Tooltip("Maximum duration (seconds) for the approach transition when using road chunks before boss battle begins.")]
+    public float roadTransitionDuration = 15f;
+
     [Header("Chunk Settings")]
     public LevelDatabase levelDatabase;
     public float chunkLength = 40f;
@@ -42,6 +52,10 @@ public class LevelManager : MonoBehaviour
 
     private bool isGameOver = false;
     private bool isBossPhase = false;
+
+    // Road fallback tracking
+    private GameObject targetBossChunkInstance;
+    private float roadTransitionTimer = 0f;
 
     private void Awake()
     {
@@ -77,9 +91,12 @@ public class LevelManager : MonoBehaviour
         isBossPhase = true;
         isTransitioningToBridge = true;
         isPlayerOnBridge = false;
+        roadTransitionTimer = roadTransitionDuration;
+
+        bool shouldUseRoadFallback = useRoadChunksForBridge || currentTheme == null || currentTheme.transitionBridge == null;
 
         // Place the Bridge chunk at the horizon (Chunk 2, ~60-80m away) so it immediately connects to the city road ahead
-        if (currentTheme != null && currentTheme.transitionBridge != null && activeChunks.Count >= 3)
+        if (!shouldUseRoadFallback && currentTheme != null && currentTheme.transitionBridge != null && activeChunks.Count >= 3)
         {
             var chunkList = new List<ChunkTracker>(activeChunks);
             // chunkList[0] = City chunk currently under player
@@ -98,29 +115,42 @@ public class LevelManager : MonoBehaviour
             }
             activeChunks = new Queue<ChunkTracker>(chunkList);
             lastSpawnedChunk = chunkList[chunkList.Count - 1].instance.transform;
+            targetBossChunkInstance = null;
+            Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Bridge placed at the horizon. Player running towards bridge!");
         }
-
-        Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Bridge placed at the horizon. Player running ~12-15s through city towards bridge!");
+        else if (shouldUseRoadFallback && activeChunks.Count > 0)
+        {
+            var chunkList = new List<ChunkTracker>(activeChunks);
+            // The horizon chunk marks the start of the boss arena
+            int targetIdx = Mathf.Min(2, chunkList.Count - 1);
+            targetBossChunkInstance = chunkList[targetIdx].instance;
+            Debug.Log("<color=yellow>[LevelManager]</color> Boss Phase started: Using road chunks for boss arena. Player approaching boss encounter...");
+        }
     }
 
     private void HandleBossFight()
     {
         isBossPhase = true;
         isTransitioningToBridge = false;
+        isPlayerOnBridge = true;
     }
 
     private void HandleBossDefeated()
     {
         isBossPhase = false;
         isTransitioningToBridge = false;
+        isPlayerOnBridge = false;
+        targetBossChunkInstance = null;
 
-        Debug.Log("<color=orange>[LevelManager]</color> Boss Defeated: Spawning City chunks at the horizon. Bridge will end seamlessly!");
+        Debug.Log("<color=orange>[LevelManager]</color> Boss Defeated: Resuming normal road generation!");
     }
 
     private void HandleLevelComplete(int newLevel)
     {
         isBossPhase = false;
         isTransitioningToBridge = false;
+        isPlayerOnBridge = false;
+        targetBossChunkInstance = null;
 
         if (levelDatabase != null && levelDatabase.allThemes.Count > 0)
         {
@@ -171,22 +201,49 @@ public class LevelManager : MonoBehaviour
             ChunkTracker chunkAtPlayer = GetChunkAtPlayer();
             if (chunkAtPlayer.instance != null)
             {
-                bool isBridge = (currentTheme.transitionBridge != null && chunkAtPlayer.originalPrefab == currentTheme.transitionBridge);
+                bool shouldUseRoadFallback = useRoadChunksForBridge || currentTheme.transitionBridge == null;
 
-                if (!isPlayerOnBridge && isBridge)
+                if (!shouldUseRoadFallback && currentTheme.transitionBridge != null)
                 {
-                    isPlayerOnBridge = true;
-                    isTransitioningToBridge = false;
-                    Debug.Log("<color=green>[LevelManager]</color> Player stepped onto the Bridge! Triggering Boss Fight...");
-                    if (GameManager.Instance != null)
+                    bool isBridge = (chunkAtPlayer.originalPrefab == currentTheme.transitionBridge);
+
+                    if (!isPlayerOnBridge && isBridge)
                     {
-                        GameManager.Instance.OnBridgeReached();
+                        isPlayerOnBridge = true;
+                        isTransitioningToBridge = false;
+                        Debug.Log("<color=green>[LevelManager]</color> Player stepped onto the Bridge! Triggering Boss Fight...");
+                        if (GameManager.Instance != null)
+                        {
+                            GameManager.Instance.OnBridgeReached();
+                        }
+                    }
+                    else if (isPlayerOnBridge && !isBridge)
+                    {
+                        isPlayerOnBridge = false;
+                        Debug.Log("<color=cyan>[LevelManager]</color> Player exited the Bridge and returned to the City!");
                     }
                 }
-                else if (isPlayerOnBridge && !isBridge)
+                else
                 {
-                    isPlayerOnBridge = false;
-                    Debug.Log("<color=cyan>[LevelManager]</color> Player exited the Bridge and returned to the City!");
+                    // Road chunks used for boss arena
+                    if (isTransitioningToBridge)
+                    {
+                        roadTransitionTimer -= dt;
+                        bool reachedTargetChunk = (targetBossChunkInstance != null && chunkAtPlayer.instance == targetBossChunkInstance);
+                        bool timerExpired = (roadTransitionTimer <= 0f);
+
+                        if (reachedTargetChunk || timerExpired)
+                        {
+                            isPlayerOnBridge = true;
+                            isTransitioningToBridge = false;
+                            targetBossChunkInstance = null;
+                            Debug.Log("<color=green>[LevelManager]</color> Player reached Boss Arena (Road Chunks)! Triggering Boss Fight...");
+                            if (GameManager.Instance != null)
+                            {
+                                GameManager.Instance.OnBridgeReached();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -207,6 +264,19 @@ public class LevelManager : MonoBehaviour
             if (shouldDespawn)
             {
                 ChunkTracker oldChunk = activeChunks.Dequeue();
+
+                // If target chunk despawned during road fallback transition, trigger boss arena immediately
+                if (isTransitioningToBridge && oldChunk.instance != null && oldChunk.instance == targetBossChunkInstance)
+                {
+                    isPlayerOnBridge = true;
+                    isTransitioningToBridge = false;
+                    targetBossChunkInstance = null;
+                    if (GameManager.Instance != null)
+                    {
+                        GameManager.Instance.OnBridgeReached();
+                    }
+                }
+
                 PoolManager.Instance.ReturnToPool(oldChunk.instance, oldChunk.originalPrefab);
 
                 // Maintain constant chunk count: immediately spawn next chunk at horizon
@@ -244,17 +314,25 @@ public class LevelManager : MonoBehaviour
         if (currentTheme == null) return;
 
         GameObject prefabToSpawn;
+        bool shouldUseRoadFallback = useRoadChunksForBridge || currentTheme.transitionBridge == null;
 
-        // In boss phase, spawn the Bridge chunk at the horizon! Otherwise spawn City chunks!
-        if (isBossPhase && currentTheme.transitionBridge != null)
+        // In boss phase, spawn the Bridge chunk if available and not using road fallback!
+        if (isBossPhase && !shouldUseRoadFallback && currentTheme.transitionBridge != null)
         {
             prefabToSpawn = currentTheme.transitionBridge;
         }
         else
         {
-            if (currentTheme.chunkVariants == null || currentTheme.chunkVariants.Length == 0) return;
-            int randomVariantIndex = Random.Range(0, currentTheme.chunkVariants.Length);
-            prefabToSpawn = currentTheme.chunkVariants[randomVariantIndex];
+            if (isBossPhase && customBossRoadChunk != null)
+            {
+                prefabToSpawn = customBossRoadChunk;
+            }
+            else
+            {
+                if (currentTheme.chunkVariants == null || currentTheme.chunkVariants.Length == 0) return;
+                int randomVariantIndex = Random.Range(0, currentTheme.chunkVariants.Length);
+                prefabToSpawn = currentTheme.chunkVariants[randomVariantIndex];
+            }
         }
 
         float spawnZ = 0f;

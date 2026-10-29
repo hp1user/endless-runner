@@ -27,6 +27,8 @@ namespace UI.Control
         public GameObject armorContainer;
         public Image armorBarFill;
         public Image armorBarGhost;
+        public RectTransform armorCap;
+        public RectTransform armorFrame;
         public TextMeshProUGUI armorText;
         public Image armorIcon;
 
@@ -36,6 +38,8 @@ namespace UI.Control
         public Image ammoBarFill;
         public Image ammoBarGhost;
         public Image ammoReserveBarFill;
+        public RectTransform ammoCap;
+        public RectTransform ammoFrame;
         public TextMeshProUGUI ammoCurrentText;
         public TextMeshProUGUI ammoReserveText;
         public TextMeshProUGUI ammoDividerText;
@@ -74,10 +78,17 @@ namespace UI.Control
         public GameObject armorContainer;
         public Image armorBarFill;
         public Image armorBarGhost;
+        public RectTransform armorCap;
+        public RectTransform armorFrame;
         public TextMeshProUGUI armorText;
         public Image armorIcon;
         public Image weaponIcon;
         public TextMeshProUGUI weaponNameText;
+        public Image ammoBarFill;
+        public Image ammoBarGhost;
+        public Image ammoReserveBarFill;
+        public RectTransform ammoCap;
+        public RectTransform ammoFrame;
         public TextMeshProUGUI ammoCurrentText;
         public TextMeshProUGUI ammoReserveText;
         public TextMeshProUGUI ammoDividerText;
@@ -228,11 +239,16 @@ namespace UI.Control
                 if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.healthBarGhost, ghostHealthRatio);
             }
 
-            // Armor Fill
+            // Armor Fill & Cap Indicator (Wuthering Waves style)
             currentArmorRatio = Mathf.Lerp(currentArmorRatio, targetArmorRatio, Time.deltaTime * barLerpSpeed);
             UpdateFillAmount(armorBarFill, currentArmorRatio);
+            UpdateCapPosition(armorCap, currentArmorRatio, armorBarFill, armorFrame);
             if (topBarHUD != null) UpdateFillAmount(topBarHUD.armorBarFill, currentArmorRatio);
-            if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.armorBarFill, currentArmorRatio);
+            if (sideWingsHUD != null)
+            {
+                UpdateFillAmount(sideWingsHUD.armorBarFill, currentArmorRatio);
+                UpdateCapPosition(sideWingsHUD.armorCap, currentArmorRatio, sideWingsHUD.armorBarFill, sideWingsHUD.armorFrame);
+            }
 
             // Armor Ghost Lag
             if (armorDamageTimer > 0f)
@@ -257,10 +273,16 @@ namespace UI.Control
             if (topBarHUD != null) ApplyIconScale(topBarHUD.healthIcon, heartPulse);
             if (sideWingsHUD != null) ApplyIconScale(sideWingsHUD.healthIcon, heartPulse);
 
-            // Ammo Magazine Fill
+            // Ammo Magazine Fill & Cap Indicator (Wuthering Waves style)
             currentAmmoRatio = Mathf.Lerp(currentAmmoRatio, targetAmmoRatio, Time.deltaTime * barLerpSpeed);
+            UpdateFillAmount(ammoBarFill, currentAmmoRatio);
+            UpdateCapPosition(ammoCap, currentAmmoRatio, ammoBarFill, ammoFrame);
             if (topBarHUD != null) UpdateFillAmount(topBarHUD.ammoBarFill, currentAmmoRatio);
-            if (sideWingsHUD != null) UpdateFillAmount(sideWingsHUD.ammoBarFill, currentAmmoRatio);
+            if (sideWingsHUD != null)
+            {
+                UpdateFillAmount(sideWingsHUD.ammoBarFill, currentAmmoRatio);
+                UpdateCapPosition(sideWingsHUD.ammoCap, currentAmmoRatio, sideWingsHUD.ammoBarFill, sideWingsHUD.ammoFrame);
+            }
 
             if (ammoFireTimer > 0f)
             {
@@ -282,6 +304,42 @@ namespace UI.Control
         private void UpdateFillAmount(Image img, float amount)
         {
             if (img != null) img.fillAmount = amount;
+        }
+
+        private void UpdateCapPosition(RectTransform cap, float ratio, Image fillImage, RectTransform frame = null)
+        {
+            if (cap == null && frame == null) return;
+
+            float trackHeight = 340f;
+            if (fillImage != null && fillImage.rectTransform != null)
+            {
+                trackHeight = fillImage.rectTransform.rect.height;
+                if (trackHeight <= 0f && fillImage.transform.parent != null)
+                {
+                    var parentRt = fillImage.transform.parent.GetComponent<RectTransform>();
+                    if (parentRt != null) trackHeight = parentRt.rect.height;
+                }
+            }
+            float yPos = Mathf.Clamp(trackHeight * ratio, 0f, trackHeight);
+
+            if (ratio <= 0.005f)
+            {
+                if (cap != null && cap.gameObject.activeSelf) cap.gameObject.SetActive(false);
+                if (frame != null && frame.gameObject.activeSelf) frame.gameObject.SetActive(false);
+                return;
+            }
+
+            if (cap != null)
+            {
+                if (!cap.gameObject.activeSelf) cap.gameObject.SetActive(true);
+                cap.anchoredPosition = new Vector2(0f, yPos);
+            }
+
+            if (frame != null)
+            {
+                if (!frame.gameObject.activeSelf) frame.gameObject.SetActive(true);
+                frame.sizeDelta = new Vector2(frame.sizeDelta.x, yPos);
+            }
         }
 
         private void ApplyIconScale(Image icon, float scale)

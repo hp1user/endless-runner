@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e120c7fe4b6663c49af8bdbbf10b6d52, type: 3}
+  m_Name: Default_SciFi_Cyan
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.Data::HUDThemeProfile
+  themeName: Default Sci-Fi Cyan
+  description: High-tech vertical side docks with cyan and emerald neon vitals and flush screen bezels.
+  dockLeftPanel: {fileID: 21300000, guid: cafe1111222233334444555566667771, type: 3}
+  dockRightPanel: {fileID: 21300000, guid: cafe1111222233334444555566667772, type: 3}
+  verticalTrack: {fileID: 21300000, guid: cafe1111222233334444555566667773, type: 3}
+  verticalFill: {fileID: 21300000, guid: cafe1111222233334444555566667774, type: 3}
+  heartIcon: {fileID: 21300000, guid: 9eeb812123d217b4b98cae4342ab15e0, type: 3}
+  shieldIcon: {fileID: 21300000, guid: 553beb1e253302045bb2e9dcce420931, type: 3}
+  bulletIcon: {fileID: 21300000, guid: 6852389fbaec2ea42a5ff80de14a772e, type: 3}
+  ammoBoxIcon: {fileID: 21300000, guid: cafe1111222233334444555566667775, type: 3}
+  defaultWeaponIcon: {fileID: 21300000, guid: 0e681a96c15b18445bcca6b68c0a2f32, type: 3}
+  dockWidth: 80
+  dockHeight: 490
+  dockOffsetY: -80
+  dockMarginX: 0
+  topStatusPanel: {fileID: 21300000, guid: 3738707951b38b545a5ffecb4cece92e, type: 3}
+  topAmmoPanel: {fileID: 21300000, guid: 45a6507e48c11d0469e0e99fc19a9052, type: 3}
+  horizontalTrack: {fileID: 21300000, guid: 1ce80988277f2d24aadcaeb0ac49eca5, type: 3}
+  horizontalFill: {fileID: 21300000, guid: 913dfaddba54bc545b64662ab5f5d023, type: 3}
+  bossPanel: {fileID: 21300000, guid: b055b055111122223333444455556661, type: 3}
+  bossSkullIcon: {fileID: 21300000, guid: b0555cb0111122223333444455556662, type: 3}
+  bossTrack: {fileID: 21300000, guid: 1ce80988277f2d24aadcaeb0ac49eca5, type: 3}
+  bossFill: {fileID: 21300000, guid: 913dfaddba54bc545b64662ab5f5d023, type: 3}
+  healthColor: {r: 0.06, g: 0.94, b: 0.5, a: 1}
+  armorColor: {r: 0.42, g: 0.91, b: 1, a: 1}
+  ammoColor: {r: 1, g: 0.67, b: 0.2, a: 1}
+  ghostDamageColor: {r: 0.95, g: 0.22, b: 0.22, a: 1}
+  bossHealthColor: {r: 0.95, g: 0.15, b: 0.2, a: 1}
+  bossGhostColor: {r: 1, g: 0.78, b: 0.15, a: 1}
+  fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
