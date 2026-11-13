@@ -779,8 +779,21 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Category dropdown automatically assigns default reductions (Boss $\rightarrow$ 40%, Elite $\rightarrow$ 20%) while allowing custom overrides.
     - Added live damage reduction metric to the Data Manager item preview card.
     - Saved `[Bug]Boss` in `EnemyDatabase.asset` with `damageReduction: 40`.
-
-
-
-
-
+- **Sci-Fi UI & Typography Alignment (`MainMenu.unity`, `GameView_EndlessRunner.unity`, `UpgradeManager.cs`)**:
+  - **Main Menu UI Overhaul (`MainMenu.unity`)**:
+    - **Start Button Text**: Upgraded to all-caps `START` with bold tracking (`fontSize: 40`, `fontStyle: Bold`, `characterSpacing: 16`), rendered in vibrant emissive cyan (`#00E5FF`).
+    - **Start Button Chassis**: Replaced raw gray box with high-tech dark slate/navy chassis (`rgba(20, 36, 56, 0.95)`), featuring dynamic cyan glow highlights on hover and active click states.
+    - **Loading Panel**: Styled backdrop to deep space navy (`rgba(10, 18, 30, 0.98)`), with electric cyan progress fill and sleek dark track chassis.
+  - **Next Level & Progression Banner (`GameView_EndlessRunner.unity`, `UpgradeManager.cs`)**:
+    - **Level-Up Banner Text**: Replaced raw unstyled black text (`rgba(0,0,0,1)`) with high-tech sci-fi typography (`fontSize: 54`, `fontStyle: Bold`, `characterSpacing: 18`, middle-centered alignment).
+    - **Dynamic Palette Formatting in `UpgradeManager.cs`**:
+      - Boss Defeat: Radiant amber/gold banner `<color=#FFB830>★ BOSS DEFEATED ★</color>`.
+      - Level Progression: Electric cyber cyan banner `<color=#00E5FF>LEVEL {level} REACHED</color>`.
+    - **Banner Panel Backdrop**: Replaced transparent canvas with sleek rounded sci-fi chassis card (`rgba(10, 20, 36, 0.92)`, sliced rect `820x160`).
+  - **Confirm Button in Card Selection (`GameView_EndlessRunner.unity`)**:
+    - **Confirm Text**: Upgraded from unstyled black text to bold uppercase `CONFIRM` (`fontSize: 40`, `fontStyle: Bold`, `characterSpacing: 16`, electric cyan `#00E5FF`).
+    - **Button Frame**: Replaced pure white placeholder with compact high-tech chassis (`520x90`, dark slate `rgba(20, 36, 56, 0.95)` with cyan hover glow).
+  - **Game Over & Restart Polish (`GameView_EndlessRunner.unity`)**:
+    - Upgraded `Game Over ..` to bold tracked `MISSION FAILED` in warning coral red (`#FF4059`).
+    - Upgraded Restart button to bold tracked `RESTART` in dark chassis with cyan highlights.
+  - **Upgrade Card UI Preserved**: Upgrade card prefabs and layout components remained untouched as requested.

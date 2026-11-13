@@ -142,7 +142,9 @@ public class UpgradeManager : MonoBehaviour
 
             {
 
-                levelUpBannerText.text = isBoss ? "BOSS DEFEATED!" : $"LEVEL {level} REACHED!";
+                levelUpBannerText.text = isBoss 
+                    ? "<color=#FFB830>★ BOSS DEFEATED ★</color>" 
+                    : $"<color=#00E5FF>LEVEL {level} REACHED</color>";
 
             }
 
