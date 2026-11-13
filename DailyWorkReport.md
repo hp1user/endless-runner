@@ -820,3 +820,27 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **Full Canvas Stretch for `CardsPanel`**: Configured `CardsPanel` to stretch full-screen (`anchorMin: (0, 0), anchorMax: (1, 1), sizeDelta: (0, 0)`), providing an accurate responsive anchor context.
     - **`UpgradeManager.cs` Integration**: Added immediate responsive layout update hook in `DisplayCardsOnScreen()`.
   - **Camera Build Zoom Note**: Analyzed Cinemachine camera settings (`gateFitMode: Horizontal`, `FOV: 56`). Documented why vertical FOV adapts on different mobile screen aspect ratios (19.5:9 / 20:9 vs 16:9).
+
+- **Post-Apocalyptic Abandoned Highway Vehicle Textures & Materials (`Car.prefab`, `Bus.prefab`, `SUV.prefab`, `Van.prefab`)**:
+  - **Context & Diagnosis**:
+    - The 4 highway obstacle vehicle prefabs (`Car.prefab`, `Bus.prefab`, `SUV.prefab`, `Van.prefab`) were rendering flat white without textures because they shared an untextured material (`Vehicles.mat`).
+    - Furthermore, `Bus.fbx`, `SUV.fbx`, and `Van.fbx` lacked UV coordinate layers in their source FBX exports.
+  - **UV Generation & Alignment**:
+    - Enabled `generateSecondaryUV: 1` and `swapUVChannels: 1` on `Bus.fbx.meta`, `SUV.fbx.meta`, and `Van.fbx.meta`.
+    - Unity automatically calculates unwrapped lightmap UV charts for all submesh parts and swaps them to primary UV channel 0 (`mesh.uv`), allowing seamless 2D texture sampling across every vehicle part (body, doors, windows, wheels, bumpers).
+  - **Tailored Procedural Vehicle Textures (`Assets/3d/Environment/Vehicles/Textures/`)**:
+    - Generated 4 high-resolution (1024x1024) rusted/broken apocalyptic textures featuring multi-octave noise, surface metal oxidation, peeling lacquer blister borders, vertical acid rain rust drip streaks, road grime gradients, and gouge scratches:
+      - `T_Car_Rusted.png`: Weathered crimson passenger sedan with deep rust blooms, oxidized metal scratches, blistered lacquer borders, and road grime along lower quarter panels.
+      - `T_Bus_Rusted.png`: Highway transit yellow with heavy vertical rust driplines descending from window seals, worn charcoal skirt trim, and dark grime on lower wheel skirts.
+      - `T_SUV_Rusted.png`: Rugged matte olive drab / coyote tan with dried mud splatter cakes along lower rocker panels, deep gouges, and oxidized steel brush-guard wear.
+      - `T_Van_Rusted.png`: Chalky oxidized delivery white / utility grey with orange rust blooms spreading along flat cargo sheet-metal panels, door seams, and water-channel rust.
+  - **Dedicated Curved World Materials (`Assets/3d/Environment/Vehicles/Materials/`)**:
+    - Created 4 dedicated materials mapped to the project'\''s curved roadway shader (`Shader Graphs/World Bend`, GUID `061a183c1e894ae4b8dbc427879d7e72`):
+      - `M_Car_Rusted.mat` $\rightarrow$ `T_Car_Rusted.png`
+      - `M_Bus_Rusted.mat` $\rightarrow$ `T_Bus_Rusted.png`
+      - `M_SUV_Rusted.mat` $\rightarrow$ `T_SUV_Rusted.png`
+      - `M_Van_Rusted.mat` $\rightarrow$ `T_Van_Rusted.png`
+    - Maintained exact highway curvature compatibility (`_Curvature: -0.0015`, `_DistanceOffset: -30`) so the vehicles bend naturally with the procedural roadway.
+    - Configured realistic physical response (`_Metallic: 0.15`, `_Smoothness: 0.25`).
+    - Remapped FBX material slots (`Car.fbx.meta`, `Bus.fbx.meta`, `SUV.fbx.meta`, `Van.fbx.meta`) to automatically assign each vehicle'\''s dedicated rusted material across all prefab instances.
+    - Updated fallback `Vehicles.mat` to reference `T_Car_Rusted.png`.
