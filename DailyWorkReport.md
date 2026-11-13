@@ -672,4 +672,22 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Restored `vfxgraph_Liquid_v1.vfx` to **World Space (`m_Space: 1`)** matching `VFXAssets`, enabling particles and ground puddles to remain fixed in world coordinates for 5–6 seconds as the emitter moves.
     - Preserved Local Space simulation for enemy death splashes by branching `vfxgraph_Liquid_Local.vfx` (`m_Space: 0`) for the burst prefabs (`v2` - `v5`), maintaining synchronized track scrolling via `VFXTrackMover`.
     - Preserved user's custom prefab adjustments (color overrides, custom rotations) across `Assets/Prefabs/VFX/Boss_AcidOrb.prefab` and `Assets/Resources/Boss_AcidOrb.prefab`.
+- **Player Ultimate Attack VFX - Cyber-EMP Radial Energy Discharge (`PlayerUltimate_EMP.prefab`, `AOE.asset`)**:
+  - **Identified & Imported VFX Assets**:
+    - Analyzed the external `VFXAssets` project for AoE effects matching the user's EMP / radial energy discharge theme.
+    - Selected the `ElectricOrbs` series (`vfx_Electricity_Burst_v2`), which provides intense electric cyan/blue/violet radial arcs, sizzling sparks, and central energy flash.
+    - Imported dependencies cleanly without unnecessary asset bloat:
+      - `Assets/GabrielAguiarProductions/Shaders/ElectricityShader.shadergraph`
+      - `Assets/GabrielAguiarProductions/Prefabs/VFXGraphs/vfxgraph_Electricity_v1.vfx`
+      - `Assets/GabrielAguiarProductions/Prefabs/VFXGraphs/vfxgraph_Electricity_v2_simple.vfx`
+      - `Assets/GabrielAguiarProductions/Prefabs/ElectricOrbs/` prefabs.
+  - **Created `PlayerUltimate_EMP.prefab`**:
+    - Configured root `PlayerUltimate_EMP` at torso level (`Y = 1.2m`) with a 4.5x scale multiplier (`(4.5, 4.5, 4.5)`) to cover all 3 highway lanes, matching `effectRadius = 10m` on `AOE.asset`.
+    - Tuned `vfxgraph_Electricity` properties for a dense, punchy blast: `ElectricityRate: 50`, `SparksRate: 35`, `SparksLifetime: 0.5s`, `ElectricityLifetime: 0.35s`, `Loop: false`.
+    - Created lightweight `EMPFlashLight.cs` component driving a dynamic point light flash (`#00E5FF`, range 15m, intensity 6) that rapidly fades over 0.5s to dynamically illuminate the roadway and environment during detonation.
+    - Created automated Editor utility `PlayerUltimatePrefabBuilder.cs` under `[MenuItem("Tools/VFX/Build or Rebuild Player Ultimate EMP Prefab")]`.
+  - **Hooked into Player Ultimate Configuration (`AOE.asset`)**:
+    - Assigned `PlayerUltimate_EMP.prefab` to `visualEffectPrefab` on `Assets/ScriptableObjects/Player/Skill & Ultimate/AOE.asset`.
+    - Adjusted `effectDuration` from `1.0s` to `1.5s` to allow the full lightning arc and spark dissipation cycle to finish gracefully before object destruction.
+
 

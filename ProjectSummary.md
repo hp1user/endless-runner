@@ -184,6 +184,12 @@ This document serves as the master technical blueprint and living knowledge base
      - Overhauled Bug Boss 2-lane acid spit attack (`BossProjectile.cs`, `Assets/Prefabs/VFX/Boss_AcidOrb.prefab`) using ToonLiquids `vfx_RadioactiveWaste_Loop_v1` with slowed-down dripping droplets, flat ground liquid puddles laying on the road, and pure organic volume-preserving liquid wobble without artificial mesh satellites or flat billboard quads.
      - Created `BossAcidOrbPrefabBuilder.cs` editor builder under `VFX.EditorTool` and resolved `Editor` namespace collision in `LootItemEditor.cs`.
      - Updated `DataManagerWindow.cs` with **"VFX & Combat Effects"** inspector section for configuring enemy Death VFX, Variants, Hit VFX, and pool lifetimes.
+  15. **Player Ultimate AoE Attack (Cyber-EMP Radial Energy Discharge) VFX (2026-11-13)**:
+     - Imported Electric Orbs VFX suite into `Assets/GabrielAguiarProductions/` with electric shaders and VFX Graphs.
+     - Built `Assets/Prefabs/VFX/PlayerUltimate_EMP.prefab` (and `Assets/Resources/PlayerUltimate_EMP.prefab`) configured to scale across a 10m blast radius covering all 3 highway lanes with 50 radial lightning arcs, energetic purple/blue sizzle sparks, and central high-energy flash.
+     - Created `EMPFlashLight.cs` adding dynamic point light flash illumination (`#00E5FF`, range 15m) that ramps smoothly down over 0.5s.
+     - Assigned `PlayerUltimate_EMP.prefab` to `AOE.asset` (`visualEffectPrefab`) with `effectDuration = 1.5s` and `effectRadius = 10m`.
+     - Provided `PlayerUltimatePrefabBuilder.cs` under `[MenuItem("Tools/VFX/Build or Rebuild Player Ultimate EMP Prefab")]` for repeatable automated configuration.
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.
   - Testing boss combat on road chunks using `BossCheckpointSystem.JumpToBossCheckpoint(5)`.
