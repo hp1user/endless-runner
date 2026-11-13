@@ -504,6 +504,16 @@ public class UpgradeManager : MonoBehaviour
 
         }
 
+        if (cardSelectionPanel != null)
+        {
+            var responsiveLayout = cardSelectionPanel.GetComponent<UpgradeCardResponsiveLayout>();
+            if (responsiveLayout == null)
+            {
+                responsiveLayout = cardSelectionPanel.AddComponent<UpgradeCardResponsiveLayout>();
+            }
+            responsiveLayout.UpdateLayout();
+        }
+
     }
 
     // Called when you tap a card

@@ -797,3 +797,26 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Upgraded `Game Over ..` to bold tracked `MISSION FAILED` in warning coral red (`#FF4059`).
     - Upgraded Restart button to bold tracked `RESTART` in dark chassis with cyan highlights.
   - **Upgrade Card UI Preserved**: Upgrade card prefabs and layout components remained untouched as requested.
+
+- **Responsive Upgrade Card Layout for Portrait & Landscape (`UpgradeCardResponsiveLayout.cs`, `UpgradeManager.cs`, `GameView_EndlessRunner.unity`)**:
+  - **Problem Solved**: In vertical (portrait) mode, 3 upgrade cards fit when stacked vertically. However, in horizontal (landscape) mode, fixed vertical stacking (`VerticalLayoutGroup` with 1564 total height) overflowed off the top and bottom of the screen, with the `CONFIRM` button overlapping directly on top of the bottom card.
+  - **Implemented `UpgradeCardResponsiveLayout.cs` (Legacy uGUI)**:
+    - **Dynamic Orientation Switching**:
+      - **Vertical / Portrait (`canvasWidth <= canvasHeight`)**:
+        - Keeps `VerticalLayoutGroup` enabled on `CardContainer`.
+        - Stacked 1 column top-to-bottom with 36px spacing.
+        - Automatically computes scale (`scale = 0.60–1.0`) based on available screen height so cards never overflow even on shorter screens.
+        - Positions `CONFIRM` button cleanly below the cards (`confirmSize: 520x90`).
+      - **Horizontal / Landscape (`canvasWidth > canvasHeight`)**:
+        - Keeps `VerticalLayoutGroup` enabled on `CardContainer` (does NOT turn off VerticalLayoutGroup).
+        - Applies compact spacing (`landscapeSpacing: 18px`).
+        - Dynamically scales `CardContainer` (`scale = 0.38–0.62`) so the vertical 3-card stack fits cleanly within the horizontal screen height without overflowing off top or bottom.
+        - Automatically positions `CONFIRM` button centered directly below the cards with clean vertical spacing (`confirmGap: 16px`) and zero overlap.
+    - **Sub-Canvas & Sorting Order Fix (`sortingOrder: 500`)**:
+      - Added a nested `Canvas` component with `overrideSorting = true` and `sortingOrder = 500` plus a `GraphicRaycaster` to `CardsPanel`.
+      - Moved `CardsPanel` to the end of the `UI Manager` Canvas hierarchy (`transform.SetAsLastSibling()`).
+      - Resolves the issue where `CardsPanel` was being rendered behind the HUD (`SideWings_HUD`, `TopBar_HUD`, `Boss_HUD`) and UI Toolkit panels. `CardsPanel` is now guaranteed to render on top of all HUD and UI elements.
+    - **`[ExecuteAlways]` Support**: Runs live in the Unity Editor / Simulator when toggling between Portrait and Landscape via `OnRectTransformDimensionsChange()` and `Update()`.
+    - **Full Canvas Stretch for `CardsPanel`**: Configured `CardsPanel` to stretch full-screen (`anchorMin: (0, 0), anchorMax: (1, 1), sizeDelta: (0, 0)`), providing an accurate responsive anchor context.
+    - **`UpgradeManager.cs` Integration**: Added immediate responsive layout update hook in `DisplayCardsOnScreen()`.
+  - **Camera Build Zoom Note**: Analyzed Cinemachine camera settings (`gateFitMode: Horizontal`, `FOV: 56`). Documented why vertical FOV adapts on different mobile screen aspect ratios (19.5:9 / 20:9 vs 16:9).
