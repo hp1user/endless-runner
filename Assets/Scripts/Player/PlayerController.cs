@@ -685,11 +685,9 @@ namespace Player.Control
                 }
                 else if (currentWeaponData.fireMode == WeaponFireMode.Auto)
                 {
-                    // Auto weapons (Assault Rifle, SMG):
-                    // First shot fires on tap (shotsFiredThisTriggerPull == 0).
-                    // Continuous auto-fire ONLY engages once held past autoFireHoldDelay!
-                    if (shotsFiredThisTriggerPull == 0) canShoot = true;
-                    else if (triggerHoldTimer >= autoFireHoldDelay) canShoot = true;
+                    // Auto weapons (Assault Rifle, SMG, LMG/Minigun):
+                    // Fires continuously at the weapon's fireRate while the trigger is held
+                    canShoot = true;
                 }
 
                 // STRICT SAFETY: Do NOT fire while actively swiping on screen!
@@ -879,57 +877,193 @@ namespace Player.Control
                 targetPos.z = origin.z + (isBossFight ? 20f : 50f);
             }
 
+            // 1. SNIPER PIERCING BEHAVIOR (Punches through multiple enemies & boss parts in line)
+            if (currentWeaponData.isPiercing || currentWeaponData.category == WeaponCategory.Sniper)
+            {
+                RaycastHit[] hits = Physics.RaycastAll(ray, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+                if (hits == null || hits.Length == 0)
+                {
+                    hits = Physics.SphereCastAll(ray, 0.45f, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+                }
+
+                Vector3 farthestPoint = origin + (targetPos - origin).normalized * currentWeaponData.range;
+                bool anyEnemyHit = false;
+                System.Collections.Generic.HashSet<object> damagedEntities = new System.Collections.Generic.HashSet<object>();
+
+                if (hits != null && hits.Length > 0)
+                {
+                    System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+                    farthestPoint = hits[hits.Length - 1].point;
+
+                    foreach (var hit in hits)
+                    {
+                        if (impactEffect != null)
+                        {
+                            GameObject impactPrefab = impactEffect.gameObject;
+                            GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                            PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
+                        }
+
+                        BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
+                        if (bodyPart != null && !damagedEntities.Contains(bodyPart))
+                        {
+                            damagedEntities.Add(bodyPart);
+                            bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
+                            anyEnemyHit = true;
+                        }
+                        else
+                        {
+                            EnemyController enemy = hit.collider.GetComponent<EnemyController>();
+                            if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
+                            if (enemy != null && !damagedEntities.Contains(enemy))
+                            {
+                                damagedEntities.Add(enemy);
+                                enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
+                                anyEnemyHit = true;
+                            }
+                        }
+                    }
+                }
+
+                PlayHitMarker(anyEnemyHit);
+                SpawnBulletTrail(origin, farthestPoint);
+                return;
+            }
+
+            // 2. SHOTGUN MULTI-TARGET SPREAD BEHAVIOR (Fires cone of pellets hitting multiple enemies/lanes)
+            int pellets = Mathf.Max(currentWeaponData.pelletCount, 1);
+            if (currentWeaponData.category == WeaponCategory.Shotgun && pellets <= 1)
+            {
+                pellets = 8;
+            }
+
+            if (pellets > 1)
+            {
+                float spread = (currentWeaponData.spreadAngle > 0f) ? currentWeaponData.spreadAngle : 8.0f;
+                Vector3 baseDirection = (targetPos - origin).normalized;
+                bool anyPelletHit = false;
+
+                for (int i = 0; i < pellets; i++)
+                {
+                    Vector3 pelletDir;
+                    if (i == 0)
+                    {
+                        pelletDir = baseDirection;
+                    }
+                    else
+                    {
+                        float angle = (i - 1) * (360f / (pellets - 1));
+                        float spreadRadius = Random.Range(0.35f, 1.0f) * spread;
+                        Quaternion spreadRot = Quaternion.Euler(
+                            Mathf.Sin(angle * Mathf.Deg2Rad) * spreadRadius,
+                            Mathf.Cos(angle * Mathf.Deg2Rad) * spreadRadius,
+                            0f
+                        );
+                        pelletDir = spreadRot * baseDirection;
+                    }
+
+                    Vector3 pelletEnd = origin + pelletDir * currentWeaponData.range;
+                    Ray pelletRay = new Ray(origin, pelletDir);
+
+                    RaycastHit hit;
+                    bool didHit = Physics.Raycast(pelletRay, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+                    if (!didHit)
+                    {
+                        didHit = Physics.SphereCast(pelletRay, 0.35f, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+                    }
+
+                    if (didHit)
+                    {
+                        pelletEnd = hit.point;
+                        if (impactEffect != null)
+                        {
+                            GameObject impactPrefab = impactEffect.gameObject;
+                            GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                            PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
+                        }
+
+                        BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
+                        if (bodyPart != null)
+                        {
+                            bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
+                            anyPelletHit = true;
+                        }
+                        else
+                        {
+                            EnemyController enemy = hit.collider.GetComponent<EnemyController>();
+                            if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
+                            if (enemy != null)
+                            {
+                                enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
+                                anyPelletHit = true;
+                            }
+                        }
+                    }
+
+                    SpawnBulletTrail(origin, pelletEnd);
+                }
+
+                PlayHitMarker(anyPelletHit);
+                return;
+            }
+
+            // 3. STANDARD SINGLE-BULLET WEAPON FIRING (Pistol, AR, SMG, LMG/Minigun)
             Vector3 shootDir = (targetPos - origin).normalized;
             Vector3 endPoint = origin + shootDir * currentWeaponData.range;
 
-            RaycastHit hit;
-            bool didHit = Physics.Raycast(ray, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
-            if (!didHit)
+            RaycastHit singleHit;
+            bool didSingleHit = Physics.Raycast(ray, out singleHit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+            if (!didSingleHit)
             {
                 // Fallback to SphereCast for rapid/auto firing weapons targeting thin moving limbs
-                didHit = Physics.SphereCast(ray, 0.35f, out hit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
+                didSingleHit = Physics.SphereCast(ray, 0.35f, out singleHit, currentWeaponData.range, hitMask, QueryTriggerInteraction.Collide);
             }
 
-            if (didHit)
+            if (didSingleHit)
             {
-                endPoint = hit.point;
+                endPoint = singleHit.point;
                 if (impactEffect != null)
                 {
                     GameObject impactPrefab = impactEffect.gameObject;
-                    GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, singleHit.point, Quaternion.LookRotation(singleHit.normal));
                     PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
                 }
 
                 bool hitEnemy = false;
-                BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
+                BossBodyPart bodyPart = singleHit.collider.GetComponent<BossBodyPart>();
                 if (bodyPart != null)
                 {
-                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
+                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, singleHit.point, singleHit.normal);
                     hitEnemy = true;
                 }
                 else
                 {
-                    EnemyController enemy = hit.collider.GetComponent<EnemyController>();
-                    if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
+                    EnemyController enemy = singleHit.collider.GetComponent<EnemyController>();
+                    if (enemy == null) enemy = singleHit.collider.GetComponentInParent<EnemyController>();
                     if (enemy != null)
                     {
-                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
+                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, singleHit.collider, singleHit.point, singleHit.normal);
                         hitEnemy = true;
                     }
                 }
 
-                if (hitEnemy && hitMarkerSounds != null && hitMarkerSounds.Length > 0 && audioSource != null)
-                {
-                    AudioClip clip = hitMarkerSounds[Random.Range(0, hitMarkerSounds.Length)];
-                    if (clip != null)
-                    {
-                        audioSource.pitch = 1.0f; // Reset pitch in case gun shots randomized it
-                        audioSource.PlayOneShot(clip, weaponVolume);
-                    }
-                }
+                PlayHitMarker(hitEnemy);
             }
 
             SpawnBulletTrail(origin, endPoint);
+        }
+
+        private void PlayHitMarker(bool hitEnemy)
+        {
+            if (hitEnemy && hitMarkerSounds != null && hitMarkerSounds.Length > 0 && audioSource != null)
+            {
+                AudioClip clip = hitMarkerSounds[Random.Range(0, hitMarkerSounds.Length)];
+                if (clip != null)
+                {
+                    audioSource.pitch = 1.0f; // Reset pitch in case gun shots randomized it
+                    audioSource.PlayOneShot(clip, weaponVolume);
+                }
+            }
         }
 
         private void SpawnBulletTrail(Vector3 startPos, Vector3 endPos)

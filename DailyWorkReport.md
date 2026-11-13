@@ -688,6 +688,25 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Created automated Editor utility `PlayerUltimatePrefabBuilder.cs` under `[MenuItem("Tools/VFX/Build or Rebuild Player Ultimate EMP Prefab")]`.
   - **Hooked into Player Ultimate Configuration (`AOE.asset`)**:
     - Assigned `PlayerUltimate_EMP.prefab` to `visualEffectPrefab` on `Assets/ScriptableObjects/Player/Skill & Ultimate/AOE.asset`.
-    - Adjusted `effectDuration` from `1.0s` to `1.5s` to allow the full lightning arc and spark dissipation cycle to finish gracefully before object destruction.
+    - Adjusted `effectDuration` from `1.0s` to `2.0s` and added `EMPScaleGrowth.cs` driving a smooth 1.2s ease-in-out radial scale expansion from torso to 10m road width with continuous crackling arcs (`Loop: true`).
+- **Complete Weapon Archetypes Overhaul: Auto-Fire Fix, Shotgun Multi-Target Spread & Sniper Piercing (`WeaponData.cs`, `PlayerController.cs`, `Weapons/*.asset`)**:
+  - **Auto-Fire Mechanics Fix (`PlayerController.cs`)**:
+    - Removed the artificial `autoFireHoldDelay = 0.22f` stutter pause that was causing SMG and other automatic weapons to pause for nearly a quarter of a second after shot 1, making them feel like sluggish single-shot weapons.
+    - Automatic weapons (`WeaponFireMode.Auto`) now fire continuously at their native `fireRate` as long as the trigger/screen is held down, while `TouchManager.IsSwiping` continues to safely protect against accidental firing during lane changes.
+  - **SMG & LMG Archetype Realignment (`SMG.asset`, `LMG.asset`)**:
+    - **SMG**: Upgraded magazine capacity from `15` to `40` rounds, increased bullet damage from `10` to `16`, and set fire rate to `18` shots/sec with 60 ammo per crate pickup.
+    - **LMG / Minigun**: Fixed `fireMode` from `0` (`Single`) to `2` (`Auto`), replaced single-shot `100` damage with high-DPS `24` damage/bullet, expanded magazine from `10` to `80` rounds, and set cyclic rate to `16` shots/sec with 80 ammo per crate pickup.
+  - **Sniper Line Piercing Damage (`WeaponData.cs`, `PlayerController.cs`, `Sniper.asset`)**:
+    - Added `public bool isPiercing` property to `WeaponData`. Enabled on `Sniper.asset` (`AWM`).
+    - Overhauled `PerformRaycastHit` for piercing weapons using `Physics.RaycastAll` / `Physics.SphereCastAll` sorted by distance.
+    - The sniper bullet punches completely through multiple enemies and boss parts in a straight line, dealing full `260` damage (was 100) to every target penetrated and drawing a continuous high-caliber piercing trail to the horizon.
+    - Adjusted Sniper mag capacity to `5` rounds with `1.2` fire rate.
+  - **Shotgun Multi-Target Pellet Spread (`WeaponData.cs`, `PlayerController.cs`, `Shotgun.asset`)**:
+    - Added `public int pelletCount` and `public float spreadAngle` to `WeaponData`. Configured on `Shotgun.asset` (`shotgun1`) with `pelletCount = 8` and `spreadAngle = 8.0f`.
+    - `PerformRaycastHit` fires an 8-pellet cone covering multiple highway lanes, enabling simultaneous multi-target damage against swarming bugs and spreading localized hits across boss body parts.
+    - Adjusted Shotgun damage to `22` damage per pellet (176 max point-blank damage) with an `8` shell magazine and `1.8` fire rate.
+  - **Bug Fixes**:
+    - Fixed `BossCheckpointSystem.cs` line 78 where `machineGun` (Minigun category) was granting ammo to `WeaponCategory.AssaultRifle` instead of `WeaponCategory.Minigun`.
+
 
 

@@ -25,11 +25,14 @@ MonoBehaviour:
   localScale: {x: 1, y: 1, z: 1}
   muzzlePosition: {x: 0, y: 0, z: 0}
   muzzleRotation: {x: 0, y: 0, z: 0}
-  baseDamage: 50
-  fireRate: 2
-  magSize: 10
+  baseDamage: 22
+  fireRate: 1.8
+  magSize: 8
   reloadSpeedMult: 1
-  range: 50
+  range: 35
+  pelletCount: 8
+  spreadAngle: 8
+  isPiercing: 0
   audioFire: {fileID: 8300000, guid: 92d415155aeee8a45a08ab6560511bb2, type: 3}
   audioMagOut: {fileID: 8300000, guid: 1139d385736f7b04abf1c0774e651036, type: 3}
   audioMagIn: {fileID: 8300000, guid: 18cfb87f2e91a804ca4c8816b7c54746, type: 3}

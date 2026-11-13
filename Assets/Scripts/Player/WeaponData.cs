@@ -35,6 +35,16 @@ public class WeaponData : ScriptableObject
     public float reloadSpeedMult = 1.0f;
     public float range = 50f;
 
+    [Header("Special Weapon Behaviors")]
+    [Tooltip("For Shotguns / Multi-target weapons: Number of pellets fired per shot (default 1).")]
+    public int pelletCount = 1;
+
+    [Tooltip("Cone spread angle in degrees for multi-pellet weapons (e.g. 7-10 degrees for Shotguns).")]
+    public float spreadAngle = 0f;
+
+    [Tooltip("For Snipers: If true, bullet pierces through multiple enemies and boss parts in a straight line.")]
+    public bool isPiercing = false;
+
     [Header("Audio SFX")]
     public AudioClip audioFire;
     public AudioClip audioMagOut;

@@ -75,7 +75,7 @@ public static class BossCheckpointSystem
         if (level >= 10)
         {
             UnlockGunSafely("M4", WeaponCategory.AssaultRifle, 150);
-            UnlockGunSafely("machineGun", WeaponCategory.AssaultRifle, 200);
+            UnlockGunSafely("machineGun", WeaponCategory.Minigun, 200);
             UnlockGunSafely("AWM", WeaponCategory.Sniper, 30);
         }
 

@@ -188,8 +188,18 @@ This document serves as the master technical blueprint and living knowledge base
      - Imported Electric Orbs VFX suite into `Assets/GabrielAguiarProductions/` with electric shaders and VFX Graphs.
      - Built `Assets/Prefabs/VFX/PlayerUltimate_EMP.prefab` (and `Assets/Resources/PlayerUltimate_EMP.prefab`) configured to scale across a 10m blast radius covering all 3 highway lanes with 50 radial lightning arcs, energetic purple/blue sizzle sparks, and central high-energy flash.
      - Created `EMPFlashLight.cs` adding dynamic point light flash illumination (`#00E5FF`, range 15m) that ramps smoothly down over 0.5s.
-     - Assigned `PlayerUltimate_EMP.prefab` to `AOE.asset` (`visualEffectPrefab`) with `effectDuration = 1.5s` and `effectRadius = 10m`.
+     - Assigned `PlayerUltimate_EMP.prefab` to `AOE.asset` (`visualEffectPrefab`) with `effectDuration = 2.0s` and `EMPScaleGrowth.cs` driving a 1.2s gradual expansion.
      - Provided `PlayerUltimatePrefabBuilder.cs` under `[MenuItem("Tools/VFX/Build or Rebuild Player Ultimate EMP Prefab")]` for repeatable automated configuration.
+  16. **Weapon Archetypes Overhaul: Shotgun Multi-Target, Sniper Pierce, and Responsive Auto-Fire (2026-11-13)**:
+     - Fixed automatic weapon firing delay in `PlayerController.cs` so SMG, AR, and LMG engage continuous fire instantly when holding down trigger/touch without awkward hold stutter pauses.
+     - Implemented **Sniper Piercing Damage**: Sniper bullets (`isPiercing = true`) penetrate all enemies and boss parts in a straight line using `Physics.RaycastAll`, dealing 260 damage to each target penetrated.
+     - Implemented **Shotgun Multi-Target Spread**: Fires 8 pellets across an 8-degree cone (`pelletCount = 8`, `spreadAngle = 8f`), allowing widespread damage across lanes and localized part damage on the Bug Boss.
+     - Rebalanced weapon stats & magazines across `Assets/Resources/Weapons/`:
+       - SMG: 40 mag, 16 damage, 18 fire rate (Auto).
+       - LMG / Minigun: 80 mag, 24 damage, 16 fire rate (Auto, fixed from Single).
+       - Shotgun: 8 mag, 22 damage/pellet (8 pellets = 176 point-blank), 1.8 fire rate.
+       - Sniper: 5 mag, 260 piercing damage, 1.2 fire rate.
+     - Updated supply crate ammo drop quantities (`Ammo_SMG: 60`, `Ammo_Minigun: 80`).
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.
   - Testing boss combat on road chunks using `BossCheckpointSystem.JumpToBossCheckpoint(5)`.
