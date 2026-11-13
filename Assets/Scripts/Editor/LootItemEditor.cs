@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(LootItem))]
-public class LootItemEditor : Editor
+public class LootItemEditor : UnityEditor.Editor
 {
     SerializedProperty typeProp;
     SerializedProperty amountProp;

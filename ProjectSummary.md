@@ -181,6 +181,8 @@ This document serves as the master technical blueprint and living knowledge base
      - Ground Bug Death Splash: `vfx_RadioactiveWaste_Burst_v4_Small.prefab`.
      - Hit Effect for bugs: `vfx_RadioactiveWaste_Burst_v5_Small.prefab`; Boss Hit Effect: full-size `v5.prefab`.
      - Synchronized ground splash & corpse movement with highway track speed (`VFXTrackMover.cs`, Local Space VFX Graph simulation) so decals and defeated bugs travel backwards seamlessly with the road and exit behind the camera.
+     - Overhauled Bug Boss 2-lane acid spit attack (`BossProjectile.cs`, `Assets/Prefabs/VFX/Boss_AcidOrb.prefab`) using ToonLiquids `vfx_RadioactiveWaste_Loop_v1` with slowed-down dripping droplets, flat ground liquid puddles laying on the road, and pure organic volume-preserving liquid wobble without artificial mesh satellites or flat billboard quads.
+     - Created `BossAcidOrbPrefabBuilder.cs` editor builder under `VFX.EditorTool` and resolved `Editor` namespace collision in `LootItemEditor.cs`.
      - Updated `DataManagerWindow.cs` with **"VFX & Combat Effects"** inspector section for configuring enemy Death VFX, Variants, Hit VFX, and pool lifetimes.
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.

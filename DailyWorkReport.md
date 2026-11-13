@@ -644,4 +644,32 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
   - Created `VFXTrackMover.cs` component that dynamically reads `LevelManager.Instance` speed (`worldMoveSpeed = 15f` or `transitionSpeed = 4.5f`) and chunk direction, translating the splash backwards synchronously with the road.
   - Updated `EnemyController.SpawnDeathVFX()` to ensure `VFXTrackMover` is attached and enabled on spawned death splashes.
   - Updated `EnemyController.Update()` during death (`isDead`) so the falling corpse also slides backward synchronously with the track speed rather than moving at slow bug speed, keeping corpse and ground blood puddle anchored to the moving asphalt until they travel out of view.
+- **Boss Acid Spit Attack VFX Overhaul (`BossProjectile.cs`, `EnemyController.cs`)**:
+  - Replaced the placeholder primitive sphere with a multi-layered toxic **Acid Spit Orb**:
+    - **Pulsating Liquid Core**: Smooth glossy orb with dynamic organic liquid wobble (`Mathf.Sin` scale pulsation) and axial tumbling rotation.
+    - **High-Gloss Wet Slime Material**: URP Lit material with intense HDR neon emission (`#48FF0A`), high smoothness (0.95), and low metallic (0.05).
+    - **Glowing Toxic Corona**: Camera-facing billboard quad using `Glow_02.png` with additive blending.
+    - **Boiling Droplets Particle System**: Integrated particle emitter spraying sizzling green bubbles and corrosive droplets trailing behind in the -Z direction.
+    - **Viscous Slime Trail**: Wide tapered `TrailRenderer` (1.3m to 0.05m) with toxic lime gradient.
+    - **Detonation & Ground Splash**: When the acid orb crosses the player lane or impacts, it triggers `vfx_RadioactiveWaste_Burst_v4` on the road surface, which travels backward synchronously with the track via `VFXTrackMover`.
+- **Boss Acid Orb Refinement with ToonLiquids Loop VFX (`Boss_AcidOrb.prefab`, `BossProjectile.cs`, `vfx_RadioactiveWaste_Loop_v1.prefab`)**:
+  - **Removed Physical Droplets & TrailRenderer**: Removed the child sphere meshes (`SpillDroplet_L`, `SpillDroplet_R`), removed the `TrailRenderer`, and removed the custom particle emitter.
+  - **Integrated `vfx_RadioactiveWaste_Loop_v1` for Dripping Droplets**:
+    - Imported and configured `Assets/GabrielAguiarProductions/Prefabs/ToonLiquids/vfx_RadioactiveWaste_Loop_v1.prefab`.
+    - Slowed down burst rate from `64` to `12` (`Rate: 12`, `BloodVelocity: (1.5, 3.5, 1.5)`) to produce intermittent dripping droplets that fall from the flying orb into the air.
+  - **Flat Ground Effect (`Ground_Acid_Trail`)**:
+    - Attached a ground-level instance of `vfx_RadioactiveWaste_Loop_v1` positioned directly on the road surface (`Y = 0`) laying flat under the moving orb.
+    - Configured with `Rate: 16`, `GroundBloodScale: 4.5`, and `GroundBloodLifetime: 3.5s`, continuously laying expanding green radioactive acid puddles along the highway asphalt as the orb passes.
+  - **VFX Graph Lifecycle & Rotation Decoupling (`Boss_AcidOrb.prefab`, `BossProjectile.cs`, `BossAcidOrbVisual.cs`)**:
+    - Decoupled orb visual tumbling rotation from child VFX emitters by reorganizing the prefab hierarchy:
+      - Root `Boss_AcidOrb` handles only trajectory translation along the highway.
+      - Child `Visual_OrbMesh` contains the Sphere mesh and `BossAcidOrbVisual.cs`, isolating wobble and tumbling spin strictly to the 3D sphere.
+      - Child `Dripping_Droplets` and `Ground_Acid_Trail` are independent sibling children of the root, maintaining stable, non-spinning downward and flat road orientations.
+    - Updated `BossProjectile.cs` to cache `VisualEffect` instances at spawn.
+    - When fading out, it hides the core orb mesh, calls `vfx.Stop()` to cease emission, and waits for the 3.5s ground puddles to finish their natural dissolution before destroying the projectile container.
+  - **Restored World Space Simulation on `vfxgraph_Liquid_v1.vfx` for Moving Particle Trails**:
+    - Identified why moving the orb in Editor did not leave particle trails: `vfxgraph_Liquid_v1.vfx` had previously been switched to Local Space (`m_Space: 0`), forcing all emitted particles to follow the moving transform rather than staying behind in the scene.
+    - Restored `vfxgraph_Liquid_v1.vfx` to **World Space (`m_Space: 1`)** matching `VFXAssets`, enabling particles and ground puddles to remain fixed in world coordinates for 5–6 seconds as the emitter moves.
+    - Preserved Local Space simulation for enemy death splashes by branching `vfxgraph_Liquid_Local.vfx` (`m_Space: 0`) for the burst prefabs (`v2` - `v5`), maintaining synchronized track scrolling via `VFXTrackMover`.
+    - Preserved user's custom prefab adjustments (color overrides, custom rotations) across `Assets/Prefabs/VFX/Boss_AcidOrb.prefab` and `Assets/Resources/Boss_AcidOrb.prefab`.
 

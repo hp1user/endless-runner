@@ -431,7 +431,7 @@ namespace Enemy.Control
             spawnOrigin.y += 0.8f;
             spawnOrigin.z -= 1.5f;
 
-            BossProjectile.Spawn(targetedLanes, spawnOrigin, projectileSpeed, projectileDamage, playerTransform);
+            BossProjectile.Spawn(targetedLanes, spawnOrigin, projectileSpeed, projectileDamage, playerTransform, deathVFX);
 
             // Visual telegraph overlay matching the attack trajectory
             float telegraphDuration = 2.0f;
