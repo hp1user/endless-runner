@@ -904,7 +904,7 @@ namespace Player.Control
                 BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
                 if (bodyPart != null)
                 {
-                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier);
+                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
                     hitEnemy = true;
                 }
                 else
@@ -913,7 +913,7 @@ namespace Player.Control
                     if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
                     if (enemy != null)
                     {
-                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider);
+                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
                         hitEnemy = true;
                     }
                 }

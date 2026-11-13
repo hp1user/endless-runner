@@ -44,7 +44,7 @@ namespace Enemy.Control
             isBroken = false;
         }
 
-        public void TakeDamage(float damage)
+        public void TakeDamage(float damage, Vector3 hitPoint = default, Vector3 hitNormal = default)
         {
             if (bossController == null)
             {
@@ -52,6 +52,14 @@ namespace Enemy.Control
             }
 
             if (bossController != null && bossController.IsDead) return;
+
+            // Trigger hit VFX on Boss at impact point
+            if (bossController != null)
+            {
+                Vector3 pt = (hitPoint != default) ? hitPoint : transform.position;
+                Vector3 n = (hitNormal != default) ? hitNormal : Vector3.up;
+                bossController.SpawnHitVFX(pt, n);
+            }
 
             // Failsafe: If currentHealth wasn't initialized yet
             if (currentHealth <= 0f && !isBroken)

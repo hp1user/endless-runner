@@ -766,6 +766,66 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(deathDurationField);
 
+        // --- VFX & COMBAT EFFECTS ---
+        scroll.Add(CreateHeader("VFX & Combat Effects"));
+
+        var deathVfxField = new ObjectField("Death VFX (Splash)")
+        {
+            objectType = typeof(GameObject),
+            value = enemy.deathVFX
+        };
+        deathVfxField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Death VFX");
+            enemy.deathVFX = evt.newValue as GameObject;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(deathVfxField);
+
+        var deathVariantField = new ObjectField("Death VFX Variant (Optional)")
+        {
+            objectType = typeof(GameObject),
+            value = enemy.deathVFX_Variant
+        };
+        deathVariantField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Death VFX Variant");
+            enemy.deathVFX_Variant = evt.newValue as GameObject;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(deathVariantField);
+
+        var hitVfxField = new ObjectField("Hit VFX")
+        {
+            objectType = typeof(GameObject),
+            value = enemy.hitVFX
+        };
+        hitVfxField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Hit VFX");
+            enemy.hitVFX = evt.newValue as GameObject;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(hitVfxField);
+
+        var deathVfxLifetimeField = new FloatField("Death VFX Lifetime (s)") { value = enemy.deathVFXLifetime > 0f ? enemy.deathVFXLifetime : 2f };
+        deathVfxLifetimeField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Death VFX Lifetime");
+            enemy.deathVFXLifetime = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(deathVfxLifetimeField);
+
+        var hitVfxLifetimeField = new FloatField("Hit VFX Lifetime (s)") { value = enemy.hitVFXLifetime > 0f ? enemy.hitVFXLifetime : 1f };
+        hitVfxLifetimeField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Hit VFX Lifetime");
+            enemy.hitVFXLifetime = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+        });
+        scroll.Add(hitVfxLifetimeField);
+
         // --- BOSS MINIONS SECTION ---
         var minionsSection = new VisualElement();
         minionsSection.name = "minionsSection";

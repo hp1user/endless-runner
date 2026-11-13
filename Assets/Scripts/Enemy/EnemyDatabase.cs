@@ -36,6 +36,18 @@ public class EnemyEntry
     public float moveSpeed = 5f;
     public float damage = 10f;
 
+    [Header("VFX Settings")]
+    [Tooltip("Primary VFX prefab spawned when this enemy dies (Death Splash).")]
+    public GameObject deathVFX;
+    [Tooltip("Optional secondary death VFX prefab (e.g. random splash variant).")]
+    public GameObject deathVFX_Variant;
+    [Tooltip("VFX prefab spawned when this enemy takes hit damage.")]
+    public GameObject hitVFX;
+    [Tooltip("Lifetime of the spawned death VFX before returning to pool.")]
+    public float deathVFXLifetime = 2.0f;
+    [Tooltip("Lifetime of the spawned hit VFX before returning to pool.")]
+    public float hitVFXLifetime = 1.0f;
+
     [Header("Death Settings")]
     public float deathDuration = 3.0f;
     public float groundYPosition = 0f;
@@ -60,6 +72,11 @@ public class EnemyEntry
         copy.maxHealth = this.maxHealth;
         copy.moveSpeed = this.moveSpeed;
         copy.damage = this.damage;
+        copy.deathVFX = this.deathVFX;
+        copy.deathVFX_Variant = this.deathVFX_Variant;
+        copy.hitVFX = this.hitVFX;
+        copy.deathVFXLifetime = this.deathVFXLifetime;
+        copy.hitVFXLifetime = this.hitVFXLifetime;
         copy.deathDuration = this.deathDuration;
         copy.groundYPosition = this.groundYPosition;
         copy.canSpawnMinions = false;

@@ -22,6 +22,18 @@ namespace Enemy.Control
         private float deathDuration = 3.0f;
         private float groundYPosition = 0f;
 
+        [Header("VFX Settings")]
+        [Tooltip("Primary VFX prefab spawned when this enemy dies (Death Splash).")]
+        public GameObject deathVFX;
+        [Tooltip("Optional secondary death VFX prefab (e.g. random splash variant).")]
+        public GameObject deathVFX_Variant;
+        [Tooltip("VFX prefab spawned when this enemy takes hit damage.")]
+        public GameObject hitVFX;
+        [Tooltip("Lifetime of the spawned death VFX before returning to pool.")]
+        public float deathVFXLifetime = 2.0f;
+        [Tooltip("Lifetime of the spawned hit VFX before returning to pool.")]
+        public float hitVFXLifetime = 1.0f;
+
         // Hardcoded Layer Mask
         private LayerMask playerLayer => LayerMask.GetMask("Player");
 
@@ -194,6 +206,12 @@ namespace Enemy.Control
             deathDuration = data.deathDuration;
             groundYPosition = data.groundYPosition;
 
+            if (data.deathVFX != null) deathVFX = data.deathVFX;
+            if (data.deathVFX_Variant != null) deathVFX_Variant = data.deathVFX_Variant;
+            if (data.hitVFX != null) hitVFX = data.hitVFX;
+            if (data.deathVFXLifetime > 0f) deathVFXLifetime = data.deathVFXLifetime;
+            if (data.hitVFXLifetime > 0f) hitVFXLifetime = data.hitVFXLifetime;
+
             if (isBoss)
             {
                 float baseTotal = data.maxHealth > 0 ? data.maxHealth : 2500f;
@@ -254,10 +272,20 @@ namespace Enemy.Control
 
             if (isDead)
             {
-                // Slide the corpse backward on the X/Z plane only (prevent floating up)
-                Vector3 slideDir = -targetDirection;
-                slideDir.y = 0f;
-                transform.Translate(slideDir.normalized * moveSpeed * Time.deltaTime, Space.World);
+                // Slide the corpse backward matching LevelManager track speed so it stays anchored to the road
+                float dt = Mathf.Min(Time.deltaTime, 0.1f);
+                float speed = 15f;
+                Vector3 dir = Vector3.back;
+                if (LevelManager.Instance != null)
+                {
+                    speed = LevelManager.Instance.isTransitioningToBridge 
+                        ? LevelManager.Instance.transitionSpeed 
+                        : LevelManager.Instance.worldMoveSpeed;
+                    dir = (LevelManager.Instance.chunkDirection == LevelManager.MoveDirection.Backward) 
+                        ? Vector3.back 
+                        : Vector3.forward;
+                }
+                transform.position += dir * speed * dt;
                 return;
             }
 
@@ -642,9 +670,64 @@ namespace Enemy.Control
             }
         }
 
-        public void TakeDamage(float damage, Collider hitCollider = null)
+        public void SpawnDeathVFX()
+        {
+            GameObject vfxPrefab = deathVFX;
+            if (deathVFX != null && deathVFX_Variant != null)
+            {
+                vfxPrefab = (Random.value < 0.5f) ? deathVFX : deathVFX_Variant;
+            }
+            else if (vfxPrefab == null && deathVFX_Variant != null)
+            {
+                vfxPrefab = deathVFX_Variant;
+            }
+
+            if (vfxPrefab != null && PoolManager.Instance != null)
+            {
+                Vector3 spawnPos = transform.position;
+                if (isGroundEnemy && groundYPosition != 0f)
+                {
+                    spawnPos.y = groundYPosition;
+                }
+
+                GameObject splash = PoolManager.Instance.SpawnFromPool(vfxPrefab, spawnPos, Quaternion.identity);
+                if (splash != null)
+                {
+                    var mover = splash.GetComponent<VFX.VFXTrackMover>();
+                    if (mover == null) mover = splash.AddComponent<VFX.VFXTrackMover>();
+                    mover.enabled = true;
+                }
+                float lifetime = deathVFXLifetime > 0f ? deathVFXLifetime : 2.0f;
+                PoolManager.Instance.ReturnToPoolAfterDelay(splash, vfxPrefab, lifetime);
+            }
+        }
+
+        public void SpawnHitVFX(Vector3 hitPoint, Vector3 hitNormal)
+        {
+            GameObject vfxPrefab = hitVFX;
+            if (vfxPrefab == null) return;
+
+            Quaternion rot = (hitNormal != Vector3.zero) ? Quaternion.LookRotation(hitNormal) : Quaternion.identity;
+            if (PoolManager.Instance != null)
+            {
+                GameObject vfxObj = PoolManager.Instance.SpawnFromPool(vfxPrefab, hitPoint, rot);
+                float lifetime = hitVFXLifetime > 0f ? hitVFXLifetime : 1.0f;
+                PoolManager.Instance.ReturnToPoolAfterDelay(vfxObj, vfxPrefab, lifetime);
+            }
+        }
+
+        public void TakeDamage(float damage, Collider hitCollider = null, Vector3 hitPoint = default, Vector3 hitNormal = default)
         {
             if (isDead) return;
+
+            if (hitPoint != default)
+            {
+                SpawnHitVFX(hitPoint, hitNormal);
+            }
+            else
+            {
+                SpawnHitVFX(transform.position + Vector3.up * 0.5f, Vector3.up);
+            }
 
             if (isBoss && hitCollider != null)
             {
@@ -652,7 +735,7 @@ namespace Enemy.Control
                 if (part == null) part = hitCollider.GetComponentInParent<BossBodyPart>();
                 if (part != null)
                 {
-                    part.TakeDamage(damage);
+                    part.TakeDamage(damage, hitPoint, hitNormal);
                     return;
                 }
 
@@ -687,6 +770,9 @@ namespace Enemy.Control
         {
             if (isDead) return;
             isDead = true;
+
+            // Trigger Death Splash VFX
+            SpawnDeathVFX();
 
             if (debugMode) Debug.Log($"<color=black><b>[Enemy]</b></color> {enemyName} has been defeated!");
 

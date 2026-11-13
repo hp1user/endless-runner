@@ -173,6 +173,15 @@ This document serves as the master technical blueprint and living knowledge base
      - When receiving a new weapon for an occupied slot, it cleanly replaces the existing weapon in that slot (with 2 full magazines of starting ammo), updates the weapon wheel, and equips the new gun.
      - Aligned keyboard hotkeys 1-4 directly to Slots 1-4 via SwitchToSlot().
   13. Maintained master documentation in ProjectSummary.md and DailyWorkReport.md.
+  14. **Bug Death Splash & Hit VFX System + Tool Integration (2026-11-13)**:
+     - Imported ToonLiquids VFX suite into `Assets/GabrielAguiarProductions/` with VFX Graph and Shader Graph enabled in `Packages/manifest.json`.
+     - Pruned unused assets from ~180MB down to 3MB keeping strictly required dependencies.
+     - Duplicated `v2`, `v3`, `v4`, and `v5` into 25% smaller `_Small` variants for regular Beetle, Bug, and minion swarms, while preserving full-size VFX for the Bug Boss.
+     - Beetle / Fly Bug Death Splash: `vfx_RadioactiveWaste_Burst_v2_Small.prefab` & `v3_Small.prefab` (50/50 alternating variants).
+     - Ground Bug Death Splash: `vfx_RadioactiveWaste_Burst_v4_Small.prefab`.
+     - Hit Effect for bugs: `vfx_RadioactiveWaste_Burst_v5_Small.prefab`; Boss Hit Effect: full-size `v5.prefab`.
+     - Synchronized ground splash & corpse movement with highway track speed (`VFXTrackMover.cs`, Local Space VFX Graph simulation) so decals and defeated bugs travel backwards seamlessly with the road and exit behind the camera.
+     - Updated `DataManagerWindow.cs` with **"VFX & Combat Effects"** inspector section for configuring enemy Death VFX, Variants, Hit VFX, and pool lifetimes.
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.
   - Testing boss combat on road chunks using `BossCheckpointSystem.JumpToBossCheckpoint(5)`.

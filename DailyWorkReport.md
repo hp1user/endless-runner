@@ -613,3 +613,35 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
   - **Smart Ammo Drop Harmony**:
     - Discarded weapons are removed from unlockedWeapons, so GetOwnedWeaponCategories() immediately stops dropping ammo for the old weapon and starts dropping ammo for the new weapon.
   - **Backups Preserved**: PlayerController.cs.backup3, WeaponWheelToolkitManager.cs.backup.
+
+## Date: 2026-11-13
+
+### Features Added: Bug Death Splash & Hit VFX System + Data Manager Tool Update
+- **VFX Assets Integration (`Assets/GabrielAguiarProductions/`)**:
+  - Imported ToonLiquids VFX suite (prefabs, VFX Graphs, URP Shader Graphs, textures) from VFXAssets into `Assets/GabrielAguiarProductions/`.
+  - Added `"com.unity.visualeffectgraph": "17.3.0"` and `"com.unity.shadergraph": "17.3.0"` to `Packages/manifest.json`.
+  - Wrapped legacy camera controller in `#if ENABLE_LEGACY_INPUT_MANAGER` for New Input System compatibility.
+- **Configured Death Splash & Hit VFX Matrix (`EnemyDatabase.asset`)**:
+  - **Beetle / Fly Bug Death Splash**: Configured with `vfx_RadioactiveWaste_Burst_v2.prefab` (primary) and `vfx_RadioactiveWaste_Burst_v3.prefab` (variant), automatically alternating with 50/50 randomized splash bursts on death.
+  - **Ground Bug Death Splash**: Configured with `vfx_RadioactiveWaste_Burst_v4.prefab`.
+  - **Hit Effect for All Bugs & Boss**: Configured with `vfx_RadioactiveWaste_Burst_v5.prefab`, spawning localized radioactive burst VFX at the exact bullet raycast impact coordinate (`hit.point`, `hit.normal`).
+- **Core Gameplay Integration (`EnemyController.cs`, `BossBodyPart.cs`, `PlayerController.cs`, `PoolManager.cs`)**:
+  - Extended `EnemyEntry` in `EnemyDatabase.cs` with `deathVFX`, `deathVFX_Variant`, `hitVFX`, `deathVFXLifetime`, and `hitVFXLifetime`. Updated `Clone()` to pass VFX settings to spawned minions.
+  - Added `SpawnDeathVFX()` and `SpawnHitVFX(Vector3 hitPoint, Vector3 hitNormal)` in `EnemyController.cs`, hooked into `Die()` and `TakeDamage()`.
+  - Updated `BossBodyPart.TakeDamage()` to accept impact coordinates and trigger localized hit VFX on the Bug Boss.
+  - Updated `PlayerController.PerformRaycastHit()` to forward `hit.point` and `hit.normal` to `bodyPart.TakeDamage()` and `enemy.TakeDamage()`.
+  - Enhanced `PoolManager.SpawnFromPool()` to automatically call `vfx.Reinit()` / `vfx.Play()` on recycled `VisualEffect` instances.
+- **Editor Tool Enhancement (`DataManagerWindow.cs`)**:
+  - Added a dedicated **"VFX & Combat Effects"** section in `BuildEnemyInspector()` under the Enemy tab in `DataManagerWindow`.
+  - Provides visual `ObjectField` selectors for Death VFX, Death VFX Variant, Hit VFX, and lifetime float fields with full Undo/Redo and serialized dirty tracking.
+- **VFX Duplication & 25% Scaled Variants for Minions (`vfx_RadioactiveWaste_Burst_*_Small.prefab`)**:
+  - Duplicated `v2`, `v3`, `v4`, and `v5` into `_Small` variants (`vfx_RadioactiveWaste_Burst_v2_Small.prefab`, `v3_Small.prefab`, `v4_Small.prefab`, `v5_Small.prefab`).
+  - Scaled Transform hierarchy and VFX Graph property sheets (`BloodSize`, `GroundBloodSize`, `GroundBloodScale`, `BloodParticlesSize`, `ImpactSize`, `BloodVelocity`) by 0.75x (25% reduction).
+  - Assigned `_Small` variants to standard enemies (Beetle, Bug, and Boss minion swarms) in `EnemyDatabase.asset`.
+  - Preserved the full-size `v4` and `v5` prefabs for the Bug Boss encounter.
+- **Track-Speed Movement Matching for Ground Splashes & Corpses (`VFXTrackMover.cs`, `vfxgraph_Liquid_v1.vfx`, `EnemyController.cs`)**:
+  - Converted particle systems in `vfxgraph_Liquid_v1.vfx` to Local Space (`m_Space: 0`) so that emitted particles, liquid bursts, and ground splatters simulate relative to the GameObject Transform.
+  - Created `VFXTrackMover.cs` component that dynamically reads `LevelManager.Instance` speed (`worldMoveSpeed = 15f` or `transitionSpeed = 4.5f`) and chunk direction, translating the splash backwards synchronously with the road.
+  - Updated `EnemyController.SpawnDeathVFX()` to ensure `VFXTrackMover` is attached and enabled on spawned death splashes.
+  - Updated `EnemyController.Update()` during death (`isDead`) so the falling corpse also slides backward synchronously with the track speed rather than moving at slow bug speed, keeping corpse and ground blood puddle anchored to the moving asphalt until they travel out of view.
+

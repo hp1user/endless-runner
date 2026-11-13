@@ -47,6 +47,24 @@ public class PoolManager : MonoBehaviour
             objectToSpawn = Instantiate(prefab, position, rotation, parent);
         }
 
+        // 4. Ensure recycled VFX Graph and ParticleSystem effects restart properly
+        if (objectToSpawn != null)
+        {
+            var vfxArray = objectToSpawn.GetComponentsInChildren<UnityEngine.VFX.VisualEffect>();
+            for (int i = 0; i < vfxArray.Length; i++)
+            {
+                vfxArray[i].Reinit();
+                vfxArray[i].Play();
+            }
+
+            var psArray = objectToSpawn.GetComponentsInChildren<ParticleSystem>();
+            for (int i = 0; i < psArray.Length; i++)
+            {
+                psArray[i].Clear();
+                psArray[i].Play();
+            }
+        }
+
         return objectToSpawn;
     }
 
