@@ -43,12 +43,12 @@ public static class BossCheckpointSystem
             enemyManager.ClearAllActiveEnemies();
         }
 
-        // 3. Grant random upgrade cards matching the level progression (e.g. 5 cards for Lvl 5, 10 for Lvl 10)
-        int cardCount = Mathf.Max(1, targetLevel);
+        // 3. Grant random upgrade cards matching the level progression (e.g. 2-5 cards for balanced testing)
+        int cardCount = Mathf.Clamp(targetLevel / 2, 2, 5);
         if (UpgradeManager.Instance != null)
         {
             List<UpgradeCard> awarded = UpgradeManager.Instance.ApplyRandomUpgrades(cardCount);
-            Debug.Log($"<color=green>[Checkpoint]</color> Awarded {awarded.Count} random upgrade cards for Level {targetLevel}.");
+            Debug.Log($"<color=green>[Checkpoint]</color> Awarded {awarded.Count} random upgrade cards for Level {targetLevel}. Current Damage Multiplier: {PlayerController.Instance.damageMultiplier:F2}x");
         }
 
         // 4. Unlock weapons and stock ammo appropriate for this level

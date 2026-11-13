@@ -67,8 +67,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy.Control.BossBodyPart
   partType: 2
-  maxHealth: 200
-  currentHealth: 200
+  maxHealth: 350
+  currentHealth: 350
   isBroken: 0
   damageMultiplier: 1
 --- !u!1 &5638563286070733414
@@ -138,8 +138,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy.Control.BossBodyPart
   partType: 1
-  maxHealth: 200
-  currentHealth: 200
+  maxHealth: 350
+  currentHealth: 350
   isBroken: 0
   damageMultiplier: 1
 --- !u!1 &7373473144305565866
@@ -209,8 +209,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy.Control.BossBodyPart
   partType: 0
-  maxHealth: 600
-  currentHealth: 600
+  maxHealth: 1000
+  currentHealth: 1000
   isBroken: 0
   damageMultiplier: 1
 --- !u!1001 &398736779964835061

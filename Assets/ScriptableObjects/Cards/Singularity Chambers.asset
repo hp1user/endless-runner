@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Singularity Chambers
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
   cardName: Singularity Chambers
-  description: Every 10th shot from any weapon fires a micro-black hole that pulls minor enemies from adjacent lanes into the center lane before detonating for massive AoE damage.
+  description: Condenses graviton energy into ammunition, increasing all weapon damage by +15%.
   cardIcon: {fileID: 0}
   rarity: 4
   category: Elemental / High-Reward
@@ -21,7 +21,7 @@ MonoBehaviour:
   visualConcept: A swirling vortex of dark purple energy compressed inside a reinforced glass bullet casing.
   effects:
   - upgradeType: 2
-    upgradeValue: 25
+    upgradeValue: 15
     weaponID: 
   rarityBackgroundImage: {fileID: 21300000, guid: a2be7258a35661548a757c6468dbcbb3, type: 3}
   rarityColor: {r: 1, g: 1, b: 1, a: 1}

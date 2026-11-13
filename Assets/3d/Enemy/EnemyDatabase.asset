@@ -25,6 +25,7 @@ MonoBehaviour:
     maxHealth: 10
     moveSpeed: 0.5
     damage: 10
+    damageReduction: 0
     deathVFX: {fileID: 1018269980160251502, guid: 48397d0beec14c79a090e48a262f63d2, type: 3}
     deathVFX_Variant: {fileID: 1018269980160251502, guid: a6a5dab5efe7407286b949c46bdbb8fa, type: 3}
     hitVFX: {fileID: 1018269980160251502, guid: 912a1bb6ec144ec7a9f20f9edb694996, type: 3}
@@ -47,6 +48,7 @@ MonoBehaviour:
     maxHealth: 10
     moveSpeed: 0.75
     damage: 15
+    damageReduction: 0
     deathVFX: {fileID: 1018269980160251502, guid: b5e801b087854037bc08a58212801eca, type: 3}
     deathVFX_Variant: {fileID: 0}
     hitVFX: {fileID: 1018269980160251502, guid: 912a1bb6ec144ec7a9f20f9edb694996, type: 3}
@@ -66,9 +68,10 @@ MonoBehaviour:
     alwaysChasePlayer: 0
     chaseChance: 80
     bossTargetLevel: 5
-    maxHealth: 4500
+    maxHealth: 1700
     moveSpeed: 0.35
     damage: 15
+    damageReduction: 40
     deathVFX: {fileID: 1018269980160251502, guid: f6fe58354ba20044aabc23113a977750, type: 3}
     deathVFX_Variant: {fileID: 0}
     hitVFX: {fileID: 1018269980160251502, guid: 69537cab7fbd6534eb9a291ec7bf92a5, type: 3}

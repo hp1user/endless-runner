@@ -642,11 +642,23 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(prefabField);
 
+        Slider dmgReductionSlider = null;
+
         var categoryField = new EnumField("Category", enemy.category);
         categoryField.RegisterValueChangedCallback(evt =>
         {
             Undo.RecordObject(_enemyDatabase, "Change Enemy Category");
             enemy.category = (EnemyCategory)evt.newValue;
+            if (enemy.category == EnemyCategory.Boss && enemy.damageReduction == 0f)
+            {
+                enemy.damageReduction = 40f;
+                if (dmgReductionSlider != null) dmgReductionSlider.value = 40f;
+            }
+            else if (enemy.category == EnemyCategory.Elite && enemy.damageReduction == 0f)
+            {
+                enemy.damageReduction = 20f;
+                if (dmgReductionSlider != null) dmgReductionSlider.value = 20f;
+            }
             EditorUtility.SetDirty(_enemyDatabase);
             _itemListView.RefreshItems();
             UpdatePreview();
@@ -756,6 +768,16 @@ public class DataManagerWindow : EditorWindow
             UpdatePreview();
         });
         scroll.Add(dmgField);
+
+        dmgReductionSlider = new Slider("Damage Reduction (%)", 0f, 100f) { value = enemy.damageReduction, showInputField = true };
+        dmgReductionSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(_enemyDatabase, "Change Damage Reduction");
+            enemy.damageReduction = evt.newValue;
+            EditorUtility.SetDirty(_enemyDatabase);
+            UpdatePreview();
+        });
+        scroll.Add(dmgReductionSlider);
 
         var deathDurationField = new FloatField("Death Duration (s)") { value = enemy.deathDuration };
         deathDurationField.RegisterValueChangedCallback(evt =>
@@ -989,7 +1011,7 @@ public class DataManagerWindow : EditorWindow
             if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
 
             _previewTitle.text = string.IsNullOrEmpty(_selectedEnemy.enemyName) ? "UNNAMED" : _selectedEnemy.enemyName.ToUpper();
-            _previewDesc.text = $"HP: {_selectedEnemy.maxHealth} | Speed: {_selectedEnemy.moveSpeed}\nDamage: {_selectedEnemy.damage}\nLevels: {_selectedEnemy.minSpawnLevel} - {_selectedEnemy.maxSpawnLevel}";
+            _previewDesc.text = $"HP: {_selectedEnemy.maxHealth} | Speed: {_selectedEnemy.moveSpeed}\nDamage: {_selectedEnemy.damage} | Dmg Reduction: {_selectedEnemy.damageReduction:F0}%\nLevels: {_selectedEnemy.minSpawnLevel} - {_selectedEnemy.maxSpawnLevel}";
             _previewValue.text = _selectedEnemy.category.ToString().ToUpper();
 
             Texture2D previewTex = null;

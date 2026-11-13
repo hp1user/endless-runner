@@ -10696,6 +10696,7 @@ MonoBehaviour:
   bossDropPool:
   - {fileID: 11400000, guid: 31ce551c7b56276459c11b574b2a9fe0, type: 2}
   - {fileID: 11400000, guid: 16cd7a3f1ebb7db46bd71a29007a64b6, type: 2}
+  - {fileID: 11400000, guid: ef57eaf0b80a28142b2253a4e98493d9, type: 2}
   - {fileID: 11400000, guid: 071eeb6449706cf4ab43397747ab2690, type: 2}
   bossMythicChance: 5
   bossLegendaryChance: 30
@@ -11346,7 +11347,18 @@ MonoBehaviour:
   - {fileID: 434363012403784196, guid: 288f81d2ce4488945b73bf0ab726c88b, type: 3}
   - {fileID: 5813622984434979675, guid: 8ad7563d9cee84a4e8017776bdf7e15a, type: 3}
   - {fileID: 384531726870941863, guid: beb98519f4599c74bbe0557772c4b19d, type: 3}
-  weaponDropChance: 59.4
+  weaponDropChance: 35
+  commonWeaponWeight: 50
+  shotgunWeight: 8
+  sniperWeight: 4
+  minigunWeight: 2
+  heavyLauncherWeight: 2
+  consumableItemWeight: 30
+  standardAmmoWeight: 30
+  shotgunAmmoWeight: 10
+  sniperAmmoWeight: 6
+  minigunAmmoWeight: 5
+  heavyAmmoWeight: 5
 --- !u!1 &1472922692
 GameObject:
   m_ObjectHideFlags: 0

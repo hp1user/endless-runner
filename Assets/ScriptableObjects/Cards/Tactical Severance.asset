@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Tactical Severance
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
   cardName: Tactical Severance
-  description: +40% critical damage when shooting elite enemy joints, boss limbs, or marked weak spots.
+  description: Increases precision weapon damage output by +20%.
   cardIcon: {fileID: 0}
   rarity: 2
   category: Precision / Boss Encounters
@@ -21,7 +21,7 @@ MonoBehaviour:
   visualConcept: A sniper crosshair locked directly onto a pulsating, glowing joint of a massive insect leg.
   effects:
   - upgradeType: 2
-    upgradeValue: 40
+    upgradeValue: 20
     weaponID: 
   rarityBackgroundImage: {fileID: 21300000, guid: f1eecb9c4d951154e9733f991c67f22a, type: 3}
   rarityColor: {r: 1, g: 1, b: 1, a: 1}

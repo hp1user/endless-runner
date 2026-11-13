@@ -707,6 +707,80 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Adjusted Shotgun damage to `22` damage per pellet (176 max point-blank damage) with an `8` shell magazine and `1.8` fire rate.
   - **Bug Fixes**:
     - Fixed `BossCheckpointSystem.cs` line 78 where `machineGun` (Minigun category) was granting ammo to `WeaponCategory.AssaultRifle` instead of `WeaponCategory.Minigun`.
+- **Roguelike Upgrade Cards Descriptions & Stat Normalization (`Assets/ScriptableObjects/Cards/*.asset`)**:
+  - Replaced all placeholder `"What does this card do?"` texts across the card deck with concise, clear in-game descriptions:
+    - **Damage Boost (Rare)**: *"Increases all weapon damage output by +10%."* (`upgradeValue: 10`).
+    - **Damage Boost (Epic)**: *"Increases all weapon damage output by +20%."* (`upgradeValue: 20`).
+    - **Vitality Boost (Common)**: *"Increases Maximum Health by +10 and heals 10 HP immediately."* (`upgradeValue: 10`).
+    - **Vitality Boost (Uncommon)**: *"Increases Maximum Health by +15 and heals 15 HP immediately."* (`upgradeValue: 15`).
+    - **Vitality Boost (Rare)**: *"Increases Maximum Health by +25 and heals 25 HP immediately."* (`upgradeValue: 25`).
+    - **Swift Reflexes (Common)**: *"Increases lane-switching speed by +10% for snappier dodging."* (`upgradeValue: 0.6`).
+    - **Swift Reflexes (Rare)**: *"Increases lane-switching speed by +25% for lightning-fast dodging."* (`upgradeValue: 1.5`).
+    - **Sidearm: Desert Eagle**: *"Unlocks the heavy Desert Eagle sidearm with high-caliber single-target stopping power."* (`weaponID: D Eagle`).
+- **Boss Health Buff (+70%) & Gun Damage Rebalance (`Bug Boss.prefab`, `EnemyDatabase.asset`, `BossBodyPart.cs`, `EnemyController.cs`, `Weapons/*.asset`)**:
+  - **Increased Boss Health to 1700 HP (+70% boost)**:
+    - **Head**: Scaled from `600 HP` $\rightarrow$ **`1000 HP`**.
+    - **Left Leg**: Scaled from `200 HP` $\rightarrow$ **`350 HP`**.
+    - **Right Leg**: Scaled from `200 HP` $\rightarrow$ **`350 HP`**.
+    - Total Health Pool: **1700 HP** (was 1000 HP).
+    - Updated across `Bug Boss.prefab`, `EnemyDatabase.asset` (`maxHealth: 1700`), `BossBodyPart.cs` default values, and `EnemyController.cs` formulas.
+  - **Rebalanced & Nerfed Gun Damage**:
+    - **Sniper**: Nerfed from `250` $\rightarrow$ **`110 damage`** (takes 3-4 clean shots to break a 350 HP leg, preventing 1-shot chunking while retaining multi-enemy penetration).
+    - **LMG / Minigun**: Nerfed from `24` $\rightarrow$ **`12 damage`** at 15 shots/sec (reduces DPS from 384 down to 180, rewarding sustained suppressive fire without instant melting).
+    - **Shotgun**: Nerfed from `22` $\rightarrow$ **`11 damage per pellet`** (8 pellets $\times$ 11 = 88 max point-blank damage, requires 4 point-blank blasts to break a leg).
+    - **SMG**: Adjusted from `16` $\rightarrow$ **`10 damage`** at 17 shots/sec (170 DPS).
+    - **Assault Rifle**: Adjusted from `22` $\rightarrow$ **`14 damage`** at 13 shots/sec (182 DPS).
+    - **Pistol**: Adjusted from `18` $\rightarrow$ **`12 damage`**.
+    - **Rocket / Grenade**: Nerfed to `160` and `135 damage`.
+- **Rarity System Overhaul for Heavy/Power Weapons (`LootManager.cs`, `PlayerController.cs`, `GameView_EndlessRunner.unity`, `WeaponUnlock_*.asset`)**:
+  - **Loot Drop Rate & Weapon Weighting**:
+    - Reduced `weaponDropChance` in `GameView_EndlessRunner.unity` from test override `59.4%` down to balanced `18%`.
+    - Implemented archetype-weighted weapon drop tables in `LootManager.cs`:
+      - Standard/Common weapons (`AR`: weight 40, `SMG`: weight 40).
+      - Rare/Power weapons (`Shotgun`: weight 10, `Sniper`: weight 6, `Minigun`: weight 4).
+      - Minigun is now a 4% chance on weapon drops (1 in 25 weapon crates) instead of 20% (1 in 5).
+  - **Smart Ammo Drop Weighting**:
+    - Weighted consumable and ammo drops so heavy weapon ammo does not flood the player:
+      - Health & Armor consumables: weight 30.
+      - Standard ammo (`AR`, `SMG`): weight 30.
+      - Power ammo (`Shotgun`: 10, `Sniper`: 6, `Minigun`: 5, `Launcher`: 5).
+      - Heavy ammo now only rolls with ~5-10% relative weight even when owned.
+  - **Duplicate Heavy Weapon Pickup & Initial Unlock Ammo Balancing**:
+    - In `PlayerController.UnlockWeapon`, duplicate heavy weapon pickups (`Shotgun`, `Sniper`, `Minigun`, `Rocket`, `Grenade`) now reward 1 magazine instead of 2 magazines.
+    - Initial weapon unlock starting reserve ammo granted is 1 magazine for heavy weapons instead of 2 magazines.
+  - **Upgrade Card Rarity Escalation**:
+    - `WeaponUnlock_Shotgun.asset`: Elevated to **Rare** (Rarity: 2).
+    - `WeaponUnlock_Sniper.asset`: Elevated to **Epic** (Rarity: 3) with matching Epic frame artwork and violet tint.
+    - `WeaponUnlock_Minigun.asset`: Elevated to **Legendary** (Rarity: 4) with matching Legendary frame artwork and gold tint.
+    - Directly links to `UpgradeManager`'s weighted boss and level-up card draw systems.
+  - **Weapon Crate Drop Rate Restored to 59.4% & Standard Weapon Dominance**:
+    - Restored `weaponDropChance` in `GameView_EndlessRunner.unity` and `LootManager.cs` to `59.4%` so weapon crates drop at the original high frequency.
+    - Assigned `commonWeaponWeight = 50` (AR and SMG) vs `shotgunWeight = 8`, `sniperWeight = 4`, `minigunWeight = 2`.
+    - AR and SMG make up **87.8% of all weapon crates** (~52% of all crates dropped overall), ensuring players regularly receive standard weapon drops and ammo refills early in runs while heavy weapons remain rare.
+  - **Damage Multiplier Audit & Broken Card Rebalancing**:
+    - Identified source of `37.1` damage from `14` base AR damage: `PlayerController.damageMultiplier` was at `2.65x` ($14 \times 2.65 = 37.1$).
+    - Root cause: `Dead Mans Switch.asset` was granting an exorbitant `+150%` damage (`upgradeValue: 150`), and `Tactical Severance.asset` was granting `+40%` flat damage.
+    - Rebalanced high-stat cards:
+      - `Dead Mans Switch.asset`: Reduced from `+150%` down to `+30%` (`upgradeValue: 30`).
+      - `Tactical Severance.asset`: Reduced from `+40%` down to `+20%` (`upgradeValue: 20`).
+      - `Singularity Chambers.asset`: Reduced from `+25%` down to `+15%` (`upgradeValue: 15`).
+    - Fixed `PlayerController.cs`: `damageMultiplier = 1.0f` and `armorPerKill = 0f` are now explicitly reset upon `InitializeStats()` and `ApplyCharacterData()`.
+    - Tuned `BossCheckpointSystem.cs`: Capped simulation cards granted on checkpoint jumps to `Mathf.Clamp(targetLevel / 2, 2, 5)` instead of awarding 10-15 stacked cards.
+    - Enhanced `BossBodyPart.cs` debug logging to clearly display incoming damage and part multipliers.
+- **Configurable Enemy Damage Reduction System (Boss & Elite Armor/Resistance) (`EnemyDatabase.cs`, `EnemyController.cs`, `BossBodyPart.cs`, `DataManagerWindow.cs`)**:
+  - **Mechanic**:
+    - Added `damageReduction` (percentage 0-100%) to `EnemyEntry` in `EnemyDatabase.cs`.
+    - Applied dynamically across all damage calculation pathways: $\text{effectiveDamage} = \text{damage} \times (1 - \frac{\text{damageReduction}}{100})$.
+    - **Boss**: Default `40%` reduction. Base AR 14 damage deals $14 \times 0.60 = \mathbf{8.4\text{ damage}}$. Buffed 34 damage deals $34 \times 0.60 = \mathbf{20.4\text{ damage}}$.
+    - **Elite**: Default `20%` reduction ($20\%$ less damage).
+    - **Standard**: `0%` reduction (full damage taken).
+  - **Data Manager UI Integration**:
+    - Added interactive **"Damage Reduction (%)"** slider (0–100%) with live float input in `DataManagerWindow.cs` under the "Combat Stats" section.
+    - Category dropdown automatically assigns default reductions (Boss $\rightarrow$ 40%, Elite $\rightarrow$ 20%) while allowing custom overrides.
+    - Added live damage reduction metric to the Data Manager item preview card.
+    - Saved `[Bug]Boss` in `EnemyDatabase.asset` with `damageReduction: 40`.
+
+
 
 
 

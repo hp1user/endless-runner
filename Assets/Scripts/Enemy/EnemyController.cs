@@ -62,6 +62,7 @@ namespace Enemy.Control
         public bool IsDead => isDead;
         public bool IsBoss => isBoss;
         public float CurrentHealth => currentHealth;
+        public float DamageReduction => damageReduction;
 
         /// <summary>
         /// Cleanly despawns an active enemy and returns it to PoolManager if pooled.
@@ -88,9 +89,10 @@ namespace Enemy.Control
         }
 
         [Header("Boss Body Parts & Animation")]
-        [SerializeField] private float bossHeadHealth = 600f;
-        [SerializeField] private float bossLegHealth = 200f;
+        [SerializeField] private float bossHeadHealth = 1000f;
+        [SerializeField] private float bossLegHealth = 350f;
         [SerializeField] private float bossHeadMultiplier = 1.0f;
+        [SerializeField] private float damageReduction = 0f;
         private Animator animator;
         private bool leftLegBroken = false;
         private bool rightLegBroken = false;
@@ -114,9 +116,9 @@ namespace Enemy.Control
                 if (name.ToLower().Contains("boss"))
                 {
                     isBoss = true;
-                    bossHeadHealth = 600f;
-                    bossLegHealth = 200f;
-                    currentHealth = 1000f;
+                    bossHeadHealth = 1000f;
+                    bossLegHealth = 350f;
+                    currentHealth = 1700f;
                 }
                 else
                 {
@@ -206,6 +208,13 @@ namespace Enemy.Control
             deathDuration = data.deathDuration;
             groundYPosition = data.groundYPosition;
 
+            damageReduction = data.damageReduction;
+            if (damageReduction <= 0f)
+            {
+                if (isBoss) damageReduction = 40f;
+                else if (data.category == EnemyCategory.Elite) damageReduction = 20f;
+            }
+
             if (data.deathVFX != null) deathVFX = data.deathVFX;
             if (data.deathVFX_Variant != null) deathVFX_Variant = data.deathVFX_Variant;
             if (data.hitVFX != null) hitVFX = data.hitVFX;
@@ -214,9 +223,9 @@ namespace Enemy.Control
 
             if (isBoss)
             {
-                float baseTotal = data.maxHealth > 0 ? data.maxHealth : 2500f;
-                bossHeadHealth = (baseTotal * 0.6f) * healthMultiplier;
-                bossLegHealth = (baseTotal * 0.2f) * healthMultiplier;
+                float baseTotal = data.maxHealth > 0 ? data.maxHealth : 1700f;
+                bossHeadHealth = (baseTotal * (1000f / 1700f)) * healthMultiplier;
+                bossLegHealth = (baseTotal * (350f / 1700f)) * healthMultiplier;
                 currentHealth = bossHeadHealth + (bossLegHealth * 2f);
             }
             else
@@ -523,7 +532,7 @@ namespace Enemy.Control
                 {
                     float health = (part.partType == BossBodyPartType.Head) ? bossHeadHealth : bossLegHealth;
                     float mult = (part.partType == BossBodyPartType.Head) ? bossHeadMultiplier : 1.0f;
-                    part.Initialize(this, health, mult);
+                    part.Initialize(this, health, mult, damageReduction);
                 }
                 RecalculateBossHealth();
                 return;
@@ -559,7 +568,7 @@ namespace Enemy.Control
                 float health = (type == BossBodyPartType.Head) ? bossHeadHealth : bossLegHealth;
                 float mult = (type == BossBodyPartType.Head) ? bossHeadMultiplier : 1.0f;
                 part.partType = type;
-                part.Initialize(this, health, mult);
+                part.Initialize(this, health, mult, damageReduction);
             }
             RecalculateBossHealth();
         }
@@ -589,7 +598,7 @@ namespace Enemy.Control
             if (isBoss && UI.Control.UIManager.Instance != null)
             {
                 float totalMax = (bossHeadHealth + (bossLegHealth * 2f));
-                UI.Control.UIManager.Instance.UpdateBossHealth(currentHealth, totalMax > 0f ? totalMax : 1000f);
+                UI.Control.UIManager.Instance.UpdateBossHealth(currentHealth, totalMax > 0f ? totalMax : 1700f);
             }
 
             if (currentHealth <= 0f)
@@ -729,6 +738,8 @@ namespace Enemy.Control
                 SpawnHitVFX(transform.position + Vector3.up * 0.5f, Vector3.up);
             }
 
+            float reductionFactor = 1f - Mathf.Clamp01(damageReduction / 100f);
+
             if (isBoss && hitCollider != null)
             {
                 BossBodyPart part = hitCollider.GetComponent<BossBodyPart>();
@@ -742,23 +753,24 @@ namespace Enemy.Control
                 string colName = hitCollider.name.ToLower();
                 if (colName.Contains("head"))
                 {
-                    OnPartDamaged(BossBodyPartType.Head, damage * bossHeadMultiplier, false);
+                    OnPartDamaged(BossBodyPartType.Head, (damage * bossHeadMultiplier) * reductionFactor, false);
                     return;
                 }
                 else if (colName.Contains("l_leg") || colName.Contains("left"))
                 {
-                    OnPartDamaged(BossBodyPartType.LeftLeg, damage, false);
+                    OnPartDamaged(BossBodyPartType.LeftLeg, damage * reductionFactor, false);
                     return;
                 }
                 else if (colName.Contains("r_leg") || colName.Contains("right"))
                 {
-                    OnPartDamaged(BossBodyPartType.RightLeg, damage, false);
+                    OnPartDamaged(BossBodyPartType.RightLeg, damage * reductionFactor, false);
                     return;
                 }
             }
 
-            currentHealth -= damage;
-            if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {damage} damage! Remaining HP: {currentHealth}");
+            float finalDamage = damage * reductionFactor;
+            currentHealth -= finalDamage;
+            if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {finalDamage:F1} damage (Incoming: {damage:F1}{(damageReduction > 0f ? $" -{damageReduction:F0}%" : "")})! Remaining HP: {currentHealth:F1}");
 
             if (currentHealth <= 0)
             {

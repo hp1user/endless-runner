@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Dead Mans Switch
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
   cardName: Dead Man's Switch
-  description: Caps Max HP at 50%. Grants +150% Base Weapon Damage. You now heal
-    2 HP for every limb successfully severed from a boss or elite enemy.
+  description: High-risk combat overdrive. Grants +30% Base Weapon Damage output.
   cardIcon: {fileID: 0}
   rarity: 4
   category: High-Risk / High-Reward
@@ -23,7 +22,7 @@ MonoBehaviour:
     detonator wire in its metallic teeth.
   effects:
   - upgradeType: 2
-    upgradeValue: 150
+    upgradeValue: 30
     weaponID: 
   rarityBackgroundImage: {fileID: 21300000, guid: a2be7258a35661548a757c6468dbcbb3, type: 3}
   rarityColor: {r: 1, g: 0.7, b: 0.15, a: 1}

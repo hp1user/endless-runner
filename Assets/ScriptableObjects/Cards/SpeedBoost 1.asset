@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bed7a25e43127540a118a5cc490e605, type: 3}
   m_Name: SpeedBoost 1
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
-  cardName: Speed Boost
-  description: What does this card do?
+  cardName: Swift Reflexes (Rare)
+  description: Increases lane-switching speed by +25% for lightning-fast dodging.
   cardIcon: {fileID: 0}
   rarity: 2
   effects:
   - upgradeType: 1
-    upgradeValue: 0.25
+    upgradeValue: 1.5
   rarityBackgroundImage: {fileID: 21300000, guid: f1eecb9c4d951154e9733f991c67f22a, type: 3}
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
   selectedCardSprite: {fileID: 21300000, guid: 1306c6a68c906934cad63d2843ac6879, type: 3}

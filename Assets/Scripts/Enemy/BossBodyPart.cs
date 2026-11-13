@@ -21,12 +21,15 @@ namespace Enemy.Control
         public float currentHealth;
         public bool isBroken = false;
         public float damageMultiplier = 1.0f;
+        [Tooltip("Percentage damage reduction (e.g. 40% for Bosses). Defaults to 40% if this is a boss part.")]
+        [Range(0f, 100f)]
+        public float damageReduction = 40f;
 
         private EnemyController bossController;
 
         private void Awake()
         {
-            if (maxHealth <= 0f) maxHealth = (partType == BossBodyPartType.Head) ? 600f : 200f;
+            if (maxHealth <= 0f) maxHealth = (partType == BossBodyPartType.Head) ? 1000f : 350f;
             currentHealth = maxHealth;
             isBroken = false;
             if (bossController == null)
@@ -35,12 +38,13 @@ namespace Enemy.Control
             }
         }
 
-        public void Initialize(EnemyController boss, float health, float multiplier)
+        public void Initialize(EnemyController boss, float health, float multiplier, float reduction = 40f)
         {
             bossController = boss;
             maxHealth = health;
             currentHealth = health;
             damageMultiplier = multiplier;
+            damageReduction = reduction;
             isBroken = false;
         }
 
@@ -64,10 +68,16 @@ namespace Enemy.Control
             // Failsafe: If currentHealth wasn't initialized yet
             if (currentHealth <= 0f && !isBroken)
             {
-                currentHealth = maxHealth > 0f ? maxHealth : ((partType == BossBodyPartType.Head) ? 600f : 200f);
+                currentHealth = maxHealth > 0f ? maxHealth : ((partType == BossBodyPartType.Head) ? 1000f : 350f);
             }
 
-            float effectiveDamage = damage * damageMultiplier;
+            float reduction = damageReduction;
+            if (reduction <= 0f && bossController != null && bossController.DamageReduction > 0f)
+            {
+                reduction = bossController.DamageReduction;
+            }
+            float reductionFactor = 1f - Mathf.Clamp01(reduction / 100f);
+            float effectiveDamage = damage * damageMultiplier * reductionFactor;
 
             if (isBroken)
             {
@@ -80,7 +90,9 @@ namespace Enemy.Control
             }
 
             currentHealth -= effectiveDamage;
-            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {effectiveDamage:F1} damage. Remaining Part HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}");
+            string redInfo = (reduction > 0f) ? $" (-{reduction:F0}% reduction)" : "";
+            string multInfo = (damageMultiplier != 1.0f) ? $" (Part Multiplier: {damageMultiplier:F2}x)" : "";
+            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {effectiveDamage:F1} damage (Incoming: {damage:F1}{redInfo}{multInfo}). Remaining Part HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}");
 
             if (currentHealth <= 0f)
             {

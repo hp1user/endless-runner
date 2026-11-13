@@ -226,6 +226,8 @@ namespace Player.Control
             laneDistance = playerStats.laneDistance;
             runtimeMovementSpeed = playerStats.movementSpeed * playerStats.moveSpeedMultiplier;
             runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
+            damageMultiplier = 1.0f;
+            armorPerKill = 0f;
             UpdatePlayerUI();
         }
 
@@ -242,6 +244,8 @@ namespace Player.Control
             equippedUltimate = character.activeUltimate;
 
             // 2. Assign Stats
+            damageMultiplier = 1.0f;
+            armorPerKill = 0f;
             if (playerStats != null)
             {
                 playerStats.baseHealth = character.baseHealth;
@@ -1443,7 +1447,11 @@ namespace Player.Control
             if (unlockedWeapons.Contains(newGun))
             {
                 if (debugMode) Debug.Log($"<color=magenta>[Loot]</color> You already own the {newGun.weaponName}! Converting to ammo...");
-                AddAmmo(newGun.category, newGun.magSize * 2);
+                int ammoMultiplier = (newGun.category == WeaponCategory.Shotgun ||
+                                      newGun.category == WeaponCategory.Sniper ||
+                                      newGun.category == WeaponCategory.Minigun ||
+                                      newGun.category == WeaponCategory.RocketLauncher) ? 1 : 2;
+                AddAmmo(newGun.category, newGun.magSize * ammoMultiplier);
                 return;
             }
 
@@ -1465,10 +1473,14 @@ namespace Player.Control
 
             unlockedWeapons.Add(newGun);
 
-            // 3. Grant starting reserve ammo for the newly unlocked/upgraded weapon (at least 2 full magazines)
+            // 3. Grant starting reserve ammo for the newly unlocked/upgraded weapon (1 mag for heavy/rare weapons, 2 mags for standard)
             if (!reserveAmmo.ContainsKey(newGun.category) || reserveAmmo[newGun.category] == 0)
             {
-                reserveAmmo[newGun.category] = newGun.magSize * 2;
+                int startingMagMultiplier = (newGun.category == WeaponCategory.Shotgun ||
+                                             newGun.category == WeaponCategory.Sniper ||
+                                             newGun.category == WeaponCategory.Minigun ||
+                                             newGun.category == WeaponCategory.RocketLauncher) ? 1 : 2;
+                reserveAmmo[newGun.category] = newGun.magSize * startingMagMultiplier;
             }
 
             // 4. Update the Weapon Wheel UI

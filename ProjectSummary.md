@@ -200,6 +200,38 @@ This document serves as the master technical blueprint and living knowledge base
        - Shotgun: 8 mag, 22 damage/pellet (8 pellets = 176 point-blank), 1.8 fire rate.
        - Sniper: 5 mag, 260 piercing damage, 1.2 fire rate.
      - Updated supply crate ammo drop quantities (`Ammo_SMG: 60`, `Ammo_Minigun: 80`).
+  17. **Upgrade Cards Descriptions & Stat Normalization (2026-11-13)**:
+     - Populated all remaining cards in `Assets/ScriptableObjects/Cards/` with concise, informative in-game descriptions and aligned upgrade values (e.g. Damage Boost +10%/+20%, Vitality Boost +10/+15/+25 HP, Swift Reflexes +10%/+25% lane change speed).
+  18. **Boss Health Scaling (+70%) & Weapon Damage Nerf (2026-11-13)**:
+     - Scaled Bug Boss health from 1000 HP to **1700 HP** (+70% increase): Head **1000 HP** (was 600), Left Leg **350 HP** (was 200), Right Leg **350 HP** (was 200).
+     - Nerfed weapon damage to prevent chunking/melting: Sniper (110, was 250), LMG (12, was 24), Shotgun (11/pellet = 88 max, was 22/pellet = 176), SMG (10, was 16), AR (14, was 22), Pistol (12, was 18).
+  19. **Heavy/Power Weapon Rarity Overhaul (Shotgun, Sniper, Minigun) (2026-11-13)**:
+     - Addressed heavy weapon saturation and boss melting by transitioning Shotgun, Sniper, and Minigun into rare drops across all loot pathways.
+     - **Weighted Weapon Drops (`LootManager.cs`)**:
+       - Restored weapon crate drop chance to `59.4%` so weapon crates drop frequently as before.
+       - Implemented weighted weapon selection: Standard weapons (`AR: 50`, `SMG: 50`) make up **87.8% of all weapon crates** (~52% of all crate drops overall). Power weapons are rare (`Shotgun: 8`, `Sniper: 4`, `Minigun: 2`). Minigun is now ~1.75% of weapon crates (~1% of all crates).
+     - **Smart Ammo Drop Weighting (`LootManager.cs`)**:
+       - Health and Armor: weight 30; Standard ammo (AR, SMG): weight 30.
+       - Heavy ammo drops are weighted down (Shotgun: 10, Sniper: 6, Minigun: 5) so players cannot stockpile huge heavy ammo reserves.
+     - **Ammo Acquisition Limits (`PlayerController.cs`)**:
+       - Duplicate weapon pickups convert into 1 magazine of ammo for heavy weapons instead of 2 magazines.
+       - Initial weapon unlock starting reserve ammo is 1 magazine for heavy weapons instead of 2 magazines.
+     - **Upgrade Card Rarities (`UpgradeCard` & `Cards/*.asset`)**:
+       - Shotgun: **Rare** (Rarity: 2).
+       - Sniper: **Epic** (Rarity: 3) with Epic frame and purple styling.
+       - Minigun: **Legendary** (Rarity: 4) with Legendary frame and gold styling.
+       - Directly integrates with `UpgradeManager`'s rarity-weighted level up and boss reward pools.
+      - **Damage Multiplier Rebalance & Card Normalization**:
+        - Rebalanced disproportionate damage cards (`Dead Mans Switch`: +30% was +150%; `Tactical Severance`: +20% was +40%; `Singularity Chambers`: +15% was +25%).
+        - Added strict `damageMultiplier = 1.0f` reset to `PlayerController.InitializeStats()`.
+        - Capped checkpoint test cards to 2-5 to prevent stat bloat during test jumps.
+   20. **Configurable Enemy Damage Reduction System (Boss & Elite Resistance) (2026-11-13)**:
+      - Implemented configurable `damageReduction` percentage (0-100%) in `EnemyDatabase.cs`, `EnemyController.cs`, and `BossBodyPart.cs`.
+      - Incoming bullet and skill damage scales via $\text{damage} \times (1 - \frac{\text{damageReduction}}{100})$.
+      - **Boss**: Default `40%` reduction ($14 \rightarrow 8.4$, $34 \rightarrow 20.4$).
+      - **Elite**: Default `20%` reduction.
+      - **Standard**: `0%` reduction.
+      - **Data Manager Tool**: Integrated an interactive `Damage Reduction (%)` slider with float field into `DataManagerWindow.cs` under Combat Stats, with auto-default assignment on Category switch and live preview display.
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.
   - Testing boss combat on road chunks using `BossCheckpointSystem.JumpToBossCheckpoint(5)`.

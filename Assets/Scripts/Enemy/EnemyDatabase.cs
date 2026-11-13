@@ -35,6 +35,9 @@ public class EnemyEntry
     public float maxHealth = 30f;
     public float moveSpeed = 5f;
     public float damage = 10f;
+    [Tooltip("Percentage damage reduction (e.g. 40% for Bosses, 20% for Elites). 0 = full damage taken.")]
+    [Range(0f, 100f)]
+    public float damageReduction = 0f;
 
     [Header("VFX Settings")]
     [Tooltip("Primary VFX prefab spawned when this enemy dies (Death Splash).")]
@@ -72,6 +75,7 @@ public class EnemyEntry
         copy.maxHealth = this.maxHealth;
         copy.moveSpeed = this.moveSpeed;
         copy.damage = this.damage;
+        copy.damageReduction = this.damageReduction;
         copy.deathVFX = this.deathVFX;
         copy.deathVFX_Variant = this.deathVFX_Variant;
         copy.hitVFX = this.hitVFX;
