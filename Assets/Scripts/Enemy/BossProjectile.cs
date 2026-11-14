@@ -1,246 +1,55 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VFX;
 using Player.Control;
+using AcidSpitAdvanced;
 
 namespace Enemy.Control
 {
-    /// <summary>
-    /// Multi-lane acid spit projectile fired by the Boss that travels down the bridge.
-    /// Features multi-harmonic organic liquid wobbling, ToonLiquids dripping droplets,
-    /// and a flat ground liquid effect laying continuous acid puddles on the road.
-    /// </summary>
-    public class BossProjectile : MonoBehaviour
+    /// <summary>Compatibility bridge for the existing two-lane boss attack. Original orb prefabs are preserved.</summary>
+    public static class BossProjectile
     {
-        private static GameObject cachedOrbPrefab = null;
+        private static GameObject advancedPrefab;
 
-        private float[] targetedLanes;
-        private float travelSpeed = 14f;
-        private float damage = 25f;
-        private Transform playerTarget;
-        private bool hasHitPlayer = false;
-        private bool hasDetonated = false;
-        private bool isFadingOut = false;
-        private GameObject impactPrefab;
-        private List<GameObject> visualOrbs = new List<GameObject>();
-        private List<Renderer> cachedRenderers = new List<Renderer>();
-        private List<VisualEffect> cachedVFX = new List<VisualEffect>();
-
-        public static BossProjectile Spawn(float[] lanes, Vector3 startPos, float speed, float damageAmount, Transform target, GameObject impactVFX = null)
+        public static AcidProjectileController Spawn(float[] lanes, Vector3 startPos, float speed, float damageAmount, Transform target, GameObject impactVFX = null)
         {
-            GameObject projObj = new GameObject("BossAcidBarrage");
-            projObj.transform.position = startPos;
-
-            BossProjectile projectile = projObj.AddComponent<BossProjectile>();
-            projectile.Initialize(lanes, speed, damageAmount, target, impactVFX);
-            return projectile;
+            if (!advancedPrefab)
+                advancedPrefab = Resources.Load<GameObject>("AcidSpitAdvanced/AcidProjectile_Advanced");
+            if (!advancedPrefab)
+            {
+                Debug.LogError("Advanced acid prefab missing. Run Tools/VFX/Build Advanced Acid Spit.");
+                return null;
+            }
+            AcidPool.SurfaceVelocity = GetRoadVelocity;
+            AcidProjectileController first = null;
+            bool hitRegistered = false; // Prevent double damage if player is mid-lane change between targeted lanes
+            foreach (float lane in lanes)
+            {
+                Vector3 origin = new Vector3(lane, startPos.y + 0.35f, startPos.z);
+                float plane = target ? target.position.z + 0.8f : startPos.z - 30f;
+                var projectile = AcidProjectileController.Launch(advancedPrefab, origin, Vector3.back, speed, 0, plane);
+                if (!projectile) continue;
+                if (!first) first = projectile;
+                // Enemy colliders cannot intercept their own attack. Damage remains owned by this adapter.
+                projectile.collisionMask = LayerMask.GetMask("Player");
+                projectile.groundMask = LayerMask.GetMask("Default", "Ground", "Road");
+                projectile.groundSkimming = false;
+                projectile.Impact += (source, hit) =>
+                {
+                    if (hitRegistered) return;
+                    if (!target || Mathf.Abs(target.position.x - lane) > 1.0f) return;
+                    hitRegistered = true;
+                    var player = target.GetComponent<PlayerController>();
+                    if (player) player.TakeDamage(damageAmount);
+                };
+            }
+            return first;
         }
 
-        public void Initialize(float[] lanes, float speed, float damageAmount, Transform target, GameObject impactVFX = null)
+        static Vector3 GetRoadVelocity()
         {
-            this.targetedLanes = lanes;
-            this.travelSpeed = speed;
-            this.damage = damageAmount;
-            this.playerTarget = target;
-            this.impactPrefab = impactVFX;
-            this.hasHitPlayer = false;
-            this.hasDetonated = false;
-            this.isFadingOut = false;
-
-            // 1. One-time static cached prefab load (0 GC after first load, fully compatible with Android APK)
-            if (cachedOrbPrefab == null)
-            {
-                cachedOrbPrefab = Resources.Load<GameObject>("Boss_AcidOrb");
-#if UNITY_EDITOR
-                if (cachedOrbPrefab == null)
-                {
-                    cachedOrbPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/VFX/Boss_AcidOrb.prefab");
-                }
-#endif
-            }
-
-            // 2. Spawn Acid Orb for each targeted lane
-            foreach (float laneX in lanes)
-            {
-                if (cachedOrbPrefab != null)
-                {
-                    Vector3 localOffset = new Vector3(laneX - transform.position.x, 0.6f, 0f);
-                    GameObject orb = (PoolManager.Instance != null)
-                        ? PoolManager.Instance.SpawnFromPool(cachedOrbPrefab, transform.position + localOffset, Quaternion.identity, transform)
-                        : Instantiate(cachedOrbPrefab, transform);
-
-                    orb.name = $"AcidOrb_Lane_{laneX}";
-                    orb.transform.localPosition = localOffset;
-
-                    // Pre-cache components at spawn time to avoid runtime GC allocations
-                    Renderer[] rends = orb.GetComponentsInChildren<Renderer>(true);
-                    for (int r = 0; r < rends.Length; r++) rends[r].enabled = true;
-                    cachedRenderers.AddRange(rends);
-
-                    VisualEffect[] vfxs = orb.GetComponentsInChildren<VisualEffect>(true);
-                    for (int v = 0; v < vfxs.Length; v++)
-                    {
-                        if (vfxs[v] != null)
-                        {
-                            if (VFXPerformanceManager.IsVFXEnabled)
-                            {
-                                vfxs[v].enabled = true;
-                                vfxs[v].Reinit();
-                                vfxs[v].Play();
-                            }
-                            else
-                            {
-                                vfxs[v].enabled = false;
-                            }
-                        }
-                    }
-                    cachedVFX.AddRange(vfxs);
-
-                    visualOrbs.Add(orb);
-                    continue;
-                }
-
-                // Procedural Fallback ONLY if prefab is missing (Emergency safety net)
-                GameObject procOrb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                procOrb.name = $"AcidOrb_Lane_{laneX}";
-                procOrb.transform.SetParent(transform);
-                procOrb.transform.localPosition = new Vector3(laneX - transform.position.x, 0.6f, 0f);
-                procOrb.transform.localScale = new Vector3(1.35f, 1.35f, 1.45f);
-
-                Collider col = procOrb.GetComponent<Collider>();
-                if (col != null) Destroy(col);
-
-                Renderer rend = procOrb.GetComponent<Renderer>();
-                if (rend != null) cachedRenderers.Add(rend);
-
-                visualOrbs.Add(procOrb);
-            }
-        }
-
-        private void Update()
-        {
-            if (isFadingOut) return;
-
-            // Move along Z toward the player (negative Z direction relative to the bridge arena)
-            transform.position += Vector3.back * travelSpeed * Time.deltaTime;
-
-            // Procedural fallback wobble & rotation (prefab orbs handle this internally on Visual_OrbMesh via BossAcidOrbVisual)
-            float wobble = Mathf.Sin(Time.time * 13.5f) * 0.15f;
-            foreach (GameObject orb in visualOrbs)
-            {
-                if (orb != null && orb.GetComponentInChildren<VFX.BossAcidOrbVisual>() == null)
-                {
-                    Transform visualChild = orb.transform.Find("Visual_OrbMesh") ?? orb.transform;
-                    visualChild.localScale = new Vector3(1.35f + wobble, 1.35f - wobble, 1.45f + wobble * 0.5f);
-                    visualChild.Rotate(new Vector3(35f, 55f, 180f) * Time.deltaTime, Space.Self);
-                }
-            }
-
-            // Hit & Detonation detection when reaching player's plane
-            if (playerTarget != null)
-            {
-                float playerZ = playerTarget.position.z;
-                float currentZ = transform.position.z;
-
-                // Trigger splash detonation when crossing player plane
-                if (!hasDetonated && (currentZ <= playerZ + 0.8f))
-                {
-                    hasDetonated = true;
-                    DetonateImpactSplashes(currentZ);
-                }
-
-                if (!hasHitPlayer && Mathf.Abs(currentZ - playerZ) <= 1.0f)
-                {
-                    float playerX = playerTarget.position.x;
-                    foreach (float laneX in targetedLanes)
-                    {
-                        if (Mathf.Abs(playerX - laneX) <= 1.0f)
-                        {
-                            hasHitPlayer = true;
-                            PlayerController playerCtrl = playerTarget.GetComponent<PlayerController>();
-                            if (playerCtrl != null)
-                            {
-                                playerCtrl.TakeDamage(damage);
-                                Debug.Log($"<color=red>[Boss Projectile]</color> Hit player on lane {laneX:F1}! Dealt {damage} damage.");
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // When well past the player, trigger graceful trail fadeout rather than instant destroy
-            float despawnZ = (playerTarget != null) ? playerTarget.position.z - 18f : -25f;
-            if (transform.position.z < despawnZ)
-            {
-                StartCoroutine(FadeAndCleanupRoutine());
-            }
-        }
-
-        private System.Collections.IEnumerator FadeAndCleanupRoutine()
-        {
-            isFadingOut = true;
-
-            // 1. Hide orb sphere meshes immediately (using cached list, 0 GC allocation)
-            for (int i = 0; i < cachedRenderers.Count; i++)
-            {
-                if (cachedRenderers[i] != null) cachedRenderers[i].enabled = false;
-            }
-
-            // 2. Stop emitting new particles from VFX Graph instances (using cached list, 0 GC allocation)
-            for (int i = 0; i < cachedVFX.Count; i++)
-            {
-                if (cachedVFX[i] != null) cachedVFX[i].Stop();
-            }
-
-            // 3. Wait for existing ground liquid puddles (3.5s) to naturally dissolve before recycling orbs
-            yield return new WaitForSeconds(3.5f);
-
-            // Re-enable renderers and return orbs to pool
-            for (int i = 0; i < cachedRenderers.Count; i++)
-            {
-                if (cachedRenderers[i] != null) cachedRenderers[i].enabled = true;
-            }
-
-            if (cachedOrbPrefab != null && PoolManager.Instance != null)
-            {
-                for (int i = 0; i < visualOrbs.Count; i++)
-                {
-                    if (visualOrbs[i] != null)
-                    {
-                        PoolManager.Instance.ReturnToPool(visualOrbs[i], cachedOrbPrefab);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < visualOrbs.Count; i++)
-                {
-                    if (visualOrbs[i] != null) Destroy(visualOrbs[i]);
-                }
-            }
-            visualOrbs.Clear();
-
-            Destroy(gameObject);
-        }
-
-        private void DetonateImpactSplashes(float impactZ)
-        {
-            if (impactPrefab == null || PoolManager.Instance == null) return;
-            if (!VFXPerformanceManager.IsVFXEnabled) return; // Skip heavy GPU compute VFX on low-end hardware
-
-            foreach (float laneX in targetedLanes)
-            {
-                Vector3 splashPos = new Vector3(laneX, 0.45f, impactZ);
-                GameObject splash = PoolManager.Instance.SpawnFromPool(impactPrefab, splashPos, Quaternion.identity);
-                if (splash != null)
-                {
-                    var mover = splash.GetComponent<VFX.VFXTrackMover>();
-                    if (mover == null) mover = splash.AddComponent<VFX.VFXTrackMover>();
-                    mover.enabled = true;
-                }
-                PoolManager.Instance.ReturnToPoolAfterDelay(splash, impactPrefab, 2.5f);
-            }
+            if (!LevelManager.Instance) return Vector3.zero;
+            var lm = LevelManager.Instance;
+            float speed = lm.isTransitioningToBridge ? lm.transitionSpeed : lm.worldMoveSpeed;
+            return (lm.chunkDirection == LevelManager.MoveDirection.Backward ? Vector3.back : Vector3.forward) * speed;
         }
     }
 }

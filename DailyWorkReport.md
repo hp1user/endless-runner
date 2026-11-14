@@ -890,3 +890,19 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
 - **Orientation & Surface Loss Prevention (`ProjectSettings/ProjectSettings.asset`)**:
   - Disabled `allowedAutorotateToPortraitUpsideDown: 0` in project settings. Prevents accidental 180° screen flips which trigger Android Vulkan surface recreation (`onSurfaceDestroyed` / `onSurfaceCreated`) while active compute shaders are in-flight, which was causing catastrophic freezes and OS watchdog crashes.
 
+- **Advanced Acid Spit VFX System Verification (`Assets/VFX/AcidSpitAdvanced/`, `BossProjectile.cs`)**:
+  - **Technical Audit & Architecture Verification**:
+    - **Zero Compute Shaders**: Replaces Unity VFX Graph compute shaders (`DispatchCompute`) with pure URP Vertex/Fragment HLSL shaders (`AcidProjectileURP.shader`, `AcidPuddleURP.shader`, `AcidVaporURP.shader`) and standard Shuriken particle systems, eliminating Android Vulkan PSO stalls and driver dispatch bottlenecks on low-end GPUs (PowerVR GE8320 / Mali).
+    - **Opaque Geometry Pipeline (`clip()` vs Alpha Blending)**:
+      - Main toxic projectile and puddles render in the Opaque queue (`Queue = Geometry`), utilizing procedural HLSL vertex wobble, toon lighting bands, and alpha-testing (`clip()`) for erosion decay.
+      - Eliminates mobile GPU tile-based memory bandwidth bottlenecks caused by alpha overdraw.
+    - **Strict Bounded Pooling (`AcidPool.cs`)**:
+      - Hard safety caps enforced: 8 active projectiles, 8 impacts, 16 puddles. Prevents memory runaway or allocation spikes during rapid firing.
+    - **Zero Runtime Garbage Collection**:
+      - Replaced per-frame dynamic allocations with `Physics.SphereCastNonAlloc`, single-instance `MaterialPropertyBlock`, and shared static procedural meshes (`AcidDroplet.asset` with 352 triangles, `AcidPuddle.asset`, `AcidSplash.asset`).
+    - **Dynamic Road Tracking**:
+      - Hooked `AcidPool.SurfaceVelocity` into `LevelManager.Instance` speed and direction so expanding acid pools slide backwards synchronously with the road.
+    - **Boss Attack Safety Guard**:
+      - Added `hitRegistered` latch in `BossProjectile.Spawn()` to ensure players transitioning between targeted lanes take exact barrage damage (25 HP) without receiving accidental double hits.
+
+

@@ -232,6 +232,12 @@ This document serves as the master technical blueprint and living knowledge base
       - **Elite**: Default `20%` reduction.
       - **Standard**: `0%` reduction.
       - **Data Manager Tool**: Integrated an interactive `Damage Reduction (%)` slider with float field into `DataManagerWindow.cs` under Combat Stats, with auto-default assignment on Category switch and live preview display.
+   21. **Advanced Mesh-Based Boss Acid Spit (2026-11-14)**:
+      - New `Assets/VFX/AcidSpitAdvanced/` effect replaces the live boss projectile path while preserving the original Boss_AcidOrb prefabs.
+      - Opaque custom URP HLSL, generated 352-triangle liquid droplet, animated mesh trail, mesh splash and bubbling residue; no VFX Graph/compute dependencies.
+      - Modular swept-collision controller, bounded pools, optional raycast-gated ground-skimming; existing two-lane attack and supplied damage preserved.
+      - Isolated test scene plus actual boss Main Camera portrait flight/splash inspection completed. Collision/lifecycle/skimming/pool-limit validation passed. Android device performance and player build remain unverified.
+      - Details: `Assets/VFX/AcidSpitAdvanced/README.md`; evidence: `Captures/AcidSpitAdvanced/`.
 - **Next Potential Steps / Open Tasks:**
   - Play-testing in Unity Editor to evaluate gameplay balance for weapon drops, ammo replenishment, and armor siphon sustainability.
   - Testing boss combat on road chunks using `BossCheckpointSystem.JumpToBossCheckpoint(5)`.
