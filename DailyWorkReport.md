@@ -842,5 +842,51 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
       - `M_Van_Rusted.mat` $\rightarrow$ `T_Van_Rusted.png`
     - Maintained exact highway curvature compatibility (`_Curvature: -0.0015`, `_DistanceOffset: -30`) so the vehicles bend naturally with the procedural roadway.
     - Configured realistic physical response (`_Metallic: 0.15`, `_Smoothness: 0.25`).
-    - Remapped FBX material slots (`Car.fbx.meta`, `Bus.fbx.meta`, `SUV.fbx.meta`, `Van.fbx.meta`) to automatically assign each vehicle'\''s dedicated rusted material across all prefab instances.
+    - Remapped FBX material slots (`Car.fbx.meta`, `Bus.fbx.meta`, `SUV.fbx.meta`, `Van.fbx.meta`) to automatically assign each vehicle's dedicated rusted material across all prefab instances.
     - Updated fallback `Vehicles.mat` to reference `T_Car_Rusted.png`.
+
+## Date: 2026-11-14
+
+### Features Added & Mobile Performance Optimizations
+- **Mobile VFX Hardware Detection & Dynamic Throttling (`VFXPerformanceManager.cs`)**:
+  - **Context & Diagnosis**:
+    - Low-end mobile devices like the Samsung Galaxy Tab A7 Lite (SM-T225, Android 11) run on the PowerVR GE8320 GPU and 3GB RAM. VFX Graph computes liquid droplets, ground splatters, and bursts using GPU Compute Shaders (`DispatchCompute`). The PowerVR GE8320 architecture lacks dedicated compute throughput, dropping frame rates to single digits during heavy combat.
+  - **Dynamic Hardware Profiler (`VFXPerformanceManager.cs`)**:
+    - Automatically identifies low-end hardware profiles at runtime:
+      - System memory $\le 3200\text{MB}$.
+      - PowerVR GPUs (e.g. Rogue GE8300 / GE8320 / GE8322).
+      - Entry-tier Mali GPUs (Mali-400/450/T-series, Mali-G31/G51/G52).
+    - Exposes `VFXPerformanceManager.IsVFXEnabled`:
+      - Automatically initializes to `false` on low-end hardware, bypassing GPU compute passes entirely and ensuring a rock-solid, smooth frame rate.
+      - Automatically initializes to `true` on mid/high-tier devices (e.g., Google Pixel 7a, modern flagships).
+      - Persisted via `PlayerPrefs` (`VFX_ENABLED_KEY`), allowing user settings menu toggles.
+  - **Per-Target Hit VFX Rate Limiting**:
+    - High fire-rate weapons (Minigun at 15 rps, Assault Rifle at 13 rps, SMG at 17 rps) previously spawned a separate VFX Graph instance on every single bullet impact, resulting in up to 30–50 concurrent compute shader instances.
+    - Implemented `CanSpawnHitVFX(targetInstanceId)` with `MIN_HIT_VFX_INTERVAL = 0.10f`, capping hit VFX to a maximum of 10 bursts per second per target.
+    - Added automatic dictionary cleanup via `ClearTarget(targetInstanceId)` hooked into `EnemyController.Die()`, `Despawn()`, and `ForceDespawn()`.
+
+- **First-Hit Stutter Elimination & PSO / Compute Shader Pre-Warming (`PoolManager.cs`, `EnemyManager.cs`)**:
+  - **Root Cause (Pixel 7a Stutter)**:
+    - On Android devices utilizing the Vulkan or OpenGL ES graphics backend, shaders and compute kernels are compiled lazily upon the very first draw call or dispatch. Spawning the first hit or death VFX during active combat caused a 1-second pipeline compilation stall (PSO compilation freeze).
+  - **Runtime Shader & Compute Pre-Warming (`PoolManager.PrewarmPool`)**:
+    - Implemented `PrewarmPool(GameObject prefab, int count, bool warmupShaders)` in `PoolManager.cs`.
+    - Instantiates VFX instances off-screen (`Vector3.down * 500f`) during initial scene loading and executes a single simulation frame (`vfx.Simulate(0.016f)`).
+    - Forces the GPU driver to compile all vertex, fragment, and compute pipelines ahead of time while the loading screen or level begins, completely eliminating runtime first-hit stutter.
+    - Enforced a hard pool safety cap (`MAX_POOL_CAP_PER_PREFAB = 12`) to prevent unbounded memory growth during intense swarming.
+  - **Automated Scene Pre-Warming Integration (`EnemyManager.PrewarmVFX`)**:
+    - Extended `EnemyManager.Start()` with `PrewarmVFX()`: dynamically aggregates all unique `hitVFX`, `deathVFX`, and `deathVFX_Variant` across all regular enemies and bosses in `EnemyDatabase.asset` and pre-warms their pools before waves begin.
+
+- **Boss Fight Freeze & Crash Fixes (`BossProjectile.cs`, `BossAttackTelegraph.cs`, `EnemyController.cs`)**:
+  - **Boss Attack Telegraph Material Leak Fix (`BossAttackTelegraph.cs`)**:
+    - Discovered that each boss telegraph warning was executing `new Material(Shader.Find(...))` without destroying the previous instance, leaking hundreds of native material instances into memory across repeated attacks until the application ran out of graphics memory and crashed.
+    - Refactored `BossAttackTelegraph.cs` to utilize a single static, lazy-initialized `sharedTelegraphMat` across all telegraph instances.
+  - **Boss Projectile Pooling (`BossProjectile.cs`)**:
+    - Converted dynamic `Instantiate(cachedOrbPrefab)` in `BossProjectile.cs` to `PoolManager.Instance.SpawnFromPool`.
+    - In `FadeAndCleanupRoutine`, recycled expired orbs back into the pool via `PoolManager.Instance.ReturnToPool` instead of invoking `Destroy()`.
+    - Guarded boss projectile detonation splash instantiation with `VFXPerformanceManager.IsVFXEnabled`.
+  - **Multi-Part Hit Deduping**:
+    - Prevented cascading hit-VFX triggers across multi-part boss colliders during piercing or shotgun blasts.
+
+- **Orientation & Surface Loss Prevention (`ProjectSettings/ProjectSettings.asset`)**:
+  - Disabled `allowedAutorotateToPortraitUpsideDown: 0` in project settings. Prevents accidental 180° screen flips which trigger Android Vulkan surface recreation (`onSurfaceDestroyed` / `onSurfaceCreated`) while active compute shaders are in-flight, which was causing catastrophic freezes and OS watchdog crashes.
+

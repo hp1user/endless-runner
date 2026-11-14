@@ -12,6 +12,8 @@ namespace Enemy.Control
         private float duration;
         private float timer;
 
+        private static Material sharedTelegraphMat;
+
         public static BossAttackTelegraph Create(float[] targetedLanes, float startZ, float endZ, float duration)
         {
             GameObject go = new GameObject("BossAttackTelegraph");
@@ -27,9 +29,13 @@ namespace Enemy.Control
 
             laneIndicators = new LineRenderer[targetedLanes.Length];
 
-            // Create default unlit / sprite material with red tint
-            Material redMat = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color"));
-            redMat.color = new Color(1f, 0.15f, 0.15f, 0.6f);
+            // Reuse a single static shared material to prevent native memory leaks during boss battles
+            if (sharedTelegraphMat == null)
+            {
+                Shader s = Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+                sharedTelegraphMat = new Material(s);
+                sharedTelegraphMat.color = new Color(1f, 0.15f, 0.15f, 0.6f);
+            }
 
             for (int i = 0; i < targetedLanes.Length; i++)
             {
@@ -37,7 +43,7 @@ namespace Enemy.Control
                 lineObj.transform.SetParent(transform);
 
                 LineRenderer lr = lineObj.AddComponent<LineRenderer>();
-                lr.material = redMat;
+                lr.material = sharedTelegraphMat;
                 lr.startColor = new Color(1f, 0.2f, 0.2f, 0.7f);
                 lr.endColor = new Color(1f, 0.05f, 0.05f, 0.4f);
                 lr.startWidth = 1.6f;

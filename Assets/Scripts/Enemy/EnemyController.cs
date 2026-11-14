@@ -73,6 +73,8 @@ namespace Enemy.Control
             isDead = true;
             StopAllCoroutines();
 
+            VFXPerformanceManager.ClearTarget(GetInstanceID());
+
             Collider col = GetComponent<Collider>();
             if (col != null) col.enabled = false;
             Collider[] childCols = GetComponentsInChildren<Collider>();
@@ -498,6 +500,8 @@ namespace Enemy.Control
             if (isDead) return;
             isDead = true;
 
+            VFXPerformanceManager.ClearTarget(GetInstanceID());
+
             if (myManager != null) myManager.OnEnemyDespawned();
 
             Collider col = GetComponent<Collider>();
@@ -681,6 +685,8 @@ namespace Enemy.Control
 
         public void SpawnDeathVFX()
         {
+            if (!VFXPerformanceManager.IsVFXEnabled) return; // Skip heavy GPU compute VFX on low-end hardware
+
             GameObject vfxPrefab = deathVFX;
             if (deathVFX != null && deathVFX_Variant != null)
             {
@@ -713,6 +719,8 @@ namespace Enemy.Control
 
         public void SpawnHitVFX(Vector3 hitPoint, Vector3 hitNormal)
         {
+            if (!VFXPerformanceManager.CanSpawnHitVFX(GetInstanceID())) return; // Rate-limiting & low-end safety
+
             GameObject vfxPrefab = hitVFX;
             if (vfxPrefab == null) return;
 
@@ -782,6 +790,8 @@ namespace Enemy.Control
         {
             if (isDead) return;
             isDead = true;
+
+            VFXPerformanceManager.ClearTarget(GetInstanceID());
 
             // Trigger Death Splash VFX
             SpawnDeathVFX();

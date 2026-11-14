@@ -64,15 +64,36 @@ namespace Enemy.Control
             {
                 if (cachedOrbPrefab != null)
                 {
-                    GameObject orb = Instantiate(cachedOrbPrefab, transform);
+                    Vector3 localOffset = new Vector3(laneX - transform.position.x, 0.6f, 0f);
+                    GameObject orb = (PoolManager.Instance != null)
+                        ? PoolManager.Instance.SpawnFromPool(cachedOrbPrefab, transform.position + localOffset, Quaternion.identity, transform)
+                        : Instantiate(cachedOrbPrefab, transform);
+
                     orb.name = $"AcidOrb_Lane_{laneX}";
-                    orb.transform.localPosition = new Vector3(laneX - transform.position.x, 0.6f, 0f);
+                    orb.transform.localPosition = localOffset;
 
                     // Pre-cache components at spawn time to avoid runtime GC allocations
-                    Renderer[] rends = orb.GetComponentsInChildren<Renderer>();
+                    Renderer[] rends = orb.GetComponentsInChildren<Renderer>(true);
+                    for (int r = 0; r < rends.Length; r++) rends[r].enabled = true;
                     cachedRenderers.AddRange(rends);
 
-                    VisualEffect[] vfxs = orb.GetComponentsInChildren<VisualEffect>();
+                    VisualEffect[] vfxs = orb.GetComponentsInChildren<VisualEffect>(true);
+                    for (int v = 0; v < vfxs.Length; v++)
+                    {
+                        if (vfxs[v] != null)
+                        {
+                            if (VFXPerformanceManager.IsVFXEnabled)
+                            {
+                                vfxs[v].enabled = true;
+                                vfxs[v].Reinit();
+                                vfxs[v].Play();
+                            }
+                            else
+                            {
+                                vfxs[v].enabled = false;
+                            }
+                        }
+                    }
                     cachedVFX.AddRange(vfxs);
 
                     visualOrbs.Add(orb);
@@ -172,8 +193,33 @@ namespace Enemy.Control
                 if (cachedVFX[i] != null) cachedVFX[i].Stop();
             }
 
-            // 3. Wait for existing ground liquid puddles (3.5s) to naturally dissolve before destroying container
+            // 3. Wait for existing ground liquid puddles (3.5s) to naturally dissolve before recycling orbs
             yield return new WaitForSeconds(3.5f);
+
+            // Re-enable renderers and return orbs to pool
+            for (int i = 0; i < cachedRenderers.Count; i++)
+            {
+                if (cachedRenderers[i] != null) cachedRenderers[i].enabled = true;
+            }
+
+            if (cachedOrbPrefab != null && PoolManager.Instance != null)
+            {
+                for (int i = 0; i < visualOrbs.Count; i++)
+                {
+                    if (visualOrbs[i] != null)
+                    {
+                        PoolManager.Instance.ReturnToPool(visualOrbs[i], cachedOrbPrefab);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < visualOrbs.Count; i++)
+                {
+                    if (visualOrbs[i] != null) Destroy(visualOrbs[i]);
+                }
+            }
+            visualOrbs.Clear();
 
             Destroy(gameObject);
         }
@@ -181,6 +227,7 @@ namespace Enemy.Control
         private void DetonateImpactSplashes(float impactZ)
         {
             if (impactPrefab == null || PoolManager.Instance == null) return;
+            if (!VFXPerformanceManager.IsVFXEnabled) return; // Skip heavy GPU compute VFX on low-end hardware
 
             foreach (float laneX in targetedLanes)
             {

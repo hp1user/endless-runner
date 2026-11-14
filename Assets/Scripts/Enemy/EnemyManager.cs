@@ -114,6 +114,42 @@ public class EnemyManager : MonoBehaviour
         timer = 0f;
         levelDelayTimer = initialSpawnDelay;
         isWaitingForLevelDelay = (initialSpawnDelay > 0f);
+
+        PrewarmVFX();
+    }
+
+    private void PrewarmVFX()
+    {
+        if (PoolManager.Instance == null || enemyDatabase == null) return;
+        if (!VFXPerformanceManager.IsVFXEnabled) return;
+
+        System.Collections.Generic.HashSet<GameObject> vfxToWarm = new System.Collections.Generic.HashSet<GameObject>();
+        if (enemyDatabase.enemyTypes != null)
+        {
+            foreach (var entry in enemyDatabase.enemyTypes)
+            {
+                if (entry == null) continue;
+                if (entry.hitVFX != null) vfxToWarm.Add(entry.hitVFX);
+                if (entry.deathVFX != null) vfxToWarm.Add(entry.deathVFX);
+                if (entry.deathVFX_Variant != null) vfxToWarm.Add(entry.deathVFX_Variant);
+
+                if (entry.minionTypes != null)
+                {
+                    foreach (var minion in entry.minionTypes)
+                    {
+                        if (minion == null) continue;
+                        if (minion.hitVFX != null) vfxToWarm.Add(minion.hitVFX);
+                        if (minion.deathVFX != null) vfxToWarm.Add(minion.deathVFX);
+                        if (minion.deathVFX_Variant != null) vfxToWarm.Add(minion.deathVFX_Variant);
+                    }
+                }
+            }
+        }
+
+        foreach (var vfx in vfxToWarm)
+        {
+            PoolManager.Instance.PrewarmPool(vfx, 3, warmupShaders: true);
+        }
     }
 
     private void Update()
