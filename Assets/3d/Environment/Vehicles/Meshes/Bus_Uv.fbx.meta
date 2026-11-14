@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 944578cbdb3805f42841fa51c6a33cc8
+guid: 6fc447021cb9bfa4f97be8f7864ad471
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,7 +7,7 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: tripo_12a70bc1_3a21_4bfc_a394_335267b7b9fb
+      name: vehicle
     second: {fileID: 2100000, guid: d4a70002000000000000000000000002, type: 2}
   materials:
     materialImportMode: 2
@@ -50,8 +50,8 @@ ModelImporter:
     importLights: 1
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
-    swapUVChannels: 1
-    generateSecondaryUV: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
