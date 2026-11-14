@@ -63,6 +63,7 @@ namespace Enemy.Control
                 Vector3 pt = (hitPoint != default) ? hitPoint : transform.position;
                 Vector3 n = (hitNormal != default) ? hitNormal : Vector3.up;
                 bossController.SpawnHitVFX(pt, n);
+                EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Hurt, pt);
             }
 
             // Failsafe: If currentHealth wasn't initialized yet

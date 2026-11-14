@@ -125,6 +125,7 @@ public class UpgradeCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (UpgradeManager.Instance != null && myCardData != null && !isAnyCardConfirmed)
         {
+            EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.CardClick);
             UpgradeManager.Instance.PreviewUpgrade(this, myCardData);
 
             // Playful nudge animation to hint that the card can be swiped
@@ -195,6 +196,8 @@ public class UpgradeCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             isAnyCardConfirmed = true;
             float direction = currentDeltaX >= 0f ? 1f : -1f;
+
+            EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.CardSwipeConfirm);
 
             if (activeCoroutine != null) StopCoroutine(activeCoroutine);
             activeCoroutine = StartCoroutine(FlyOffAndConfirm(direction));

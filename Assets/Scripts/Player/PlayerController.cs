@@ -836,7 +836,11 @@ namespace Player.Control
                 UpdateAmmoUI();
             }
 
-            if (audioSource != null && currentWeaponData.audioFire != null)
+            if (EndlessRunner.Audio.AudioManager.Instance != null)
+            {
+                EndlessRunner.Audio.AudioManager.Instance.PlayWeaponSound(currentWeaponData.weaponID, EndlessRunner.Audio.WeaponSoundType.Fire, currentWeaponData.audioFire);
+            }
+            else if (audioSource != null && currentWeaponData.audioFire != null)
             {
                 audioSource.pitch = Random.Range(0.95f, 1.05f);
                 audioSource.PlayOneShot(currentWeaponData.audioFire, weaponVolume);
@@ -911,6 +915,7 @@ namespace Player.Control
                             GameObject impactPrefab = impactEffect.gameObject;
                             GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
                             PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
+                            EndlessRunner.Audio.AudioManager.Instance?.PlayImpactSound(EndlessRunner.Audio.ImpactSoundType.BulletHitFlesh, hit.point);
                         }
 
                         BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
@@ -989,6 +994,7 @@ namespace Player.Control
                             GameObject impactPrefab = impactEffect.gameObject;
                             GameObject impact = PoolManager.Instance.SpawnFromPool(impactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
                             PoolManager.Instance.ReturnToPoolAfterDelay(impact, impactPrefab, currentWeaponData.impactLifetime);
+                            EndlessRunner.Audio.AudioManager.Instance?.PlayImpactSound(EndlessRunner.Audio.ImpactSoundType.BulletHitFlesh, hit.point);
                         }
 
                         BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();

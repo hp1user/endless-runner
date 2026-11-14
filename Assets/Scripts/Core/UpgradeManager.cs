@@ -481,6 +481,8 @@ public class UpgradeManager : MonoBehaviour
 
         UpgradeCardUI.ResetSwipeState();
 
+        EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.CardPopup);
+
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(true);
 
         if (confirmButton != null) confirmButton.gameObject.SetActive(false);

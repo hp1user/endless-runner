@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EndlessRunner.Audio;
 
 public class DataManagerWindow : EditorWindow
 {
@@ -41,7 +42,10 @@ public class DataManagerWindow : EditorWindow
     private List<EnemyEntry> _filteredEnemies = new List<EnemyEntry>();
     private EnemyEntry _selectedEnemy;
 
-    private enum DataType { UpgradeCard, Weapon, Enemy }
+    // Audio Database Support
+    private AudioDatabase _audioDatabase;
+
+    private enum DataType { UpgradeCard, Weapon, Enemy, Audio }
     private DataType _currentDataType = DataType.UpgradeCard;
 
     [MenuItem("Tools/Endless Runner/Data Manager")]
@@ -96,6 +100,7 @@ public class DataManagerWindow : EditorWindow
         dataTypeMenu.menu.AppendAction("Upgrade Card", (a) => SetDataType(DataType.UpgradeCard), (a) => _currentDataType == DataType.UpgradeCard ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         dataTypeMenu.menu.AppendAction("Weapon", (a) => SetDataType(DataType.Weapon), (a) => _currentDataType == DataType.Weapon ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         dataTypeMenu.menu.AppendAction("Enemy", (a) => SetDataType(DataType.Enemy), (a) => _currentDataType == DataType.Enemy ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        dataTypeMenu.menu.AppendAction("Audio & Sound System", (a) => SetDataType(DataType.Audio), (a) => _currentDataType == DataType.Audio ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         
         _itemListView.makeItem = () => 
         {
@@ -329,6 +334,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.UpgradeCard => "Upgrade Cards",
                 DataType.Weapon => "Weapons",
                 DataType.Enemy => "Enemies",
+                DataType.Audio => "Audio & Sound System",
                 _ => "Items"
             };
         }
@@ -340,6 +346,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.UpgradeCard => "Card Preview",
                 DataType.Weapon => "Weapon Preview",
                 DataType.Enemy => "Enemy Preview",
+                DataType.Audio => "Soundtrack & Audio Controls",
                 _ => "Preview"
             };
         }
@@ -351,6 +358,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.UpgradeCard => "New Upgrade Card",
                 DataType.Weapon => "New Weapon",
                 DataType.Enemy => "New Enemy",
+                DataType.Audio => "Audio System Active",
                 _ => "New Item"
             };
         }
@@ -470,11 +478,33 @@ public class DataManagerWindow : EditorWindow
         }
     }
 
+    private void LoadOrCreateAudioDatabase()
+    {
+        if (_audioDatabase != null) return;
+
+        string assetPath = "Assets/Resources/Audio/AudioDatabase.asset";
+        _audioDatabase = AssetDatabase.LoadAssetAtPath<AudioDatabase>(assetPath);
+        if (_audioDatabase == null)
+        {
+            string dir = "Assets/Resources/Audio";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            _audioDatabase = ScriptableObject.CreateInstance<AudioDatabase>();
+            AssetDatabase.CreateAsset(_audioDatabase, assetPath);
+            AssetDatabase.SaveAssets();
+        }
+    }
+
     private void RefreshList()
     {
         if (_currentDataType == DataType.Enemy)
         {
             LoadOrCreateEnemyDatabase();
+        }
+        else if (_currentDataType == DataType.Audio)
+        {
+            LoadOrCreateAudioDatabase();
+            _items.Clear();
+            if (_audioDatabase != null) _items.Add(_audioDatabase);
         }
         else
         {
@@ -553,7 +583,15 @@ public class DataManagerWindow : EditorWindow
         _inspectorContainer.Clear();
         foreach (var obj in selection)
         {
-            if (_currentDataType == DataType.Enemy && obj is EnemyEntry enemy)
+            if (_currentDataType == DataType.Audio && _audioDatabase != null)
+            {
+                _selectedEnemy = null;
+                _selectedItem = _audioDatabase;
+                BuildAudioInspector(_audioDatabase);
+                UpdatePreview();
+                break;
+            }
+            else if (_currentDataType == DataType.Enemy && obj is EnemyEntry enemy)
             {
                 _selectedEnemy = enemy;
                 _selectedItem = null;
@@ -978,6 +1016,253 @@ public class DataManagerWindow : EditorWindow
         _inspectorContainer.Add(scroll);
     }
 
+    private void BuildAudioInspector(AudioDatabase audioDb)
+    {
+        _inspectorContainer.Clear();
+        if (audioDb == null) return;
+
+        var scroll = new ScrollView();
+        scroll.style.flexGrow = 1;
+
+        VisualElement CreateHeader(string title)
+        {
+            var h = new Label(title);
+            h.AddToClassList("section-header");
+            return h;
+        }
+
+        VisualElement CreateAudioClipRow(string labelText, AudioClip initialClip, System.Action<AudioClip> onClipChanged)
+        {
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 4 } };
+            var objField = new ObjectField(labelText)
+            {
+                objectType = typeof(AudioClip),
+                value = initialClip
+            };
+            objField.style.flexGrow = 1;
+            objField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(audioDb, $"Change {labelText}");
+                onClipChanged(evt.newValue as AudioClip);
+                EditorUtility.SetDirty(audioDb);
+            });
+            row.Add(objField);
+
+            var playBtn = new Button { text = "▶ Play", style = { width = 55, height = 22, marginLeft = 4, backgroundColor = new StyleColor(new Color(0.18f, 0.45f, 0.25f)) } };
+            playBtn.clicked += () =>
+            {
+                AudioClip clip = objField.value as AudioClip;
+                if (clip != null) PlayClipPreview(clip);
+            };
+            row.Add(playBtn);
+
+            var stopBtn = new Button { text = "■ Stop", style = { width = 55, height = 22, marginLeft = 2, backgroundColor = new StyleColor(new Color(0.5f, 0.2f, 0.2f)) } };
+            stopBtn.clicked += () => StopAllClipsPreview();
+            row.Add(stopBtn);
+
+            return row;
+        }
+
+        // --- MASTER VOLUMES ---
+        scroll.Add(CreateHeader("Master Volume Mixers"));
+
+        var masterSlider = new Slider("Master Volume", 0f, 1f) { value = audioDb.masterVolume };
+        masterSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Master Volume");
+            audioDb.masterVolume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+            if (Application.isPlaying && AudioManager.Instance != null) AudioManager.Instance.SetMasterVolume(evt.newValue);
+            UpdatePreview();
+        });
+        scroll.Add(masterSlider);
+
+        var musicSlider = new Slider("Music Master Volume", 0f, 1f) { value = audioDb.musicVolume };
+        musicSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Music Volume");
+            audioDb.musicVolume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+            if (Application.isPlaying && AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(evt.newValue);
+            UpdatePreview();
+        });
+        scroll.Add(musicSlider);
+
+        var sfxSlider = new Slider("SFX Master Volume", 0f, 1f) { value = audioDb.sfxVolume };
+        sfxSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "SFX Volume");
+            audioDb.sfxVolume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+            if (Application.isPlaying && AudioManager.Instance != null) AudioManager.Instance.SetSFXVolume(evt.newValue);
+            UpdatePreview();
+        });
+        scroll.Add(sfxSlider);
+
+        var l0Slider = new Slider("Layer 0 (Base) Volume", 0f, 1f) { value = audioDb.layer0Volume };
+        l0Slider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Layer 0 Volume");
+            audioDb.layer0Volume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+            if (Application.isPlaying && AudioManager.Instance != null) AudioManager.Instance.SetLayer0Volume(evt.newValue);
+        });
+        scroll.Add(l0Slider);
+
+        var l1Slider = new Slider("Layer 1 (Battle) Volume", 0f, 1f) { value = audioDb.layer1Volume };
+        l1Slider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Layer 1 Volume");
+            audioDb.layer1Volume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+            if (Application.isPlaying && AudioManager.Instance != null) AudioManager.Instance.SetLayer1Volume(evt.newValue);
+        });
+        scroll.Add(l1Slider);
+
+        // --- PERIMETER BREACH MUSIC ---
+        scroll.Add(CreateHeader("Perimeter Breach Dynamic Music"));
+
+        scroll.Add(CreateAudioClipRow("Layer 0 (Ambient Loop)", audioDb.perimeterBreachLayer0, c => audioDb.perimeterBreachLayer0 = c));
+        scroll.Add(CreateAudioClipRow("Layer 1 (Battle Loop)", audioDb.perimeterBreachLayer1, c => audioDb.perimeterBreachLayer1 = c));
+
+        var duckSlider = new Slider("Card Popup Duck Volume", 0.05f, 0.8f) { value = audioDb.cardPopupDuckVolume };
+        duckSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Duck Volume");
+            audioDb.cardPopupDuckVolume = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(duckSlider);
+
+        var cardPitchSlider = new Slider("Card Popup Slow Pitch", 0.7f, 1.0f) { value = audioDb.cardPopupSlowPitch };
+        cardPitchSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Card Popup Pitch");
+            audioDb.cardPopupSlowPitch = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(cardPitchSlider);
+
+        var slowPitchSlider = new Slider("Weapon Wheel Slow Pitch", 0.2f, 0.9f) { value = audioDb.weaponWheelSlowPitch };
+        slowPitchSlider.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Slow Pitch");
+            audioDb.weaponWheelSlowPitch = evt.newValue;
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(slowPitchSlider);
+
+        var fadeSpeedField = new FloatField("Music Fade Speed") { value = audioDb.musicFadeSpeed };
+        fadeSpeedField.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Fade Speed");
+            audioDb.musicFadeSpeed = Mathf.Max(0.5f, evt.newValue);
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(fadeSpeedField);
+
+        var pitchSpeedField = new FloatField("Pitch Smooth Speed") { value = audioDb.pitchSmoothSpeed };
+        pitchSpeedField.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Pitch Speed");
+            audioDb.pitchSmoothSpeed = Mathf.Max(0.5f, evt.newValue);
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(pitchSpeedField);
+
+        var graceField = new FloatField("Battle Music Grace Period (s)") { value = audioDb.battleGracePeriod };
+        graceField.RegisterValueChangedCallback(evt => {
+            Undo.RecordObject(audioDb, "Grace Period");
+            audioDb.battleGracePeriod = Mathf.Max(0f, evt.newValue);
+            EditorUtility.SetDirty(audioDb);
+        });
+        scroll.Add(graceField);
+
+        // --- UI SOUNDS ---
+        scroll.Add(CreateHeader("UI Sound Effects"));
+        scroll.Add(CreateAudioClipRow("Card Popup", audioDb.cardPopupSound, c => audioDb.cardPopupSound = c));
+        scroll.Add(CreateAudioClipRow("Card Click / Select", audioDb.cardClickSound, c => audioDb.cardClickSound = c));
+        scroll.Add(CreateAudioClipRow("Card Swipe Confirm", audioDb.cardSwipeConfirmSound, c => audioDb.cardSwipeConfirmSound = c));
+        scroll.Add(CreateAudioClipRow("Button Click", audioDb.buttonClickSound, c => audioDb.buttonClickSound = c));
+        scroll.Add(CreateAudioClipRow("Level Up Banner", audioDb.levelUpBannerSound, c => audioDb.levelUpBannerSound = c));
+        scroll.Add(CreateAudioClipRow("Weapon Wheel Open", audioDb.weaponWheelOpenSound, c => audioDb.weaponWheelOpenSound = c));
+        scroll.Add(CreateAudioClipRow("Weapon Wheel Close", audioDb.weaponWheelCloseSound, c => audioDb.weaponWheelCloseSound = c));
+        scroll.Add(CreateAudioClipRow("Weapon Wheel Select", audioDb.weaponWheelSelectSound, c => audioDb.weaponWheelSelectSound = c));
+
+        // --- WEAPONS SOUNDS ---
+        scroll.Add(CreateHeader("Weapon Sound Profiles"));
+        if (audioDb.weaponProfiles != null)
+        {
+            for (int w = 0; w < audioDb.weaponProfiles.Count; w++)
+            {
+                var profile = audioDb.weaponProfiles[w];
+                if (profile == null) continue;
+
+                var wpnBox = new VisualElement { style = { backgroundColor = new StyleColor(new Color(0.18f, 0.18f, 0.22f)), paddingLeft = 8, paddingRight = 8, paddingTop = 6, paddingBottom = 6, marginBottom = 6, borderTopLeftRadius = 4, borderTopRightRadius = 4, borderBottomLeftRadius = 4, borderBottomRightRadius = 4 } };
+                var wpnHeader = new Label($"{profile.displayName} (ID: {profile.weaponID})") { style = { unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 4 } };
+                wpnBox.Add(wpnHeader);
+
+                AudioClip fireClip = (profile.fireClips != null && profile.fireClips.Length > 0) ? profile.fireClips[0] : null;
+                wpnBox.Add(CreateAudioClipRow("Fire Sound", fireClip, c => {
+                    profile.fireClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0];
+                }));
+                wpnBox.Add(CreateAudioClipRow("Reload Sound", profile.reloadClip, c => profile.reloadClip = c));
+                wpnBox.Add(CreateAudioClipRow("Mag Out Sound", profile.magOutClip, c => profile.magOutClip = c));
+                wpnBox.Add(CreateAudioClipRow("Mag In Sound", profile.magInClip, c => profile.magInClip = c));
+                wpnBox.Add(CreateAudioClipRow("Empty Click Sound", profile.emptyClickClip, c => profile.emptyClickClip = c));
+
+                var wpnVolSlider = new Slider("Weapon Volume", 0f, 1f) { value = profile.volume };
+                wpnVolSlider.RegisterValueChangedCallback(evt => {
+                    profile.volume = evt.newValue;
+                    EditorUtility.SetDirty(audioDb);
+                });
+                wpnBox.Add(wpnVolSlider);
+
+                scroll.Add(wpnBox);
+            }
+        }
+
+        // --- BOSS SOUNDS ---
+        scroll.Add(CreateHeader("Boss Sound Effects"));
+        scroll.Add(CreateAudioClipRow("Boss Roar (Spawn / Fight Start)", audioDb.bossRoarClip, c => audioDb.bossRoarClip = c));
+        scroll.Add(CreateAudioClipRow("Boss Spit / Attack", audioDb.bossSpitClip, c => audioDb.bossSpitClip = c));
+        scroll.Add(CreateAudioClipRow("Boss Hurt / Hit", audioDb.bossHurtClip, c => audioDb.bossHurtClip = c));
+        scroll.Add(CreateAudioClipRow("Boss Death / Defeat", audioDb.bossDeathClip, c => audioDb.bossDeathClip = c));
+        scroll.Add(CreateAudioClipRow("Boss Phase Change", audioDb.bossPhaseChangeClip, c => audioDb.bossPhaseChangeClip = c));
+
+        // --- BUG & MINION SOUNDS ---
+        scroll.Add(CreateHeader("Bug & Minion Sound Effects"));
+        AudioClip bugHurt = (audioDb.bugHurtClips != null && audioDb.bugHurtClips.Length > 0) ? audioDb.bugHurtClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bug Hurt / Hit", bugHurt, c => audioDb.bugHurtClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        AudioClip bugDeath = (audioDb.bugDeathClips != null && audioDb.bugDeathClips.Length > 0) ? audioDb.bugDeathClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bug Death", bugDeath, c => audioDb.bugDeathClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        AudioClip bugAttack = (audioDb.bugAttackClips != null && audioDb.bugAttackClips.Length > 0) ? audioDb.bugAttackClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bug Attack", bugAttack, c => audioDb.bugAttackClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        AudioClip bugSkitter = (audioDb.bugSkitterClips != null && audioDb.bugSkitterClips.Length > 0) ? audioDb.bugSkitterClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bug Skitter / Spawn", bugSkitter, c => audioDb.bugSkitterClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        // --- IMPACT SOUNDS ---
+        scroll.Add(CreateHeader("Impact & Damage Sound Effects"));
+        AudioClip hitFlesh = (audioDb.bulletHitFleshClips != null && audioDb.bulletHitFleshClips.Length > 0) ? audioDb.bulletHitFleshClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bullet Hit Flesh", hitFlesh, c => audioDb.bulletHitFleshClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        AudioClip hitSurface = (audioDb.bulletHitSurfaceClips != null && audioDb.bulletHitSurfaceClips.Length > 0) ? audioDb.bulletHitSurfaceClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Bullet Hit Surface", hitSurface, c => audioDb.bulletHitSurfaceClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        AudioClip playerHurt = (audioDb.playerHurtClips != null && audioDb.playerHurtClips.Length > 0) ? audioDb.playerHurtClips[0] : null;
+        scroll.Add(CreateAudioClipRow("Player Hurt", playerHurt, c => audioDb.playerHurtClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
+
+        scroll.Add(CreateAudioClipRow("Player Death", audioDb.playerDeathClip, c => audioDb.playerDeathClip = c));
+
+        _inspectorContainer.Add(scroll);
+    }
+
+    private static void PlayClipPreview(AudioClip clip)
+    {
+        if (clip == null) return;
+        var method = typeof(Editor).Assembly.GetType("UnityEditor.AudioUtil")?.GetMethod("PlayPreviewClip", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, null, new System.Type[] { typeof(AudioClip), typeof(int), typeof(bool) }, null);
+        method?.Invoke(null, new object[] { clip, 0, false });
+    }
+
+    private static void StopAllClipsPreview()
+    {
+        var method = typeof(Editor).Assembly.GetType("UnityEditor.AudioUtil")?.GetMethod("StopAllPreviewClips", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+        method?.Invoke(null, null);
+    }
+
     private void ClearPreview()
     {
         _previewTitle.text = "";
@@ -999,6 +1284,22 @@ public class DataManagerWindow : EditorWindow
     {
         var previewContainer = rootVisualElement.Q<VisualElement>(className: "preview-container");
         
+        if (_currentDataType == DataType.Audio)
+        {
+            if (_audioDatabase == null) LoadOrCreateAudioDatabase();
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
+
+            _previewTitle.text = "PERIMETER BREACH";
+            _previewDesc.text = $"Adaptive Dual-Layer Audio System\nMaster: {Mathf.RoundToInt(_audioDatabase.masterVolume * 100)}% | Music: {Mathf.RoundToInt(_audioDatabase.musicVolume * 100)}% | SFX: {Mathf.RoundToInt(_audioDatabase.sfxVolume * 100)}%\nLayer 0: Continuous Groove | Layer 1: Combat Intensity";
+            _previewValue.text = "DYNAMIC";
+
+            _previewIcon.style.backgroundImage = null;
+            _previewBackground.style.backgroundImage = null;
+            _previewBackground.style.backgroundColor = new StyleColor(new Color(0.08f, 0.16f, 0.28f));
+            return;
+        }
+
         if (_currentDataType == DataType.Enemy)
         {
             if (_selectedEnemy == null)
@@ -1152,6 +1453,19 @@ public class DataManagerWindow : EditorWindow
             return;
         }
 
+        if (_currentDataType == DataType.Audio)
+        {
+            if (_audioDatabase == null) LoadOrCreateAudioDatabase();
+            Undo.RecordObject(_audioDatabase, "Add Weapon Profile");
+            string profileName = string.IsNullOrEmpty(_newItemNameField.value) ? "New Weapon Profile" : _newItemNameField.value;
+            if (_audioDatabase.weaponProfiles == null) _audioDatabase.weaponProfiles = new List<WeaponAudioProfile>();
+            _audioDatabase.weaponProfiles.Add(new WeaponAudioProfile { displayName = profileName, weaponID = profileName.Replace(" ", "_") });
+            EditorUtility.SetDirty(_audioDatabase);
+            AssetDatabase.SaveAssets();
+            BuildAudioInspector(_audioDatabase);
+            return;
+        }
+
         ScriptableObject newItem = null;
         string fullPath = "";
         
@@ -1199,6 +1513,8 @@ public class DataManagerWindow : EditorWindow
 
     private void DuplicateSelectedItem()
     {
+        if (_currentDataType == DataType.Audio) return;
+
         if (_currentDataType == DataType.Enemy)
         {
             if (_selectedEnemy == null || _enemyDatabase == null) return;

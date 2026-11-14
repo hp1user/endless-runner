@@ -47,6 +47,9 @@ public class EnemyManager : MonoBehaviour
     [Tooltip("Speed multiplier added per level (e.g., 0.05 = +5% per level)")]
     public float speedIncreasePerLevel = 0.05f;
 
+    public static EnemyManager Instance { get; private set; }
+    public int ActiveEnemyCount => activeEnemyCount;
+
     private int activeEnemyCount = 0;
     public int enemiesSpawnedThisLevel = 0;
     private float timer;
@@ -54,6 +57,12 @@ public class EnemyManager : MonoBehaviour
     private bool isWaitingForLevelDelay = false;
 
     private bool isGameOver = false;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else if (Instance != this) Destroy(gameObject);
+    }
 
     private void OnEnable()
     {

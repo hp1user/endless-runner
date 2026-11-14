@@ -323,6 +323,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
         wheelContainer.style.display = DisplayStyle.Flex;
         Time.timeScale = 0.1f;
+        EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.WeaponWheelOpen);
 
         // Default hovered slot: currently equipped weapon
         int currentEquippedSlot = -1;
@@ -343,6 +344,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         if (wheelContainer == null) return;
         wheelContainer.style.display = DisplayStyle.None;
         Time.timeScale = 1.0f;
+        EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.WeaponWheelClose);
 
         if (selectedIndex != -1)
         {

@@ -717,9 +717,9 @@ namespace Enemy.Control
             }
         }
 
-        public void SpawnHitVFX(Vector3 hitPoint, Vector3 hitNormal)
+        public void SpawnHitVFX(Vector3 hitPoint, Vector3 hitNormal, bool allowSameFrameBurst = true)
         {
-            if (!VFXPerformanceManager.CanSpawnHitVFX(GetInstanceID())) return; // Rate-limiting & low-end safety
+            if (!VFXPerformanceManager.CanSpawnHitVFX(GetInstanceID(), allowSameFrameBurst)) return; // Rate-limiting & low-end safety
 
             GameObject vfxPrefab = hitVFX;
             if (vfxPrefab == null) return;
@@ -780,6 +780,11 @@ namespace Enemy.Control
             currentHealth -= finalDamage;
             if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {finalDamage:F1} damage (Incoming: {damage:F1}{(damageReduction > 0f ? $" -{damageReduction:F0}%" : "")})! Remaining HP: {currentHealth:F1}");
 
+            if (isBoss)
+                EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Hurt, hitPoint != default ? hitPoint : transform.position);
+            else
+                EndlessRunner.Audio.AudioManager.Instance?.PlayBugSound(EndlessRunner.Audio.BugSoundType.Hurt, hitPoint != default ? hitPoint : transform.position);
+
             if (currentHealth <= 0)
             {
                 Die();
@@ -795,6 +800,11 @@ namespace Enemy.Control
 
             // Trigger Death Splash VFX
             SpawnDeathVFX();
+
+            if (isBoss)
+                EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Death, transform.position);
+            else
+                EndlessRunner.Audio.AudioManager.Instance?.PlayBugSound(EndlessRunner.Audio.BugSoundType.Death, transform.position);
 
             if (debugMode) Debug.Log($"<color=black><b>[Enemy]</b></color> {enemyName} has been defeated!");
 
