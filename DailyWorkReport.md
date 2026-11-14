@@ -905,4 +905,18 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **Boss Attack Safety Guard**:
       - Added `hitRegistered` latch in `BossProjectile.Spawn()` to ensure players transitioning between targeted lanes take exact barrage damage (25 HP) without receiving accidental double hits.
 
+- **Chunk Studio & Obstacle Vehicle Remapping (`ProceduralChunkEditorWindow.cs`, `New Highway Profile.asset`, `GameView_EndlessRunner.unity`)**:
+  - **Diagnosis**:
+    - Discovered why no vehicles were spawning: `New Highway Profile.asset` had 4 `MISSING/NULL` vehicle references pointing to obsolete/deleted dummy files in `Assets/Prefabs/Chunks/`, and `ObstacleManager` in the scene had 6 `MISSING/NULL` slots in its pool.
+  - **Remapped to Active Obstacle Directory (`Assets/Prefabs/Obstrucle/`)**:
+    - Updated `ProceduralChunkEditorWindow.cs`:
+      - Modified `AutoPopulateHighwayDefaults()` to explicitly target the functional vehicle and obstacle prefabs from `Assets/Prefabs/Obstrucle/`.
+      - Updated `AddPrefabIfFound()` to prioritize `Assets/Prefabs/Obstrucle/` paths over any duplicate model assets.
+    - Updated `New Highway Profile.asset`:
+      - Assigned all 8 active obstacle prefabs: `Bus.prefab`, `Car.prefab`, `Car 1 Variant.prefab`, `Car 2 Variant.prefab`, `SUV.prefab`, `Van.prefab`, `Obstrucle1.prefab`, and `Obstrucle2.prefab`.
+      - Re-enabled playable road obstacle spawning (`spawnOnPlayableRoad = true`, `spawnChancePerChunk = 0.75f`, `maxVehiclesPerChunk = 2`, `spawnLanesX = [-2, 0, 2]`) and dual visual highway spawning (`visualVehicleSpawnChance = 0.85f`).
+    - Purged dead references in scene `ObstacleManager` and added all 8 vehicle prefabs from `Assets/Prefabs/Obstrucle/` to `obstaclePool`.
+    - Removed obsolete broken dummy files in `Assets/Prefabs/Chunks/` to prevent future asset resolution collisions.
+
+
 

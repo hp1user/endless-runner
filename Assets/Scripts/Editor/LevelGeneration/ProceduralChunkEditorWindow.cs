@@ -464,16 +464,29 @@ namespace EndlessRunner.LevelGen.Editor
             AddPrefabIfFound("block 1", profile.debrisAndClutter.debrisPrefabs, 1f);
             AddPrefabIfFound("block 2", profile.debrisAndClutter.debrisPrefabs, 1f);
 
-            // 7. Vehicles
+            // 7. Vehicles (Assets/Prefabs/Obstrucle/)
             profile.vehicles.vehiclePrefabs.Clear();
-            AddPrefabIfFound("Bus", profile.vehicles.vehiclePrefabs, 1f);
-            AddPrefabIfFound("Car", profile.vehicles.vehiclePrefabs, 1f);
-            AddPrefabIfFound("SUV", profile.vehicles.vehiclePrefabs, 1f);
-            AddPrefabIfFound("Van", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Bus.prefab", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Car.prefab", profile.vehicles.vehiclePrefabs, 1.2f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Car 1 Variant.prefab", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Car 2 Variant.prefab", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/SUV.prefab", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Van.prefab", profile.vehicles.vehiclePrefabs, 1f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Obstrucle1.prefab", profile.vehicles.vehiclePrefabs, 0.8f);
+            AddExactPrefabIfFound("Assets/Prefabs/Obstrucle/Obstrucle2.prefab", profile.vehicles.vehiclePrefabs, 0.8f);
 
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
-            Debug.Log("<color=green>[ChunkStudio]</color> Auto-populated profile with Highway environment assets!");
+            Debug.Log("<color=green>[ChunkStudio]</color> Auto-populated profile with Highway environment assets and Assets/Prefabs/Obstrucle vehicles!");
+        }
+
+        private void AddExactPrefabIfFound(string assetPath, List<CategorizedAssetItem> targetList, float weight = 1f)
+        {
+            GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            if (go != null)
+            {
+                targetList.Add(new CategorizedAssetItem(go, weight, null, null, false));
+            }
         }
 
         private void AddPrefabIfFound(string nameSearch, List<CategorizedAssetItem> targetList, float weight = 1f, Vector3? offset = null, Vector3? rot = null, bool isBroken = false)
@@ -483,8 +496,19 @@ namespace EndlessRunner.LevelGen.Editor
 
             if (guids.Length > 0)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                // Prefer prefabs located in Assets/Prefabs/Obstrucle
+                string selectedPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+                foreach (string g in guids)
+                {
+                    string p = AssetDatabase.GUIDToAssetPath(g);
+                    if (p.IndexOf("Assets/Prefabs/Obstrucle", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        selectedPath = p;
+                        break;
+                    }
+                }
+
+                GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(selectedPath);
                 if (go != null)
                 {
                     targetList.Add(new CategorizedAssetItem(go, weight, offset, rot, isBroken));

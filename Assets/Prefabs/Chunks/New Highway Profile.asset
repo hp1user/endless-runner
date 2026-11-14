@@ -23,8 +23,8 @@ MonoBehaviour:
     medianX: -5.25
     populateVisualHighwayProps: 1
     visualObstacleMultiplier: 2
-    visualVehicleSpawnChance: 0.95
-    minVisualVehicles: 3
+    visualVehicleSpawnChance: 0.85
+    minVisualVehicles: 2
     maxVisualVehicles: 6
   sideRailings:
     enabled: 1
@@ -88,6 +88,7 @@ MonoBehaviour:
     - assetName: Stree Light
       prefab: {fileID: 5242838100307476732, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 90, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
@@ -98,30 +99,35 @@ MonoBehaviour:
     - assetName: Stree Light
       prefab: {fileID: 5242838100307476732, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
       weight: 1.5
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Small Pole 1
       prefab: {fileID: 4578308251286423793, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Small Pole 2
       prefab: {fileID: 2552084865816126167, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Small Pole 3
       prefab: {fileID: 1704040253684044557, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Small Pole 4
       prefab: {fileID: 9003380841712874823, guid: d2a83659787aa8e4dbcec5d281247183, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
@@ -136,6 +142,7 @@ MonoBehaviour:
     - assetName: Big Sign Board
       prefab: {fileID: 206471229066266946, guid: 3039b66ae37e6b04b855e889640d247f, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
@@ -149,24 +156,28 @@ MonoBehaviour:
     - assetName: Debris
       prefab: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
       weight: 1.5
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Cone
       prefab: {fileID: 919132149155446097, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: block 1
       prefab: {fileID: 919132149155446097, guid: 1226322cdc0fa084284410d465db7516, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: block 2
       prefab: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
@@ -180,35 +191,65 @@ MonoBehaviour:
     spawnOnPlayableRoad: 0
     vehiclePrefabs:
     - assetName: Bus
-      prefab: {fileID: 7190922695679026899, guid: 4dfc0f65eb9a1fd47bd0f66006eccd76, type: 3}
+      prefab: {fileID: 2061158165293844110, guid: abc4e0e69ad4d3e41b7573dacae2f1bb, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Car
-      prefab: {fileID: 9165125218981963523, guid: 3d524bf037c6d1d46a9f1074a49a0435, type: 3}
+      prefab: {fileID: 4702469101660571356, guid: e63a339973fd26a47ac0aff71f68e7f8, type: 3}
       weight: 1
+      isBroken: 0
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Car 1 Variant
+      prefab: {fileID: 7048732319850326529, guid: 4212d26663454c4449f8a3f027cbbd0b, type: 3}
+      weight: 1
+      isBroken: 0
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Car 2 Variant
+      prefab: {fileID: 2312451651809853538, guid: 786d85dcf4ac0694b982b38a3aef7707, type: 3}
+      weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: SUV
-      prefab: {fileID: 2067897568946410426, guid: 8c40a70a49697dc4e89d9b2f93089501, type: 3}
+      prefab: {fileID: 5331338544255421521, guid: 785612bc78b791c46a7a735b02ba6fe4, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
     - assetName: Van
-      prefab: {fileID: 1092843071914709398, guid: 65d9629ccce772b4ebb8c7e17b60186b, type: 3}
+      prefab: {fileID: 1145376860563125178, guid: 511f46b70d63f66499cea54c463c4167, type: 3}
       weight: 1
+      isBroken: 0
       offset: {x: 0, y: 0, z: 0}
       rotationOffset: {x: 0, y: 0, z: 0}
       scaleMultiplier: {x: 1, y: 1, z: 1}
-    spawnChancePerChunk: 0.651
+    - assetName: Obstrucle1
+      prefab: {fileID: 315329637282801567, guid: 4020c9b6ab1cbc14ebbbecfe7432b210, type: 3}
+      weight: 1
+      isBroken: 0
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    - assetName: Obstrucle2
+      prefab: {fileID: 5584706256826239875, guid: c8e100ab8ffa51b4b9eb35d109876ba0, type: 3}
+      weight: 1
+      isBroken: 0
+      offset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      scaleMultiplier: {x: 1, y: 1, z: 1}
+    spawnChancePerChunk: 0.75
     maxVehiclesPerChunk: 2
     spawnLanesX:
     - -2
     - 0
     - 2
-    - -5
-    - 5
     randomizeYaw: 1

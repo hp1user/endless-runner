@@ -45,10 +45,23 @@ public class Obstacle : MonoBehaviour
     public bool fullRandom360 = false;
 
     // Hidden variables managed by the ObstacleManager
+    private bool isManagedByManager = false;
     private MoveDirection currentDirection;
     private float currentDespawnThreshold;
     private GameObject originalPrefab;
     private bool isHit = false;
+
+    private void OnEnable()
+    {
+        isHit = false;
+    }
+
+    private void OnDisable()
+    {
+        isManagedByManager = false;
+        originalPrefab = null;
+        isHit = false;
+    }
 
     /// <summary>
     /// Calculates the randomized spawn rotation for this obstacle based on its rules.
@@ -83,11 +96,16 @@ public class Obstacle : MonoBehaviour
         originalPrefab = prefab;
         currentDirection = dir;
         currentDespawnThreshold = despawnDist;
+        isManagedByManager = true;
         isHit = false;
     }
 
     private void Update()
     {
+        // Static chunk obstacles/vehicles move with their parent chunk;
+        // only dynamic manager-spawned obstacles move and despawn independently.
+        if (!isManagedByManager) return;
+
         // Clamp deltaTime to prevent huge jumps
         float dt = Mathf.Min(Time.deltaTime, 0.1f);
 
@@ -128,15 +146,19 @@ public class Obstacle : MonoBehaviour
         isHit = true;
         player.TakeDamage(damageAmount);
         
-        // Optional: Play a hit sound or particle effect here if desired before recycling
-        Recycle();
+        // Only dynamic manager-spawned obstacles are recycled upon hitting the player.
+        // Static chunk vehicles stay attached to the chunk.
+        if (isManagedByManager)
+        {
+            Recycle();
+        }
     }
 
     private void Recycle()
     {
         if (originalPrefab != null && PoolManager.Instance != null)
             PoolManager.Instance.ReturnToPool(gameObject, originalPrefab);
-        else
+        else if (isManagedByManager)
             Destroy(gameObject);
     }
 }
