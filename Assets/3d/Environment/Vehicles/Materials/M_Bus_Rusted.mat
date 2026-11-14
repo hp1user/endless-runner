@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Bus_Rusted
-  m_Shader: {fileID: -6465566751694194690, guid: 061a183c1e894ae4b8dbc427879d7e72, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: fbe58e42baa14ce44b7eeb3602df5d64, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,6 +25,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Ba:
+        m_Texture: {fileID: 2800000, guid: cb2753cf5c1d757489170310eff8e8ec, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Base:
         m_Texture: {fileID: 2800000, guid: c4a70002000000000000000000000002, type: 3}
         m_Scale: {x: 10, y: 10}
@@ -47,6 +51,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NAMR:
+        m_Texture: {fileID: 2800000, guid: eed359cefb9774d448a6999bde04181e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:

@@ -19,6 +19,9 @@ public class UpgradeCardResponsiveLayout : MonoBehaviour
     [Tooltip("The confirm selection button.")]
     public RectTransform confirmButton;
 
+    [Tooltip("The swipe instruction hint text / container.")]
+    public RectTransform swipeHint;
+
     [Header("Portrait Layout Settings")]
     [Tooltip("Spacing between cards in portrait.")]
     public float portraitSpacing = 36f;
@@ -114,6 +117,12 @@ public class UpgradeCardResponsiveLayout : MonoBehaviour
         {
             Transform t = transform.Find("Confirm");
             if (t != null) confirmButton = t as RectTransform;
+        }
+
+        if (swipeHint == null)
+        {
+            Transform t = transform.Find("SwipeHint");
+            if (t != null) swipeHint = t as RectTransform;
         }
 
         EnsureLayoutComponents();
@@ -229,17 +238,18 @@ public class UpgradeCardResponsiveLayout : MonoBehaviour
         cardContainer.localScale = new Vector3(scale, scale, 1f);
         cardContainer.anchoredPosition = new Vector2(0f, offsetY * scale);
 
-        // Position Confirm button right below the cards with clean spacing and zero overlap
-        if (confirmButton != null)
+        // Position Confirm button or Swipe Hint right below the cards with clean spacing and zero overlap
+        RectTransform bottomElement = (swipeHint != null && swipeHint.gameObject.activeSelf) ? swipeHint : confirmButton;
+        if (bottomElement != null)
         {
-            confirmButton.anchorMin = new Vector2(0.5f, 0.5f);
-            confirmButton.anchorMax = new Vector2(0.5f, 0.5f);
-            confirmButton.pivot = new Vector2(0.5f, 0.5f);
-            confirmButton.sizeDelta = confirmSize;
-            confirmButton.localScale = Vector3.one;
+            bottomElement.anchorMin = new Vector2(0.5f, 0.5f);
+            bottomElement.anchorMax = new Vector2(0.5f, 0.5f);
+            bottomElement.pivot = new Vector2(0.5f, 0.5f);
+            bottomElement.sizeDelta = confirmSize;
+            bottomElement.localScale = Vector3.one;
 
             float cardsBottomY = cardContainer.anchoredPosition.y - (totalUnscaledHeight * scale * 0.5f);
-            confirmButton.anchoredPosition = new Vector2(0f, cardsBottomY - confirmGap - (confirmSize.y * 0.5f));
+            bottomElement.anchoredPosition = new Vector2(0f, cardsBottomY - confirmGap - (confirmSize.y * 0.5f));
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(cardContainer);

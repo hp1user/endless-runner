@@ -54,6 +54,11 @@ public class UpgradeManager : MonoBehaviour
 
     public Button confirmButton;
 
+    [Tooltip("If true, upgrade cards can be selected and confirmed by swiping left or right, bypassing the confirm button.")]
+    public bool useSwipeToConfirm = true;
+
+    public bool IsSelectionOpen => cardSelectionPanel != null && cardSelectionPanel.activeSelf;
+
     private List<GameObject> activeUICards = new List<GameObject>();
 
     private Dictionary<CardRarity, List<UpgradeCard>> deckByRarity = new Dictionary<CardRarity, List<UpgradeCard>>();
@@ -472,6 +477,10 @@ public class UpgradeManager : MonoBehaviour
 
     {
 
+        TouchManager.IsInputBlocked = true;
+
+        UpgradeCardUI.ResetSwipeState();
+
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(true);
 
         if (confirmButton != null) confirmButton.gameObject.SetActive(false);
@@ -548,10 +557,22 @@ public class UpgradeManager : MonoBehaviour
 
         }
 
-        if (confirmButton != null) confirmButton.gameObject.SetActive(true);
+        if (confirmButton != null && !useSwipeToConfirm) confirmButton.gameObject.SetActive(true);
 
-        Debug.Log($"<color=cyan>[UI]</color> Card Selected: {chosenCard.cardName}. Waiting for confirmation...");
+        Debug.Log($"<color=cyan>[UI]</color> Card Selected: {chosenCard.cardName}. Swipe left or right to confirm!");
 
+    }
+
+    /// <summary>
+    /// Confirms and applies the selected upgrade card (called directly via card swipe gestures).
+    /// </summary>
+    public void ConfirmUpgrade(UpgradeCard card)
+    {
+        if (card != null)
+        {
+            pendingCard = card;
+        }
+        ConfirmSelection();
     }
 
     // Called when you press Confirm
@@ -573,6 +594,8 @@ public class UpgradeManager : MonoBehaviour
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
 
         if (confirmButton != null) confirmButton.gameObject.SetActive(false);
+
+        TouchManager.IsInputBlocked = false;
 
         Time.timeScale = 1f;
 

@@ -168,7 +168,12 @@ namespace Player.Control
             }
         }
 
-        private void RequestReload() => touchReloadRequested = true;
+        private void RequestReload()
+        {
+            if (Time.timeScale <= 0f || TouchManager.IsInputBlocked) return;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.IsSelectionOpen) return;
+            touchReloadRequested = true;
+        }
 
         private void Awake()
         {
@@ -1198,6 +1203,9 @@ namespace Player.Control
 
         private void MoveLeft()
         {
+            if (Time.timeScale <= 0f || TouchManager.IsInputBlocked) return;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.IsSelectionOpen) return;
+
             if (GameManager.Instance != null && GameManager.Instance.isBossFightActive)
                 currentLane = Mathf.Clamp(currentLane - 1, -1, 1);
             else
@@ -1210,6 +1218,9 @@ namespace Player.Control
 
         private void MoveRight()
         {
+            if (Time.timeScale <= 0f || TouchManager.IsInputBlocked) return;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.IsSelectionOpen) return;
+
             if (GameManager.Instance != null && GameManager.Instance.isBossFightActive)
                 currentLane = Mathf.Clamp(currentLane + 1, -1, 1);
             else
