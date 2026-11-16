@@ -57,7 +57,9 @@ public class UpgradeManager : MonoBehaviour
     [Tooltip("If true, upgrade cards can be selected and confirmed by swiping left or right, bypassing the confirm button.")]
     public bool useSwipeToConfirm = true;
 
-    public bool IsSelectionOpen => cardSelectionPanel != null && cardSelectionPanel.activeSelf;
+    public bool IsSelectionOpen => (cardSelectionPanel != null && cardSelectionPanel.activeSelf) || isSequenceRunning;
+
+    private bool isSequenceRunning = false;
 
     private List<GameObject> activeUICards = new List<GameObject>();
 
@@ -109,11 +111,21 @@ public class UpgradeManager : MonoBehaviour
 
         GameManager.OnBossDefeated -= HandleBossDefeated;
 
+        isSequenceRunning = false;
+
     }
 
     private void HandleLevelUp(int currentLevel)
 
     {
+
+        // When a boss is defeated, HandleBossDefeated already triggers LevelUpSequence with boss drops
+        if (GameManager.Instance != null && GameManager.Instance.IsBossLevel(currentLevel - 1))
+        {
+            return;
+        }
+
+        if (isSequenceRunning) return;
 
         StartCoroutine(LevelUpSequence(currentLevel, false));
 
@@ -122,6 +134,8 @@ public class UpgradeManager : MonoBehaviour
     private void HandleBossDefeated()
 
     {
+
+        if (isSequenceRunning) return;
 
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 5;
 
@@ -132,6 +146,8 @@ public class UpgradeManager : MonoBehaviour
     private IEnumerator LevelUpSequence(int level, bool isBoss)
 
     {
+
+        isSequenceRunning = true;
 
         Time.timeScale = 0f; // Freeze the game
 
@@ -596,6 +612,8 @@ public class UpgradeManager : MonoBehaviour
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
 
         if (confirmButton != null) confirmButton.gameObject.SetActive(false);
+
+        isSequenceRunning = false;
 
         TouchManager.IsInputBlocked = false;
 

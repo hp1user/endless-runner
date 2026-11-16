@@ -9,6 +9,7 @@ namespace Enemy.Control
         [SerializeField] private string enemyName;
         [SerializeField] private float currentHealth;
         [SerializeField] private float moveSpeed;
+        public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
         [SerializeField] private float damage;
 
         [Header("Optimization")]
@@ -383,7 +384,6 @@ namespace Enemy.Control
             // 3. Boss Projectile Attack (Stops and fires 2-lane acid projectile every 4-8s)
             if (isBoss && !isDead && !isAttacking && playerTransform != null && Time.time >= nextProjectileAttackTime)
             {
-                nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
                 StartCoroutine(PerformProjectileAttackRoutine());
             }
 
@@ -459,6 +459,9 @@ namespace Enemy.Control
             {
                 UpdateLegCrippleState();
             }
+
+            // Schedule next attack ONLY AFTER recovery finishes, guaranteeing the boss walks for 4-8s before next attack
+            nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
         }
 
         private void SpawnMinion()
@@ -491,6 +494,11 @@ namespace Enemy.Control
                     EnemyController minionController = minionObj.GetComponent<EnemyController>();
                     if (minionController == null) minionController = minionObj.AddComponent<EnemyController>();
                     minionController.Initialize(minionData, playerTransform, myManager, minionData.prefab.gameObject);
+                    // Ensure boss-spawned minions charge forward towards the player aggressively
+                    if (minionController.MoveSpeed < 2.5f)
+                    {
+                        minionController.MoveSpeed = 2.5f;
+                    }
                 }
             }
         }
