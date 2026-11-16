@@ -769,17 +769,26 @@ namespace Enemy.Control
                 string colName = hitCollider.name.ToLower();
                 if (colName.Contains("head"))
                 {
-                    OnPartDamaged(BossBodyPartType.Head, (damage * bossHeadMultiplier) * reductionFactor, false);
+                    float headDmg = (damage * bossHeadMultiplier) * reductionFactor;
+                    OnPartDamaged(BossBodyPartType.Head, headDmg, false);
+                    Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false);
                     return;
                 }
                 else if (colName.Contains("l_leg") || colName.Contains("left"))
                 {
-                    OnPartDamaged(BossBodyPartType.LeftLeg, damage * reductionFactor, false);
+                    float legDmg = damage * reductionFactor;
+                    OnPartDamaged(BossBodyPartType.LeftLeg, legDmg, false);
+                    Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.LeftLeg, false);
                     return;
                 }
                 else if (colName.Contains("r_leg") || colName.Contains("right"))
                 {
-                    OnPartDamaged(BossBodyPartType.RightLeg, damage * reductionFactor, false);
+                    float legDmg = damage * reductionFactor;
+                    OnPartDamaged(BossBodyPartType.RightLeg, legDmg, false);
+                    Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.RightLeg, false);
                     return;
                 }
             }
@@ -787,6 +796,17 @@ namespace Enemy.Control
             float finalDamage = damage * reductionFactor;
             currentHealth -= finalDamage;
             if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {finalDamage:F1} damage (Incoming: {damage:F1}{(damageReduction > 0f ? $" -{damageReduction:F0}%" : "")})! Remaining HP: {currentHealth:F1}");
+
+            // Floating damage numbers
+            if (isBoss)
+            {
+                Vector3 bossSpawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnDamage(finalDamage, bossSpawnPos, UI.DamageNumbers.DamageStyle.BossGeneral);
+            }
+            else
+            {
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnEnemyDamage(finalDamage, transform.position);
+            }
 
             if (isBoss)
                 EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Hurt, hitPoint != default ? hitPoint : transform.position);

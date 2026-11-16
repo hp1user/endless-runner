@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EndlessRunner.Audio;
+using UI.DamageNumbers;
+using TMPro;
 
 public class DataManagerWindow : EditorWindow
 {
@@ -45,7 +47,11 @@ public class DataManagerWindow : EditorWindow
     // Audio Database Support
     private AudioDatabase _audioDatabase;
 
-    private enum DataType { UpgradeCard, Weapon, Enemy, Audio }
+    // Damage Number Settings Support
+    private DamageNumberSettings _damageNumberSettings;
+    private ToolbarMenu _dataTypeMenu;
+
+    private enum DataType { UpgradeCard, Weapon, Enemy, Audio, DamageNumbers }
     private DataType _currentDataType = DataType.UpgradeCard;
 
     [MenuItem("Tools/Endless Runner/Data Manager")]
@@ -87,7 +93,7 @@ public class DataManagerWindow : EditorWindow
         var duplicateBtn = rootVisualElement.Q<Button>("duplicateButton");
         var refreshBtn = rootVisualElement.Q<ToolbarButton>("refreshButton");
         var settingsBtn = rootVisualElement.Q<ToolbarButton>("settingsButton");
-        var dataTypeMenu = rootVisualElement.Q<ToolbarMenu>("dataTypeMenu");
+        _dataTypeMenu = rootVisualElement.Q<ToolbarMenu>("dataTypeMenu");
 
         // Callbacks
         createBtn.clicked += CreateNewItem;
@@ -97,16 +103,24 @@ public class DataManagerWindow : EditorWindow
         
         _searchField.RegisterValueChangedCallback(evt => FilterList(evt.newValue));
         
-        dataTypeMenu.menu.AppendAction("Upgrade Card", (a) => SetDataType(DataType.UpgradeCard), (a) => _currentDataType == DataType.UpgradeCard ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
-        dataTypeMenu.menu.AppendAction("Weapon", (a) => SetDataType(DataType.Weapon), (a) => _currentDataType == DataType.Weapon ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
-        dataTypeMenu.menu.AppendAction("Enemy", (a) => SetDataType(DataType.Enemy), (a) => _currentDataType == DataType.Enemy ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
-        dataTypeMenu.menu.AppendAction("Audio & Sound System", (a) => SetDataType(DataType.Audio), (a) => _currentDataType == DataType.Audio ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Upgrade Card", (a) => SetDataType(DataType.UpgradeCard), (a) => _currentDataType == DataType.UpgradeCard ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Weapon", (a) => SetDataType(DataType.Weapon), (a) => _currentDataType == DataType.Weapon ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Enemy", (a) => SetDataType(DataType.Enemy), (a) => _currentDataType == DataType.Enemy ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Audio & Sound System", (a) => SetDataType(DataType.Audio), (a) => _currentDataType == DataType.Audio ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Damage Numbers", (a) => SetDataType(DataType.DamageNumbers), (a) => _currentDataType == DataType.DamageNumbers ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         
         _itemListView.makeItem = () => 
         {
             var container = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, alignItems = Align.Center } };
             
-            var leftBox = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1, overflow = Overflow.Hidden } };
+            var leftBox = new VisualElement { name = "leftBox", style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, flexGrow = 1, overflow = Overflow.Hidden } };
+            leftBox.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (leftBox.userData is System.Action onClick)
+                {
+                    onClick.Invoke();
+                }
+            });
             var badge = new Label { name = "itemBadge", style = { flexShrink = 0, whiteSpace = WhiteSpace.NoWrap } };
             badge.style.display = DisplayStyle.None;
             var label = new Label { name = "itemLabel" };
@@ -131,10 +145,34 @@ public class DataManagerWindow : EditorWindow
 
         _itemListView.bindItem = (element, i) =>
         {
+            var leftBox = element.Q<VisualElement>("leftBox");
             var label = element.Q<Label>("itemLabel");
             var badge = element.Q<Label>("itemBadge");
             var renameBtn = element.Q<Button>("renameBtn");
             var deleteBtn = element.Q<Button>("deleteBtn");
+
+            if (leftBox != null)
+            {
+                leftBox.userData = (System.Action)(() =>
+                {
+                    if (_currentDataType == DataType.Enemy)
+                    {
+                        if (i >= 0 && i < _filteredEnemies.Count)
+                        {
+                            _itemListView.SetSelection(i);
+                            OnItemSelected(new object[] { _filteredEnemies[i] });
+                        }
+                    }
+                    else
+                    {
+                        if (i >= 0 && i < _filteredItems.Count && _filteredItems[i] != null)
+                        {
+                            _itemListView.SetSelection(i);
+                            OnItemSelected(new object[] { _filteredItems[i] });
+                        }
+                    }
+                });
+            }
 
             if (_currentDataType == DataType.Enemy)
             {
@@ -326,7 +364,21 @@ public class DataManagerWindow : EditorWindow
         _selectedEnemy = null;
         _inspectorContainer.Clear();
         ClearPreview();
+        if (_itemListView != null) _itemListView.ClearSelection();
         
+        if (_dataTypeMenu != null)
+        {
+            _dataTypeMenu.text = newType switch
+            {
+                DataType.UpgradeCard => "Data Type: Upgrade Card",
+                DataType.Weapon => "Data Type: Weapon",
+                DataType.Enemy => "Data Type: Enemy",
+                DataType.Audio => "Data Type: Audio",
+                DataType.DamageNumbers => "Data Type: Damage Numbers",
+                _ => "Data Type"
+            };
+        }
+
         if (_listHeaderLabel != null)
         {
             _listHeaderLabel.text = newType switch
@@ -335,6 +387,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Weapon => "Weapons",
                 DataType.Enemy => "Enemies",
                 DataType.Audio => "Audio & Sound System",
+                DataType.DamageNumbers => "Damage Numbers",
                 _ => "Items"
             };
         }
@@ -347,6 +400,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Weapon => "Weapon Preview",
                 DataType.Enemy => "Enemy Preview",
                 DataType.Audio => "Soundtrack & Audio Controls",
+                DataType.DamageNumbers => "Damage Numbers Preview",
                 _ => "Preview"
             };
         }
@@ -359,6 +413,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Weapon => "New Weapon",
                 DataType.Enemy => "New Enemy",
                 DataType.Audio => "Audio System Active",
+                DataType.DamageNumbers => "Damage Numbers Config",
                 _ => "New Item"
             };
         }
@@ -494,6 +549,22 @@ public class DataManagerWindow : EditorWindow
         }
     }
 
+    private void LoadOrCreateDamageNumberSettings()
+    {
+        if (_damageNumberSettings != null) return;
+
+        string assetPath = "Assets/Resources/DamageNumberSettings.asset";
+        _damageNumberSettings = AssetDatabase.LoadAssetAtPath<DamageNumberSettings>(assetPath);
+        if (_damageNumberSettings == null)
+        {
+            string dir = "Assets/Resources";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            _damageNumberSettings = ScriptableObject.CreateInstance<DamageNumberSettings>();
+            AssetDatabase.CreateAsset(_damageNumberSettings, assetPath);
+            AssetDatabase.SaveAssets();
+        }
+    }
+
     private void RefreshList()
     {
         if (_currentDataType == DataType.Enemy)
@@ -505,6 +576,12 @@ public class DataManagerWindow : EditorWindow
             LoadOrCreateAudioDatabase();
             _items.Clear();
             if (_audioDatabase != null) _items.Add(_audioDatabase);
+        }
+        else if (_currentDataType == DataType.DamageNumbers)
+        {
+            LoadOrCreateDamageNumberSettings();
+            _items.Clear();
+            if (_damageNumberSettings != null) _items.Add(_damageNumberSettings);
         }
         else
         {
@@ -543,7 +620,9 @@ public class DataManagerWindow : EditorWindow
 
             if (_filteredEnemies.Count > 0)
             {
+                _itemListView.ClearSelection();
                 _itemListView.SetSelection(0);
+                OnItemSelected(new object[] { _filteredEnemies[0] });
             }
             else
             {
@@ -568,7 +647,9 @@ public class DataManagerWindow : EditorWindow
         
         if (_filteredItems.Count > 0)
         {
+            _itemListView.ClearSelection();
             _itemListView.SetSelection(0);
+            OnItemSelected(new object[] { _filteredItems[0] });
         }
         else
         {
@@ -588,6 +669,14 @@ public class DataManagerWindow : EditorWindow
                 _selectedEnemy = null;
                 _selectedItem = _audioDatabase;
                 BuildAudioInspector(_audioDatabase);
+                UpdatePreview();
+                break;
+            }
+            else if (_currentDataType == DataType.DamageNumbers && _damageNumberSettings != null)
+            {
+                _selectedEnemy = null;
+                _selectedItem = _damageNumberSettings;
+                BuildDamageNumberInspector(_damageNumberSettings);
                 UpdatePreview();
                 break;
             }
@@ -1066,7 +1155,7 @@ public class DataManagerWindow : EditorWindow
         // --- MASTER VOLUMES ---
         scroll.Add(CreateHeader("Master Volume Mixers"));
 
-        var masterSlider = new Slider("Master Volume", 0f, 1f) { value = audioDb.masterVolume };
+        var masterSlider = new Slider("Master Volume", 0f, 1f) { value = audioDb.masterVolume, showInputField = true };
         masterSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Master Volume");
             audioDb.masterVolume = evt.newValue;
@@ -1076,7 +1165,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(masterSlider);
 
-        var musicSlider = new Slider("Music Master Volume", 0f, 1f) { value = audioDb.musicVolume };
+        var musicSlider = new Slider("Music Master Volume", 0f, 1f) { value = audioDb.musicVolume, showInputField = true };
         musicSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Music Volume");
             audioDb.musicVolume = evt.newValue;
@@ -1086,7 +1175,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(musicSlider);
 
-        var sfxSlider = new Slider("SFX Master Volume", 0f, 1f) { value = audioDb.sfxVolume };
+        var sfxSlider = new Slider("SFX Master Volume", 0f, 1f) { value = audioDb.sfxVolume, showInputField = true };
         sfxSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "SFX Volume");
             audioDb.sfxVolume = evt.newValue;
@@ -1096,7 +1185,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(sfxSlider);
 
-        var l0Slider = new Slider("Layer 0 (Base) Volume", 0f, 1f) { value = audioDb.layer0Volume };
+        var l0Slider = new Slider("Layer 0 (Base) Volume", 0f, 1f) { value = audioDb.layer0Volume, showInputField = true };
         l0Slider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Layer 0 Volume");
             audioDb.layer0Volume = evt.newValue;
@@ -1105,7 +1194,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(l0Slider);
 
-        var l1Slider = new Slider("Layer 1 (Battle) Volume", 0f, 1f) { value = audioDb.layer1Volume };
+        var l1Slider = new Slider("Layer 1 (Battle) Volume", 0f, 1f) { value = audioDb.layer1Volume, showInputField = true };
         l1Slider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Layer 1 Volume");
             audioDb.layer1Volume = evt.newValue;
@@ -1120,7 +1209,7 @@ public class DataManagerWindow : EditorWindow
         scroll.Add(CreateAudioClipRow("Layer 0 (Ambient Loop)", audioDb.perimeterBreachLayer0, c => audioDb.perimeterBreachLayer0 = c));
         scroll.Add(CreateAudioClipRow("Layer 1 (Battle Loop)", audioDb.perimeterBreachLayer1, c => audioDb.perimeterBreachLayer1 = c));
 
-        var duckSlider = new Slider("Card Popup Duck Volume", 0.05f, 0.8f) { value = audioDb.cardPopupDuckVolume };
+        var duckSlider = new Slider("Card Popup Duck Volume", 0.05f, 0.8f) { value = audioDb.cardPopupDuckVolume, showInputField = true };
         duckSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Duck Volume");
             audioDb.cardPopupDuckVolume = evt.newValue;
@@ -1128,7 +1217,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(duckSlider);
 
-        var cardPitchSlider = new Slider("Card Popup Slow Pitch", 0.7f, 1.0f) { value = audioDb.cardPopupSlowPitch };
+        var cardPitchSlider = new Slider("Card Popup Slow Pitch", 0.7f, 1.0f) { value = audioDb.cardPopupSlowPitch, showInputField = true };
         cardPitchSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Card Popup Pitch");
             audioDb.cardPopupSlowPitch = evt.newValue;
@@ -1136,7 +1225,7 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(cardPitchSlider);
 
-        var slowPitchSlider = new Slider("Weapon Wheel Slow Pitch", 0.2f, 0.9f) { value = audioDb.weaponWheelSlowPitch };
+        var slowPitchSlider = new Slider("Weapon Wheel Slow Pitch", 0.2f, 0.9f) { value = audioDb.weaponWheelSlowPitch, showInputField = true };
         slowPitchSlider.RegisterValueChangedCallback(evt => {
             Undo.RecordObject(audioDb, "Slow Pitch");
             audioDb.weaponWheelSlowPitch = evt.newValue;
@@ -1201,7 +1290,7 @@ public class DataManagerWindow : EditorWindow
                 wpnBox.Add(CreateAudioClipRow("Mag In Sound", profile.magInClip, c => profile.magInClip = c));
                 wpnBox.Add(CreateAudioClipRow("Empty Click Sound", profile.emptyClickClip, c => profile.emptyClickClip = c));
 
-                var wpnVolSlider = new Slider("Weapon Volume", 0f, 1f) { value = profile.volume };
+                var wpnVolSlider = new Slider("Weapon Volume", 0f, 1f) { value = profile.volume, showInputField = true };
                 wpnVolSlider.RegisterValueChangedCallback(evt => {
                     profile.volume = evt.newValue;
                     EditorUtility.SetDirty(audioDb);
@@ -1246,6 +1335,233 @@ public class DataManagerWindow : EditorWindow
         scroll.Add(CreateAudioClipRow("Player Hurt", playerHurt, c => audioDb.playerHurtClips = (c != null) ? new AudioClip[] { c } : new AudioClip[0]));
 
         scroll.Add(CreateAudioClipRow("Player Death", audioDb.playerDeathClip, c => audioDb.playerDeathClip = c));
+
+        _inspectorContainer.Add(scroll);
+    }
+
+    private void BuildDamageNumberInspector(DamageNumberSettings settings)
+    {
+        _inspectorContainer.Clear();
+        if (settings == null) return;
+
+        var scroll = new ScrollView();
+        scroll.style.flexGrow = 1;
+
+        VisualElement CreateHeader(string title)
+        {
+            var h = new Label(title);
+            h.AddToClassList("section-header");
+            return h;
+        }
+
+        // --- FONT & BASE SIZE ---
+        scroll.Add(CreateHeader("Font & Base Size"));
+
+        var fontField = new ObjectField("Custom Font Asset")
+        {
+            objectType = typeof(TMP_FontAsset),
+            value = settings.customFont
+        };
+        fontField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Change Font");
+            settings.customFont = evt.newValue as TMP_FontAsset;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(fontField);
+
+        var fontSlider = new Slider("Base Font Size", 2f, 12f) { value = settings.baseFontSize, showInputField = true };
+        fontSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Base Font Size");
+            settings.baseFontSize = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(fontSlider);
+
+        // --- POSITION & OFFSETS ---
+        scroll.Add(CreateHeader("Position & Worldspace Offsets"));
+
+        var headOffsetSlider = new Slider("Enemy Head Height Offset", 0.2f, 4.0f) { value = settings.enemyHeadHeightOffset, showInputField = true };
+        headOffsetSlider.tooltip = "Vertical height (in meters) above regular enemy / minion pivot to spawn floating damage text.";
+        headOffsetSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Enemy Head Offset");
+            settings.enemyHeadHeightOffset = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(headOffsetSlider);
+
+        var bossCamOffsetSlider = new Slider("Boss Camera Distance Offset", 0.05f, 1.0f) { value = settings.bossCameraOffset, showInputField = true };
+        bossCamOffsetSlider.tooltip = "Offset distance towards camera from boss hit point, preventing numbers from clipping inside 3D mesh.";
+        bossCamOffsetSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Camera Offset");
+            settings.bossCameraOffset = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossCamOffsetSlider);
+
+        var bossVertOffsetSlider = new Slider("Boss Vertical Hit Lift", 0.0f, 1.0f) { value = settings.bossVerticalOffset, showInputField = true };
+        bossVertOffsetSlider.tooltip = "Vertical upward lift applied to the impact point on the boss.";
+        bossVertOffsetSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Vertical Offset");
+            settings.bossVerticalOffset = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(bossVertOffsetSlider);
+
+        var spreadSlider = new Slider("Fanning Spread Radius", 0.0f, 0.8f) { value = settings.randomSpreadRadius, showInputField = true };
+        spreadSlider.tooltip = "Random fanning spread so consecutive auto-fire bullets and shotgun pellets do not stack on top of each other.";
+        spreadSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Spread Radius");
+            settings.randomSpreadRadius = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(spreadSlider);
+
+        // --- SCALE MULTIPLIERS ---
+        scroll.Add(CreateHeader("Scale Multipliers by Part & Target"));
+
+        var normalScaleSlider = new Slider("Normal Enemy Hit Scale", 0.5f, 2.5f) { value = settings.normalScale, showInputField = true };
+        normalScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Normal Scale");
+            settings.normalScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(normalScaleSlider);
+
+        var bossHeadScaleSlider = new Slider("Boss Head / Crit Scale", 0.5f, 3.0f) { value = settings.bossHeadScale, showInputField = true };
+        bossHeadScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Head Scale");
+            settings.bossHeadScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossHeadScaleSlider);
+
+        var bossLegScaleSlider = new Slider("Boss Leg Hit Scale", 0.5f, 2.5f) { value = settings.bossLegScale, showInputField = true };
+        bossLegScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Leg Scale");
+            settings.bossLegScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossLegScaleSlider);
+
+        var bossGeneralScaleSlider = new Slider("Boss Body Hit Scale", 0.5f, 2.5f) { value = settings.bossGeneralScale, showInputField = true };
+        bossGeneralScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss General Scale");
+            settings.bossGeneralScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossGeneralScaleSlider);
+
+        var bossBrokenScaleSlider = new Slider("Boss Broken Part Scale", 0.5f, 2.0f) { value = settings.bossBrokenScale, showInputField = true };
+        bossBrokenScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Broken Scale");
+            settings.bossBrokenScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossBrokenScaleSlider);
+
+        // --- ANIMATION & MOTION ---
+        scroll.Add(CreateHeader("Animation & Floating Motion"));
+
+        var floatSpdSlider = new Slider("Float Upward Speed", 0.5f, 5.0f) { value = settings.floatUpSpeed, showInputField = true };
+        floatSpdSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Float Speed");
+            settings.floatUpSpeed = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(floatSpdSlider);
+
+        var driftSpdSlider = new Slider("Drift Speed", 0.0f, 2.0f) { value = settings.driftSpeed, showInputField = true };
+        driftSpdSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Drift Speed");
+            settings.driftSpeed = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(driftSpdSlider);
+
+        var durationSlider = new Slider("Lifetime Duration (s)", 0.3f, 2.0f) { value = settings.duration, showInputField = true };
+        durationSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Duration");
+            settings.duration = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(durationSlider);
+
+        // --- COLOR PALETTE ---
+        scroll.Add(CreateHeader("Color Palette"));
+
+        var normalColorField = new ColorField("Normal Enemy Hit Color") { value = settings.normalColor };
+        normalColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Normal Color");
+            settings.normalColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(normalColorField);
+
+        var bossHeadColorField = new ColorField("Boss Head / Crit Color") { value = settings.bossHeadColor };
+        bossHeadColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Head Color");
+            settings.bossHeadColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossHeadColorField);
+
+        var bossLegColorField = new ColorField("Boss Leg Color") { value = settings.bossLegColor };
+        bossLegColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Leg Color");
+            settings.bossLegColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossLegColorField);
+
+        var bossGeneralColorField = new ColorField("Boss Body Color") { value = settings.bossGeneralColor };
+        bossGeneralColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss General Color");
+            settings.bossGeneralColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossGeneralColorField);
+
+        var bossBrokenColorField = new ColorField("Boss Broken Part Color") { value = settings.bossBrokenColor };
+        bossBrokenColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Boss Broken Color");
+            settings.bossBrokenColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(bossBrokenColorField);
 
         _inspectorContainer.Add(scroll);
     }
@@ -1297,6 +1613,22 @@ public class DataManagerWindow : EditorWindow
             _previewIcon.style.backgroundImage = null;
             _previewBackground.style.backgroundImage = null;
             _previewBackground.style.backgroundColor = new StyleColor(new Color(0.08f, 0.16f, 0.28f));
+            return;
+        }
+
+        if (_currentDataType == DataType.DamageNumbers)
+        {
+            if (_damageNumberSettings == null) LoadOrCreateDamageNumberSettings();
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
+
+            _previewTitle.text = "DAMAGE NUMBERS";
+            _previewDesc.text = $"3D Worldspace Floating TextMeshPro\nFont Size: {_damageNumberSettings.baseFontSize:F1} | Head Scale: {_damageNumberSettings.bossHeadScale:F2}x | Leg: {_damageNumberSettings.bossLegScale:F2}x\nEnemy Height: +{_damageNumberSettings.enemyHeadHeightOffset:F2}m | Boss Cam Offset: {_damageNumberSettings.bossCameraOffset:F2}m\nDuration: {_damageNumberSettings.duration:F2}s | Float: {_damageNumberSettings.floatUpSpeed:F1}";
+            _previewValue.text = "3D TEXT";
+
+            _previewIcon.style.backgroundImage = null;
+            _previewBackground.style.backgroundImage = null;
+            _previewBackground.style.backgroundColor = new StyleColor(new Color(0.25f, 0.16f, 0.05f));
             return;
         }
 
@@ -1427,6 +1759,8 @@ public class DataManagerWindow : EditorWindow
 
     private void CreateNewItem()
     {
+        if (_currentDataType == DataType.DamageNumbers) return;
+
         if (_currentDataType == DataType.Enemy)
         {
             LoadOrCreateEnemyDatabase();
@@ -1513,7 +1847,7 @@ public class DataManagerWindow : EditorWindow
 
     private void DuplicateSelectedItem()
     {
-        if (_currentDataType == DataType.Audio) return;
+        if (_currentDataType == DataType.Audio || _currentDataType == DataType.DamageNumbers) return;
 
         if (_currentDataType == DataType.Enemy)
         {

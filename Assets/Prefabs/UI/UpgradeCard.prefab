@@ -358,11 +358,6 @@ MonoBehaviour:
   mainIconImage: {fileID: 5875844118013173192}
   descriptionText: {fileID: 5736844093475462966}
   valueText: {fileID: 2396838451635576975}
-  swipeThreshold: 130
-  minFlickVelocity: 600
-  maxTiltAngle: 12
-  flyOffDuration: 0.18
-  returnDuration: 0.15
 --- !u!225 &966108812182414259
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -495,7 +490,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1435730872892625610}
   m_HandleRect: {fileID: 84231782729485846}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -851,7 +846,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7024387656294767155}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 

@@ -125,6 +125,7 @@ public class EnemyManager : MonoBehaviour
         isWaitingForLevelDelay = (initialSpawnDelay > 0f);
 
         PrewarmVFX();
+        var _ = UI.DamageNumbers.DamageNumberManager.Instance;
     }
 
     private void PrewarmVFX()

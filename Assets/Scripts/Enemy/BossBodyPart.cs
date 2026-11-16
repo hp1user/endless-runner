@@ -87,6 +87,8 @@ namespace Enemy.Control
                 {
                     bossController.OnPartDamaged(partType, effectiveDamage, true);
                 }
+                Vector3 numPos = (hitPoint != default) ? hitPoint : transform.position;
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, numPos, partType, true);
                 return;
             }
 
@@ -106,6 +108,9 @@ namespace Enemy.Control
             {
                 bossController.OnPartDamaged(partType, effectiveDamage, isBroken);
             }
+
+            Vector3 damagePos = (hitPoint != default) ? hitPoint : transform.position;
+            UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, damagePos, partType, isBroken);
         }
     }
 }

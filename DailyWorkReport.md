@@ -918,5 +918,56 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - Purged dead references in scene `ObstacleManager` and added all 8 vehicle prefabs from `Assets/Prefabs/Obstrucle/` to `obstaclePool`.
     - Removed obsolete broken dummy files in `Assets/Prefabs/Chunks/` to prevent future asset resolution collisions.
 
+## Date: 2026-11-16
+
+### Features Added
+- **Floating 3D Worldspace TextMeshPro Damage Numbers System (`DamageNumber.cs`, `DamageNumberManager.cs`)**:
+  - Implemented 3D floating damage numbers utilizing TextMeshPro with the `TextMeshPro/Mobile/Distance Field Overlay` shader (`Queue = Overlay`, `ZTest Always`) and sharp black outline, guaranteeing high contrast and preventing text from clipping into 3D enemy models, weapons, or terrain.
+  - **Camera Billboarding**: Damage numbers continuously track and align with the active camera plane (`Camera.main.transform.rotation`).
+  - **Punchy Impact Animation**: Rapid scale pop on bullet impact ($0.45\times \rightarrow 1.30\times \rightarrow 1.0\times$), smooth upward ascension with subtle randomized horizontal drift so rapid-fire and shotgun pellet bursts fan out cleanly without overlapping, and smooth alpha fade-out over $0.75\text{s}$.
+  - **Dedicated Zero-GC Object Pool**: Prewarms 35 instances at startup (`EnemyManager.Start()`) with hard cap management (up to 75 instances) to prevent runtime GC allocations and frame drops during intense combat.
+
+- **Localized Boss Part & Regular Enemy Damage Indicators (`BossBodyPart.cs`, `EnemyController.cs`)**:
+  - **Boss Head / Critical Hits**: Spawns at exact head impact position with fiery red/crimson coloring, enlarged $1.45\times$ scale, and `<color=#FFCC00>HEAD</color>` label.
+  - **Boss Left Leg Hits**: Spawns at impact point with vibrant amber/orange coloring, $1.25\times$ scale, and `<color=#FFA500>L-LEG</color>` label.
+  - **Boss Right Leg Hits**: Spawns at impact point with vibrant amber/orange coloring, $1.25\times$ scale, and `<color=#FFA500>R-LEG</color>` label.
+  - **Broken Part Hits**: Displays muted silver text with `<color=#888888>BROKEN</color>` label.
+  - **Regular Enemies / Minions**: Spawns floating numbers directly above the enemy's head in warm yellow/white for clear readability.
+
+- **Data Manager Tool Integration for Damage Numbers (`DataManagerWindow.cs`, `DamageNumberSettings.cs`)**:
+  - Integrated a dedicated `"Damage Numbers"` section into the `DataManagerWindow` (`Tools/Endless Runner/Data Manager`).
+  - Created `DamageNumberSettings.cs` ScriptableObject (persisted at `Assets/Resources/DamageNumberSettings.asset`) providing interactive UI Toolkit sliders, fields, and color pickers for:
+    - **Font & Base Size**: Base font size slider ($2.0 - 12.0$) and custom TMP font assignment.
+    - **Position & Offsets**: Sliders for Enemy Head Height Offset ($0.2\text{m} - 4.0\text{m}$), Boss Camera Distance Offset ($0.05\text{m} - 1.0\text{m}$), Boss Vertical Hit Lift, and Fanning Spread Radius.
+    - **Scale Multipliers**: Custom scale sliders for Normal Hit ($0.5\times - 2.5\times$), Boss Head ($0.5\times - 3.0\times$), Boss Legs ($0.5\times - 2.5\times$), Boss Body, and Broken Parts.
+    - **Animation & Motion**: Sliders for Float Upward Speed, Drift Speed, and Lifetime Duration.
+    - **Color Palette**: Interactive color fields for Normal Hits, Boss Head Hits, Boss Leg Hits, Boss Body Hits, and Broken Part Hits.
+
+- **Swipe-to-Confirm Upgrade Card Selection (`UpgradeManager.cs`, `UpgradeCardUI.cs`, `TouchManager.cs`)**:
+  - Replaced static confirmation button with horizontal swipe gestures directly on upgrade cards (`useSwipeToConfirm = true`), allowing players to select and confirm cards by swiping left or right.
+  - Implemented input isolation: blocked player lane switching while upgrade cards are active using `TouchManager.IsInputBlocked`, ensuring card swipes do not cause unintended player movement.
+
+- **Perimeter Breach Adaptive Dual-Layer Soundtrack (`AudioManager.cs`, `AudioDatabase.cs`, `DataManagerWindow.cs`)**:
+  - Developed synchronized dual-layer interactive audio system: Layer 0 (ambient background groove) plays continuously across exploration, while Layer 1 (battle intensity) dynamically fades in during combat and boss fights.
+  - Implemented gradual volume drop and smooth pitch slowdown when opening the Weapon Wheel (matrix bullet-time slow-mo) and gradual volume dimming when opening Upgrade Card popups.
+  - Added sample-accurate phase drift synchronization and audio voice pool recycling to prevent sound dropouts during high-rate automatic gunfire.
+
+### Bugs Fixed & Improvements
+- **Boss Attack Interval Loop Fix (`EnemyController.cs`)**:
+  - **Diagnosis**: Boss scheduled its next attack (`nextProjectileAttackTime = Time.time + Random.Range(4f, 8f)`) *before* executing its 4.5s attack recovery coroutine. Whenever RNG rolled $\le 4.5\text{s}$, the boss immediately re-entered the attack routine upon recovery, resulting in an endless loop of stationary acid firing without walking or advancing.
+  - **Fix**: Moved attack scheduling to execute strictly after recovery completes, guaranteeing 4–8 seconds of forward movement between attacks.
+- **Boss Minion Hovering Fix (`EnemyController.cs`)**:
+  - Minions spawned by the boss previously inherited low base speeds ($0.5 - 0.75\text{m/s}$), causing them to hover under the boss's belly while the road moved at $2.0\text{m/s}$. Enforced a minimum charge speed of $2.5\text{m/s}$ so minions sprint down the road towards the player.
+- **Duplicate LevelUpSequence Race Condition (`UpgradeManager.cs`)**:
+  - Defeating the boss fired both `OnBossDefeated` and `OnLevelCompleted`, triggering two overlapping coroutines. Added `isSequenceRunning` guard and boss-level transition filtering.
+- **Shotgun Multi-Hit VFX Restoration (`PlayerController.cs`)**:
+  - Restored individual hit markers and impact VFX across all spreading shotgun pellets hitting boss parts.
+- **Data Manager UI Slider Numeric Readouts (`DataManagerWindow.cs`)**:
+  - Added `showInputField = true` across all UI Toolkit sliders in `DataManagerWindow.cs` (Damage Numbers Inspector, Audio & Sound System Inspector, and Enemy Inspector).
+  - Sliders now display their live numeric values at the right end and allow exact float values to be typed directly.
+- **Data Manager Single Data Structure Auto-Load Fix (`DataManagerWindow.cs`)**:
+  - **Diagnosis**: Switching Data Types to single-asset structures (`Damage Numbers` or `Audio`) populated the 1-item ListView on the left, but `_itemListView.SetSelection(0)` did not trigger `selectionChanged` if the previous selection index was already 0 or during rebuild, leaving the middle Inspector pane blank until the user clicked away (e.g. to "Rarity Database") and re-clicked.
+  - **Fix**: Programmatically invoked `OnItemSelected` immediately upon list population in `FilterList()`, cleared selection state during type switching in `SetDataType()`, and added row-level click handling so clicking the entry re-opens the inspector even if already selected. Also dynamically updated the toolbar dropdown label (`Data Type: <CurrentType>`) for immediate clarity.
+
 
 
