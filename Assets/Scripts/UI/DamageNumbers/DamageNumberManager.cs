@@ -48,6 +48,7 @@ namespace UI.DamageNumbers
         [SerializeField] private Color bossLegColor = new Color(1f, 0.62f, 0.05f, 1f);      // Vibrant amber/orange
         [SerializeField] private Color bossGeneralColor = new Color(1f, 0.85f, 0.25f, 1f);  // Boss body gold
         [SerializeField] private Color bossBrokenColor = new Color(0.72f, 0.72f, 0.72f, 0.9f); // Dim silver
+        [SerializeField] private Color critColor = new Color(0.75f, 0.35f, 1.0f, 1f);        // Vibrant neon purple
 
         private Queue<DamageNumber> availablePool = new Queue<DamageNumber>();
         private List<DamageNumber> inUseList = new List<DamageNumber>();
@@ -197,7 +198,7 @@ namespace UI.DamageNumbers
         /// <summary>
         /// Spawns a floating damage number for regular enemies above their head using configured height offset.
         /// </summary>
-        public void SpawnEnemyDamage(float damage, Vector3 enemyRootPosition)
+        public void SpawnEnemyDamage(float damage, Vector3 enemyRootPosition, bool isCrit = false)
         {
             if (damage <= 0.05f) return;
 
@@ -207,11 +208,23 @@ namespace UI.DamageNumbers
             Vector3 spawnPos = enemyRootPosition + Vector3.up * yOffset;
             spawnPos += new Vector3(Random.Range(-spread, spread), Random.Range(0f, spread * 0.75f), 0f);
 
-            string text = FormatDamageString(damage);
-            Color c = (settings != null) ? settings.normalColor : normalColor;
-            float scale = (settings != null) ? settings.normalScale : 1.0f;
+            string dmgStr = FormatDamageString(damage);
+            string text = isCrit 
+                ? $"<size=75%><color=#E9D5FF><b>CRIT!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>" 
+                : dmgStr;
+
+            Color c = isCrit 
+                ? ((settings != null) ? settings.critColor : critColor)
+                : ((settings != null) ? settings.normalColor : normalColor);
+
+            float scale = isCrit
+                ? ((settings != null) ? settings.critScale : 1.55f)
+                : ((settings != null) ? settings.normalScale : 1.0f);
+
             float dur = (settings != null) ? settings.duration : 0.70f;
+            if (isCrit) dur *= 1.15f;
             float floatSpd = (settings != null) ? settings.floatUpSpeed : 1.8f;
+            if (isCrit) floatSpd *= 1.15f;
             float driftSpd = (settings != null) ? settings.driftSpeed : 0.45f;
 
             DamageNumber dn = GetInstance();
@@ -223,37 +236,109 @@ namespace UI.DamageNumbers
 
         /// <summary>
         /// Spawns a floating damage number for the Boss at the specific body part or hit location.
-        /// Formats text and color based on part type (Head, Left Leg, Right Leg, Broken).
+        /// Formats text and color based on part type (Head, Left Leg, Right Leg, Broken) and critical strike.
         /// </summary>
-        public void SpawnBossDamage(float damage, Vector3 hitPoint, BossBodyPartType partType, bool isBroken)
+        public void SpawnBossDamage(float damage, Vector3 hitPoint, BossBodyPartType partType, bool isBroken, bool isCrit = false)
         {
             if (damage <= 0.05f) return;
 
-            DamageStyle style;
-            if (isBroken)
+            string dmgStr = FormatDamageString(damage);
+            string formattedText;
+            Color color;
+            float scaleMult;
+
+            Color pCritColor = (settings != null) ? settings.critColor : critColor;
+            float pCritScale = (settings != null) ? settings.critScale : 1.55f;
+
+            if (isCrit)
             {
-                style = DamageStyle.BossBroken;
+                color = pCritColor;
+                if (isBroken)
+                {
+                    formattedText = $"<size=70%><color=#E9D5FF><b>CRIT BROKEN</b></color></size>\n<b>{dmgStr}</b>";
+                    scaleMult = (settings != null ? settings.bossBrokenScale : 0.95f) * 1.25f;
+                }
+                else
+                {
+                    switch (partType)
+                    {
+                        case BossBodyPartType.Head:
+                            formattedText = $"<size=75%><color=#E9D5FF><b>CRIT HEAD!</b></color></size>\n<size=135%><b>{dmgStr}</b></size>";
+                            scaleMult = (settings != null ? settings.bossHeadScale : 1.45f) * 1.25f;
+                            break;
+                        case BossBodyPartType.LeftLeg:
+                            formattedText = $"<size=75%><color=#E9D5FF><b>CRIT L-LEG!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                            scaleMult = (settings != null ? settings.bossLegScale : 1.25f) * 1.25f;
+                            break;
+                        case BossBodyPartType.RightLeg:
+                            formattedText = $"<size=75%><color=#E9D5FF><b>CRIT R-LEG!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                            scaleMult = (settings != null ? settings.bossLegScale : 1.25f) * 1.25f;
+                            break;
+                        default:
+                            formattedText = $"<size=75%><color=#E9D5FF><b>CRIT!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                            scaleMult = pCritScale;
+                            break;
+                    }
+                }
             }
             else
             {
-                switch (partType)
+                if (isBroken)
                 {
-                    case BossBodyPartType.Head:
-                        style = DamageStyle.BossHead;
-                        break;
-                    case BossBodyPartType.LeftLeg:
-                        style = DamageStyle.BossLeftLeg;
-                        break;
-                    case BossBodyPartType.RightLeg:
-                        style = DamageStyle.BossRightLeg;
-                        break;
-                    default:
-                        style = DamageStyle.BossGeneral;
-                        break;
+                    formattedText = $"<size=70%><color=#888888>BROKEN</color></size>\n{dmgStr}";
+                    color = (settings != null) ? settings.bossBrokenColor : bossBrokenColor;
+                    scaleMult = (settings != null) ? settings.bossBrokenScale : 0.95f;
+                }
+                else
+                {
+                    switch (partType)
+                    {
+                        case BossBodyPartType.Head:
+                            formattedText = $"<size=75%><color=#FFCC00><b>HEAD</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                            color = (settings != null) ? settings.bossHeadColor : bossHeadColor;
+                            scaleMult = (settings != null) ? settings.bossHeadScale : 1.45f;
+                            break;
+                        case BossBodyPartType.LeftLeg:
+                            formattedText = $"<size=75%><color=#FFA500><b>L-LEG</b></color></size>\n<b>{dmgStr}</b>";
+                            color = (settings != null) ? settings.bossLegColor : bossLegColor;
+                            scaleMult = (settings != null) ? settings.bossLegScale : 1.25f;
+                            break;
+                        case BossBodyPartType.RightLeg:
+                            formattedText = $"<size=75%><color=#FFA500><b>R-LEG</b></color></size>\n<b>{dmgStr}</b>";
+                            color = (settings != null) ? settings.bossLegColor : bossLegColor;
+                            scaleMult = (settings != null) ? settings.bossLegScale : 1.25f;
+                            break;
+                        default:
+                            formattedText = $"<b>{dmgStr}</b>";
+                            color = (settings != null) ? settings.bossGeneralColor : bossGeneralColor;
+                            scaleMult = (settings != null) ? settings.bossGeneralScale : 1.15f;
+                            break;
+                    }
                 }
             }
 
-            SpawnDamage(damage, hitPoint, style);
+            float duration = (settings != null) ? settings.duration : 0.75f;
+            if (isCrit) duration *= 1.2f;
+            float floatSpd = (settings != null) ? settings.floatUpSpeed : 1.8f;
+            if (isCrit) floatSpd *= 1.15f;
+            float driftSpd = (settings != null) ? settings.driftSpeed : 0.45f;
+            float camOffset = (settings != null) ? settings.bossCameraOffset : 0.25f;
+            float vertOffset = (settings != null) ? settings.bossVerticalOffset : 0.20f;
+            float spread = (settings != null) ? settings.randomSpreadRadius : 0.25f;
+
+            Vector3 cameraDir = Vector3.back;
+            if (Camera.main != null)
+            {
+                cameraDir = (Camera.main.transform.position - hitPoint).normalized;
+            }
+            Vector3 spawnPos = hitPoint + cameraDir * camOffset + Vector3.up * vertOffset;
+            spawnPos += new Vector3(Random.Range(-spread, spread), Random.Range(-spread * 0.5f, spread * 0.5f), 0f);
+
+            DamageNumber dn = GetInstance();
+            if (dn != null)
+            {
+                dn.Play(formattedText, spawnPos, color, scaleMult, duration, floatSpd, driftSpd);
+            }
         }
 
         /// <summary>
@@ -322,10 +407,10 @@ namespace UI.DamageNumbers
                     break;
 
                 case DamageStyle.Critical:
-                    formattedText = $"<size=75%><color=#FFDD00><b>CRIT</b></color></size>\n<size=120%><b>{dmgStr}</b></size>";
-                    color = new Color(1f, 0.35f, 0.15f, 1f);
-                    scaleMult = 1.35f;
-                    duration = (settings != null) ? settings.duration * 1.1f : 0.80f;
+                    formattedText = $"<size=75%><color=#E9D5FF><b>CRIT!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                    color = (settings != null) ? settings.critColor : critColor;
+                    scaleMult = (settings != null) ? settings.critScale : 1.55f;
+                    duration = (settings != null) ? settings.duration * 1.2f : 0.85f;
                     break;
 
                 case DamageStyle.Normal:

@@ -65,25 +65,44 @@ public class UpgradeManager : MonoBehaviour
 
     private Dictionary<CardRarity, List<UpgradeCard>> deckByRarity = new Dictionary<CardRarity, List<UpgradeCard>>();
 
+    // Tracks non-stackable cards (e.g. Crit Rate, Crit Damage, Weapon Unlocks) claimed this run to prevent them from dropping again
+    private HashSet<UpgradeCard> claimedUniqueCards = new HashSet<UpgradeCard>();
+
     // Remembers what card we tapped on
 
     private UpgradeCard pendingCard;
 
     private void Awake()
-
     {
-
         if (Instance == null) Instance = this;
-
         else Destroy(gameObject);
 
-        foreach (CardRarity rarity in System.Enum.GetValues(typeof(CardRarity)))
+        claimedUniqueCards.Clear();
 
+#if UNITY_EDITOR
+        // Auto-discover all UpgradeCard assets in the project so newly created cards are immediately in the drop pool
+        string[] cardGuids = UnityEditor.AssetDatabase.FindAssets("t:UpgradeCard");
+        foreach (string guid in cardGuids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            UpgradeCard card = UnityEditor.AssetDatabase.LoadAssetAtPath<UpgradeCard>(path);
+            if (card != null && !allAvailableCards.Contains(card))
+            {
+                allAvailableCards.Add(card);
+            }
+        }
+#endif
+
+        foreach (CardRarity rarity in System.Enum.GetValues(typeof(CardRarity)))
             deckByRarity[rarity] = new List<UpgradeCard>();
 
         foreach (UpgradeCard card in allAvailableCards)
-
-            deckByRarity[card.rarity].Add(card);
+        {
+            if (card != null && deckByRarity.ContainsKey(card.rarity))
+            {
+                deckByRarity[card.rarity].Add(card);
+            }
+        }
 
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
 
@@ -265,6 +284,61 @@ public class UpgradeManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Checks whether an upgrade card contains unique non-stackable mechanics (Crit Rate, Crit Damage, Weapon Unlocks).
+    /// </summary>
+    public static bool IsCardNonStackable(UpgradeCard card)
+    {
+        if (card == null || card.effects == null) return false;
+        foreach (var effect in card.effects)
+        {
+            if (effect.upgradeType == UpgradeType.CritRate ||
+                effect.upgradeType == UpgradeType.CritDamage ||
+                effect.upgradeType == UpgradeType.WeaponUnlock)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if this card has already been claimed and should not be offered to the player again.
+    /// </summary>
+    public bool IsCardAlreadyClaimed(UpgradeCard card)
+    {
+        if (card == null) return false;
+        if (claimedUniqueCards.Contains(card)) return true;
+        if (IsWeaponCardAlreadyOwned(card)) return true;
+        if (Player.Control.PlayerController.Instance != null && Player.Control.PlayerController.Instance.HasAppliedCard(card)) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Marks a non-stackable card as claimed for this run, permanently removing it from all active drop pools.
+    /// </summary>
+    public void RegisterCardClaimed(UpgradeCard card)
+    {
+        if (card == null) return;
+        if (IsCardNonStackable(card))
+        {
+            claimedUniqueCards.Add(card);
+
+            // Remove from active deck so it cannot roll again
+            if (deckByRarity.ContainsKey(card.rarity))
+            {
+                deckByRarity[card.rarity].Remove(card);
+            }
+
+            if (bossDropPool != null)
+            {
+                bossDropPool.Remove(card);
+            }
+
+            Debug.Log($"<color=cyan>[UpgradeManager]</color> Removed non-stackable card <b>{card.cardName}</b> ({card.rarity}) from active drop pools.");
+        }
+    }
+
     private bool IsWeaponCardAlreadyOwned(UpgradeCard card)
 
     {
@@ -297,8 +371,7 @@ public class UpgradeManager : MonoBehaviour
 
         if (bossDropPool == null || bossDropPool.Count == 0) return null;
 
-        // 1. Prioritize unowned weapon cards and cards not already drawn in current hand
-
+        // 1. Prioritize unowned weapon cards and cards not already drawn in current hand or claimed
         List<UpgradeCard> candidates = new List<UpgradeCard>();
 
         foreach (var card in bossDropPool)
@@ -309,14 +382,13 @@ public class UpgradeManager : MonoBehaviour
 
             if (hand != null && hand.Contains(card)) continue;
 
-            if (IsWeaponCardAlreadyOwned(card)) continue;
+            if (IsCardAlreadyClaimed(card)) continue;
 
             candidates.Add(card);
 
         }
 
-        // 2. If all unowned weapon drops are already claimed, allow other boss cards not in hand
-
+        // 2. If all unowned weapon drops are already claimed, allow other boss cards not in hand and not claimed
         if (candidates.Count == 0)
 
         {
@@ -329,15 +401,25 @@ public class UpgradeManager : MonoBehaviour
 
                 if (hand != null && hand.Contains(card)) continue;
 
+                if (IsCardAlreadyClaimed(card)) continue;
+
                 candidates.Add(card);
 
             }
 
         }
 
-        // 3. Fallback to full boss pool if hand is saturated
-
-        if (candidates.Count == 0) candidates.AddRange(bossDropPool);
+        // 3. Fallback to unowned boss pool cards if hand is saturated
+        if (candidates.Count == 0)
+        {
+            foreach (var card in bossDropPool)
+            {
+                if (card != null && !IsCardAlreadyClaimed(card))
+                {
+                    candidates.Add(card);
+                }
+            }
+        }
 
         if (candidates.Count == 0) return null;
 
@@ -458,33 +540,25 @@ public class UpgradeManager : MonoBehaviour
     }
 
     private UpgradeCard GetRandomCardOfRarity(CardRarity rarity, List<UpgradeCard> hand = null)
-
     {
-
         if (!deckByRarity.ContainsKey(rarity)) return null;
 
         List<UpgradeCard> specificPile = deckByRarity[rarity];
-
         if (specificPile == null || specificPile.Count == 0) return null;
 
+        List<UpgradeCard> validCards = specificPile.FindAll(c => c != null && !IsCardAlreadyClaimed(c));
+        if (validCards.Count == 0) return null;
+
         if (hand != null && hand.Count > 0)
-
         {
-
-            List<UpgradeCard> unselected = specificPile.FindAll(c => c != null && !hand.Contains(c));
-
+            List<UpgradeCard> unselected = validCards.FindAll(c => !hand.Contains(c));
             if (unselected.Count > 0)
-
             {
-
                 return unselected[Random.Range(0, unselected.Count)];
-
             }
-
         }
 
-        return specificPile[Random.Range(0, specificPile.Count)];
-
+        return validCards[Random.Range(0, validCards.Count)];
     }
 
     // --- UI DISPLAY LOGIC ---
@@ -594,87 +668,75 @@ public class UpgradeManager : MonoBehaviour
     }
 
     // Called when you press Confirm
-
     public void ConfirmSelection()
-
     {
-
         if (pendingCard == null) return;
 
         if (Player.Control.PlayerController.Instance != null)
-
         {
-
             Player.Control.PlayerController.Instance.ApplyUpgrade(pendingCard);
-
         }
 
+        RegisterCardClaimed(pendingCard);
+
         if (cardSelectionPanel != null) cardSelectionPanel.SetActive(false);
-
         if (confirmButton != null) confirmButton.gameObject.SetActive(false);
-
         isSequenceRunning = false;
-
         TouchManager.IsInputBlocked = false;
-
         Time.timeScale = 1f;
-
     }
 
     /// <summary>
-
     /// For Checkpoint / Testing: Automatically applies random upgrade cards directly to the player without opening UI.
-
     /// </summary>
-
     public List<UpgradeCard> ApplyRandomUpgrades(int count)
-
     {
-
         List<UpgradeCard> appliedCards = new List<UpgradeCard>();
 
         if (allAvailableCards == null || allAvailableCards.Count == 0)
-
         {
-
             Debug.LogWarning("[UpgradeManager] Cannot apply random upgrades: allAvailableCards is empty!");
-
             return appliedCards;
-
         }
 
         if (Player.Control.PlayerController.Instance == null)
-
         {
-
             Debug.LogWarning("[UpgradeManager] Cannot apply random upgrades: PlayerController Instance is null!");
-
             return appliedCards;
+        }
 
+        List<UpgradeCard> candidatePool = new List<UpgradeCard>();
+        foreach (var c in allAvailableCards)
+        {
+            if (c != null && !IsCardAlreadyClaimed(c))
+            {
+                candidatePool.Add(c);
+            }
         }
 
         for (int i = 0; i < count; i++)
-
         {
+            if (candidatePool.Count == 0) break;
 
-            UpgradeCard randomCard = allAvailableCards[Random.Range(0, allAvailableCards.Count)];
+            int randomIndex = Random.Range(0, candidatePool.Count);
+            UpgradeCard randomCard = candidatePool[randomIndex];
 
             if (randomCard != null)
-
             {
-
                 Player.Control.PlayerController.Instance.ApplyUpgrade(randomCard);
-
+                RegisterCardClaimed(randomCard);
                 appliedCards.Add(randomCard);
 
+                if (IsCardNonStackable(randomCard))
+                {
+                    candidatePool.RemoveAt(randomIndex);
+                }
+
                 Debug.Log($"<color=green>[Checkpoint]</color> Awarded Card {i + 1}/{count}: <b>{randomCard.cardName}</b> ({randomCard.rarity})");
-
             }
-
         }
 
         return appliedCards;
-
     }
 
 }

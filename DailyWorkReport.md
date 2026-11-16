@@ -969,5 +969,31 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
   - **Diagnosis**: Switching Data Types to single-asset structures (`Damage Numbers` or `Audio`) populated the 1-item ListView on the left, but `_itemListView.SetSelection(0)` did not trigger `selectionChanged` if the previous selection index was already 0 or during rebuild, leaving the middle Inspector pane blank until the user clicked away (e.g. to "Rarity Database") and re-clicked.
   - **Fix**: Programmatically invoked `OnItemSelected` immediately upon list population in `FilterList()`, cleared selection state during type switching in `SetDataType()`, and added row-level click handling so clicking the entry re-opens the inspector even if already selected. Also dynamically updated the toolbar dropdown label (`Data Type: <CurrentType>`) for immediate clarity.
 
+- **Critical Strike Rate & Damage System with Neon Purple Damage Text (`PlayerController.cs`, `BossBodyPart.cs`, `EnemyController.cs`, `DamageNumberManager.cs`, `DamageNumberSettings.cs`, `UpgradeCard.cs`, `UpgradeCardUI.cs`, `DataManagerWindow.cs`)**:
+  - **Global Baseline**: Established a global baseline of **10% Crit Chance** (`baseCritChance = 10f`) and **1.25x Crit Multiplier** (`baseCritMultiplier = 1.25f`) across all weapons.
+  - **Multiplicative Stacking (Option A)**: Critical hits calculate on bullet roll and multiply on top of weakspot multipliers (e.g., Boss Headshot $\times$ Crit Multiplier) for high-impact jackpot damage.
+  - **Vibrant Neon Purple Damage Numbers**:
+    - Critical hits render in luminous neon purple (`#C084FC` / `RGBA(0.75, 0.35, 1.0, 1.0)`) with larger scale pops ($1.55\times$).
+    - Display dedicated labels: `<color=#E9D5FF>CRIT!</color>` for standard/minion crits, `<color=#E9D5FF>CRIT HEAD!</color>` for boss headshots, and `<color=#E9D5FF>CRIT L-LEG! / R-LEG!</color>` for limbs.
+  - **Roguelike Card Upgrades & New Card Assets**:
+    - Added `UpgradeType.CritRate` and `UpgradeType.CritDamage` to `UpgradeCard.cs`.
+    - Integrated `% CRIT` and `% CDMG` value formatting into `UpgradeCardUI.cs` and the Data Manager Card Preview.
+    - Created 7 new `UpgradeCard` assets in `Assets/ScriptableObjects/Cards/`:
+      - **Precision Optics** (Uncommon): `+5% CRIT`
+      - **Deadly Focus** (Rare): `+10% CRIT`
+      - **Executioner's Eye** (Epic): `+15% CRIT`
+      - **Hollow-Point Rounds** (Uncommon): `+25% CDMG`
+      - **Vicious Munitions** (Rare): `+50% CDMG`
+      - **Fatal Devastation** (Epic): `+75% CDMG`
+      - **Lethal Singularity** (Legendary): `+15% CRIT` & `+50% CDMG`
+    - Added all 7 new cards into `allAvailableCards` and `bossDropPool` in `Assets/Scenes/GameView_EndlessRunner.unity`.
+    - Updated `UpgradeManager.Awake()` to auto-discover any newly created `UpgradeCard` assets in the project so they are dynamically present in level-up card selections.
+  - **Non-Stacking & Pool Removal for Critical Cards (`UpgradeManager.cs`, `PlayerController.cs`)**:
+    - **Permanent Pool Removal**: When the player picks any Crit card (or weapon unlock), it is immediately registered via `RegisterCardClaimed()` and removed from active rarity piles (`deckByRarity`) and `bossDropPool` so it can never be offered or dropped again during that run.
+    - **Hand Deduplication**: Guaranteed that the same crit card can never appear multiple times in the same 3-card selection hand.
+    - **Player Application Guard**: Enforced `appliedUniqueCardNames` in `PlayerController.ApplyUpgrade()`, preventing duplicate applications even if triggered externally, while preserving standard stacking behavior for `DamageBoost`, `MaxHealth`, and `SpeedBoost`.
+  - **Data Manager Tool Support**:
+    - Added `Crit Hit Scale` slider (with numeric input) and `Crit Hit Color (Purple)` picker into the Data Manager under the Damage Numbers tab.
+
 
 

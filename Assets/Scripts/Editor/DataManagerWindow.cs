@@ -1479,6 +1479,16 @@ public class DataManagerWindow : EditorWindow
         });
         scroll.Add(bossBrokenScaleSlider);
 
+        var critScaleSlider = new Slider("Crit Hit Scale", 0.5f, 3.0f) { value = settings.critScale, showInputField = true };
+        critScaleSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Crit Scale");
+            settings.critScale = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(critScaleSlider);
+
         // --- ANIMATION & MOTION ---
         scroll.Add(CreateHeader("Animation & Floating Motion"));
 
@@ -1562,6 +1572,16 @@ public class DataManagerWindow : EditorWindow
             UpdatePreview();
         });
         scroll.Add(bossBrokenColorField);
+
+        var critColorField = new ColorField("Crit Hit Color (Purple)") { value = settings.critColor };
+        critColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Crit Color");
+            settings.critColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(critColorField);
 
         _inspectorContainer.Add(scroll);
     }
@@ -1713,6 +1733,9 @@ public class DataManagerWindow : EditorWindow
                     UpgradeType.DamageBoost => "%",
                     UpgradeType.MaxHealth => " HP",
                     UpgradeType.SpeedBoost => " SPD",
+                    UpgradeType.CritRate => "% CRIT",
+                    UpgradeType.CritDamage => "% CDMG",
+                    UpgradeType.ArmorPerKill => " ARM",
                     _ => ""
                 };
                 _previewValue.text = $"+{firstFx.upgradeValue}{suffix}";

@@ -49,6 +49,10 @@ namespace UI.DamageNumbers
         [Range(0.5f, 2.0f)]
         public float bossBrokenScale = 0.95f;
 
+        [Tooltip("Scale multiplier for Critical Strike hits.")]
+        [Range(0.5f, 3.0f)]
+        public float critScale = 1.55f;
+
         [Header("Animation & Motion")]
         [Tooltip("How fast the damage number ascends upward in world space.")]
         [Range(0.5f, 5.0f)]
@@ -68,6 +72,7 @@ namespace UI.DamageNumbers
         public Color bossLegColor = new Color(1f, 0.62f, 0.05f, 1f);      // Vibrant amber/orange
         public Color bossGeneralColor = new Color(1f, 0.85f, 0.25f, 1f);  // Boss body gold
         public Color bossBrokenColor = new Color(0.72f, 0.72f, 0.72f, 0.9f); // Dim silver
+        public Color critColor = new Color(0.75f, 0.35f, 1.0f, 1f);       // Vibrant neon purple (#BF5AF2)
     }
 }
 

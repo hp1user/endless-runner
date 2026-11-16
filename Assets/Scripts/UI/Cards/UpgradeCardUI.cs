@@ -103,6 +103,9 @@ public class UpgradeCardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                     if (effect.upgradeType == UpgradeType.DamageBoost) suffix = "%";
                     else if (effect.upgradeType == UpgradeType.MaxHealth) suffix = " HP";
                     else if (effect.upgradeType == UpgradeType.SpeedBoost) suffix = " SPD";
+                    else if (effect.upgradeType == UpgradeType.CritRate) suffix = "% CRIT";
+                    else if (effect.upgradeType == UpgradeType.CritDamage) suffix = "% CDMG";
+                    else if (effect.upgradeType == UpgradeType.ArmorPerKill) suffix = " ARM";
 
                     valueText.text += "+" + effect.upgradeValue.ToString() + suffix + "\n";
                 }

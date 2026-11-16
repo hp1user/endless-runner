@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum UpgradeType { MaxHealth, SpeedBoost, DamageBoost, WeaponUnlock, ArmorPerKill }
+public enum UpgradeType { MaxHealth, SpeedBoost, DamageBoost, WeaponUnlock, ArmorPerKill, CritRate, CritDamage }
 public enum CardRarity { Common, Uncommon, Rare, Epic, Legendary, Mythic }
 
 [System.Serializable]

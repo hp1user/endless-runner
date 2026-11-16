@@ -741,7 +741,7 @@ namespace Enemy.Control
             }
         }
 
-        public void TakeDamage(float damage, Collider hitCollider = null, Vector3 hitPoint = default, Vector3 hitNormal = default)
+        public void TakeDamage(float damage, Collider hitCollider = null, Vector3 hitPoint = default, Vector3 hitNormal = default, bool isCrit = false)
         {
             if (isDead) return;
 
@@ -762,7 +762,7 @@ namespace Enemy.Control
                 if (part == null) part = hitCollider.GetComponentInParent<BossBodyPart>();
                 if (part != null)
                 {
-                    part.TakeDamage(damage, hitPoint, hitNormal);
+                    part.TakeDamage(damage, hitPoint, hitNormal, isCrit);
                     return;
                 }
 
@@ -772,7 +772,7 @@ namespace Enemy.Control
                     float headDmg = (damage * bossHeadMultiplier) * reductionFactor;
                     OnPartDamaged(BossBodyPartType.Head, headDmg, false);
                     Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false, isCrit);
                     return;
                 }
                 else if (colName.Contains("l_leg") || colName.Contains("left"))
@@ -780,7 +780,7 @@ namespace Enemy.Control
                     float legDmg = damage * reductionFactor;
                     OnPartDamaged(BossBodyPartType.LeftLeg, legDmg, false);
                     Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.LeftLeg, false);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.LeftLeg, false, isCrit);
                     return;
                 }
                 else if (colName.Contains("r_leg") || colName.Contains("right"))
@@ -788,24 +788,31 @@ namespace Enemy.Control
                     float legDmg = damage * reductionFactor;
                     OnPartDamaged(BossBodyPartType.RightLeg, legDmg, false);
                     Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.RightLeg, false);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.RightLeg, false, isCrit);
                     return;
                 }
             }
 
             float finalDamage = damage * reductionFactor;
             currentHealth -= finalDamage;
-            if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {finalDamage:F1} damage (Incoming: {damage:F1}{(damageReduction > 0f ? $" -{damageReduction:F0}%" : "")})! Remaining HP: {currentHealth:F1}");
+            if (debugMode) Debug.Log($"<color=red>[Enemy]</color> {enemyName} took {finalDamage:F1} damage (Incoming: {damage:F1}{(damageReduction > 0f ? $" -{damageReduction:F0}%" : "")}{(isCrit ? " <color=#C084FC>[CRIT]</color>" : "")})! Remaining HP: {currentHealth:F1}");
 
             // Floating damage numbers
             if (isBoss)
             {
                 Vector3 bossSpawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
-                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnDamage(finalDamage, bossSpawnPos, UI.DamageNumbers.DamageStyle.BossGeneral);
+                if (isCrit)
+                {
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnDamage(finalDamage, bossSpawnPos, UI.DamageNumbers.DamageStyle.Critical);
+                }
+                else
+                {
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnDamage(finalDamage, bossSpawnPos, UI.DamageNumbers.DamageStyle.BossGeneral);
+                }
             }
             else
             {
-                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnEnemyDamage(finalDamage, transform.position);
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnEnemyDamage(finalDamage, transform.position, isCrit);
             }
 
             if (isBoss)

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI.DamageNumbers.DamageNumberSettings
   customFont: {fileID: 0}
   baseFontSize: 4
-  enemyHeadHeightOffset: 1
+  enemyHeadHeightOffset: 0.2
   bossCameraOffset: 0.25
   bossVerticalOffset: 0.2
   randomSpreadRadius: 0.25
@@ -23,11 +23,13 @@ MonoBehaviour:
   bossLegScale: 1
   bossGeneralScale: 1.15
   bossBrokenScale: 0.95
+  critScale: 1.45
   floatUpSpeed: 1
   driftSpeed: 0.45
   duration: 0.75
-  normalColor: {r: 1, g: 0.96, b: 0.65, a: 1}
+  normalColor: {r: 1, g: 0.45360184, b: 0, a: 1}
   bossHeadColor: {r: 1, g: 0.22, b: 0.22, a: 1}
   bossLegColor: {r: 1, g: 0.62, b: 0.05, a: 1}
   bossGeneralColor: {r: 1, g: 0.85, b: 0.25, a: 1}
   bossBrokenColor: {r: 0.72, g: 0.72, b: 0.72, a: 0.9}
+  critColor: {r: 0.5258401, g: 0.1009256, b: 0.7924528, a: 1}

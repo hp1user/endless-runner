@@ -48,7 +48,7 @@ namespace Enemy.Control
             isBroken = false;
         }
 
-        public void TakeDamage(float damage, Vector3 hitPoint = default, Vector3 hitNormal = default)
+        public void TakeDamage(float damage, Vector3 hitPoint = default, Vector3 hitNormal = default, bool isCrit = false)
         {
             if (bossController == null)
             {
@@ -82,20 +82,21 @@ namespace Enemy.Control
 
             if (isBroken)
             {
-                Debug.Log($"<color=yellow>[BossPart]</color> {partType} (Broken) took {effectiveDamage:F1} DMG!");
+                Debug.Log($"<color=yellow>[BossPart]</color> {partType} (Broken) took {effectiveDamage:F1} DMG! {(isCrit ? "<color=#C084FC>[CRIT]</color>" : "")}");
                 if (bossController != null)
                 {
                     bossController.OnPartDamaged(partType, effectiveDamage, true);
                 }
                 Vector3 numPos = (hitPoint != default) ? hitPoint : transform.position;
-                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, numPos, partType, true);
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, numPos, partType, true, isCrit);
                 return;
             }
 
             currentHealth -= effectiveDamage;
             string redInfo = (reduction > 0f) ? $" (-{reduction:F0}% reduction)" : "";
             string multInfo = (damageMultiplier != 1.0f) ? $" (Part Multiplier: {damageMultiplier:F2}x)" : "";
-            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {effectiveDamage:F1} damage (Incoming: {damage:F1}{redInfo}{multInfo}). Remaining Part HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}");
+            string critInfo = isCrit ? " <color=#C084FC>[CRIT]</color>" : "";
+            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {effectiveDamage:F1} damage (Incoming: {damage:F1}{redInfo}{multInfo}{critInfo}). Remaining Part HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}");
 
             if (currentHealth <= 0f)
             {
@@ -110,7 +111,7 @@ namespace Enemy.Control
             }
 
             Vector3 damagePos = (hitPoint != default) ? hitPoint : transform.position;
-            UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, damagePos, partType, isBroken);
+            UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, damagePos, partType, isBroken, isCrit);
         }
     }
 }

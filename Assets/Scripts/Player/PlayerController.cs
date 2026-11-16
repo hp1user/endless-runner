@@ -52,6 +52,37 @@ namespace Player.Control
         public float damageMultiplier = 1.0f;
         public float armorPerKill = 0f;
 
+        [Header("Critical Strike Stats")]
+        [Tooltip("Base Critical Strike Chance in percent (e.g. 10 = 10%).")]
+        public float baseCritChance = 10f;
+        [Tooltip("Base Critical Strike Multiplier (e.g. 1.25 = 1.25x damage).")]
+        public float baseCritMultiplier = 1.25f;
+        [HideInInspector] public float bonusCritChance = 0f;
+        [HideInInspector] public float bonusCritMultiplier = 0f;
+
+        public float TotalCritChance => Mathf.Clamp(baseCritChance + bonusCritChance, 0f, 100f);
+        public float TotalCritMultiplier => Mathf.Max(1.0f, baseCritMultiplier + bonusCritMultiplier);
+
+        public struct BulletDamageResult
+        {
+            public float damage;
+            public bool isCrit;
+        }
+
+        public BulletDamageResult CalculateBulletDamage()
+        {
+            float baseDmg = (currentWeaponData != null) ? currentWeaponData.baseDamage : 10f;
+            float finalDmg = baseDmg * damageMultiplier;
+            bool isCrit = (Random.Range(0f, 100f) < TotalCritChance);
+
+            if (isCrit)
+            {
+                finalDmg *= TotalCritMultiplier;
+            }
+
+            return new BulletDamageResult { damage = finalDmg, isCrit = isCrit };
+        }
+
         [Header("Skills and Ultimates")]
         public SkillData equippedSkill;
         public SkillData equippedUltimate;
@@ -233,6 +264,9 @@ namespace Player.Control
             runtimeStrafeSmoothing = playerStats.strafeAnimationSmoothing;
             damageMultiplier = 1.0f;
             armorPerKill = 0f;
+            bonusCritChance = 0f;
+            bonusCritMultiplier = 0f;
+            appliedUniqueCardNames.Clear();
             UpdatePlayerUI();
         }
 
@@ -251,6 +285,9 @@ namespace Player.Control
             // 2. Assign Stats
             damageMultiplier = 1.0f;
             armorPerKill = 0f;
+            bonusCritChance = 0f;
+            bonusCritMultiplier = 0f;
+            appliedUniqueCardNames.Clear();
             if (playerStats != null)
             {
                 playerStats.baseHealth = character.baseHealth;
@@ -922,7 +959,8 @@ namespace Player.Control
                         if (bodyPart != null && !damagedEntities.Contains(bodyPart))
                         {
                             damagedEntities.Add(bodyPart);
-                            bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
+                            BulletDamageResult dmg = CalculateBulletDamage();
+                            bodyPart.TakeDamage(dmg.damage, hit.point, hit.normal, dmg.isCrit);
                             anyEnemyHit = true;
                         }
                         else
@@ -932,7 +970,8 @@ namespace Player.Control
                             if (enemy != null && !damagedEntities.Contains(enemy))
                             {
                                 damagedEntities.Add(enemy);
-                                enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
+                                BulletDamageResult dmg = CalculateBulletDamage();
+                                enemy.TakeDamage(dmg.damage, hit.collider, hit.point, hit.normal, dmg.isCrit);
                                 anyEnemyHit = true;
                             }
                         }
@@ -1000,7 +1039,8 @@ namespace Player.Control
                         BossBodyPart bodyPart = hit.collider.GetComponent<BossBodyPart>();
                         if (bodyPart != null)
                         {
-                            bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.point, hit.normal);
+                            BulletDamageResult dmg = CalculateBulletDamage();
+                            bodyPart.TakeDamage(dmg.damage, hit.point, hit.normal, dmg.isCrit);
                             anyPelletHit = true;
                         }
                         else
@@ -1009,7 +1049,8 @@ namespace Player.Control
                             if (enemy == null) enemy = hit.collider.GetComponentInParent<EnemyController>();
                             if (enemy != null)
                             {
-                                enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, hit.collider, hit.point, hit.normal);
+                                BulletDamageResult dmg = CalculateBulletDamage();
+                                enemy.TakeDamage(dmg.damage, hit.collider, hit.point, hit.normal, dmg.isCrit);
                                 anyPelletHit = true;
                             }
                         }
@@ -1048,7 +1089,8 @@ namespace Player.Control
                 BossBodyPart bodyPart = singleHit.collider.GetComponent<BossBodyPart>();
                 if (bodyPart != null)
                 {
-                    bodyPart.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, singleHit.point, singleHit.normal);
+                    BulletDamageResult dmg = CalculateBulletDamage();
+                    bodyPart.TakeDamage(dmg.damage, singleHit.point, singleHit.normal, dmg.isCrit);
                     hitEnemy = true;
                 }
                 else
@@ -1057,7 +1099,8 @@ namespace Player.Control
                     if (enemy == null) enemy = singleHit.collider.GetComponentInParent<EnemyController>();
                     if (enemy != null)
                     {
-                        enemy.TakeDamage(currentWeaponData.baseDamage * damageMultiplier, singleHit.collider, singleHit.point, singleHit.normal);
+                        BulletDamageResult dmg = CalculateBulletDamage();
+                        enemy.TakeDamage(dmg.damage, singleHit.collider, singleHit.point, singleHit.normal, dmg.isCrit);
                         hitEnemy = true;
                     }
                 }
@@ -1511,9 +1554,40 @@ namespace Player.Control
             EquipWeaponFromWheel(newGun);
         }
 
+        private HashSet<string> appliedUniqueCardNames = new HashSet<string>();
+
+        public bool HasAppliedCard(UpgradeCard card)
+        {
+            return card != null && appliedUniqueCardNames.Contains(card.name);
+        }
+
         public void ApplyUpgrade(UpgradeCard card)
         {
             if (card == null || card.effects == null) return;
+
+            // Check if this card contains unique non-stackable stats (Crit Rate, Crit Damage, Weapon Unlocks)
+            bool isNonStackable = false;
+            foreach (var effect in card.effects)
+            {
+                if (effect.upgradeType == UpgradeType.CritRate ||
+                    effect.upgradeType == UpgradeType.CritDamage ||
+                    effect.upgradeType == UpgradeType.WeaponUnlock)
+                {
+                    isNonStackable = true;
+                    break;
+                }
+            }
+
+            if (isNonStackable && appliedUniqueCardNames.Contains(card.name))
+            {
+                Debug.LogWarning($"<color=orange>[PlayerController]</color> Blocked duplicate application of non-stackable card: <b>{card.cardName}</b>");
+                return;
+            }
+
+            if (isNonStackable)
+            {
+                appliedUniqueCardNames.Add(card.name);
+            }
             
             foreach (var effect in card.effects)
             {
@@ -1547,6 +1621,16 @@ namespace Player.Control
                     case UpgradeType.ArmorPerKill:
                         armorPerKill += effect.upgradeValue;
                         if (debugMode) Debug.Log($"<color=cyan>[Upgrade]</color> Armor Per Kill increased by +{effect.upgradeValue}! Total: {armorPerKill}/kill");
+                        break;
+
+                    case UpgradeType.CritRate:
+                        bonusCritChance += effect.upgradeValue;
+                        if (debugMode) Debug.Log($"<color=cyan>[Upgrade]</color> Crit Chance increased by +{effect.upgradeValue}%! Total: {TotalCritChance:F0}%");
+                        break;
+
+                    case UpgradeType.CritDamage:
+                        bonusCritMultiplier += (effect.upgradeValue / 100f);
+                        if (debugMode) Debug.Log($"<color=cyan>[Upgrade]</color> Crit Multiplier increased by +{effect.upgradeValue}%! Total: {TotalCritMultiplier:F2}x");
                         break;
                 }
             }
