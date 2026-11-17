@@ -997,9 +997,38 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
 
 ## Date: 2026-11-17
 
+### Features Added
+- **Active Buffs Review Modal & HUD Trigger (`ActiveBuffsModalUI.cs`, `PlayerController.cs`, `UIManager.cs`)**:
+  - **Top-Left HUD Button & Live Counter Badge**: Added a dedicated glass button in the top-left corner with a badge showing the live count of collected cards (`0`, `1`, `2`...). Automatically refreshes via `PlayerController.OnActiveCardsUpdated`. Supports `B` or `C` keyboard shortcut.
+  - **Roguelike Option A Modal Overlay**:
+    - **Live Stat Summary Grid**: Shows real-time aggregated stats across 6 visual cells: Max HP (`current/max`), Damage Multiplier (`+% (x.xx)`), Crit Rate (`TotalCritChance% (base+cards)`), Crit Damage (`TotalCritMultiplier (base+cards)`), Movement Speed (`m/s`), and Armor/Siphon (`armor (+X/kill)`).
+    - **Collected Cards Scrollable Gallery**: Displays all acquired cards with their rarity color accent stripe, card icon, title, rarity badge, description, and stack multiplier badge (e.g. `×2`, `×3`) when duplicate stat upgrades are collected. Includes an empty-state notification for fresh runs.
+    - **Game Pause & Audio Sync**: Smoothly freezes the game (`Time.timeScale = 0f`), blocks gameplay touches (`TouchManager.IsInputBlocked = true`), and plays the card popup sound effect matching upgrade card presentation.
+- **Top-Right HUD Pause Button & Pause Menu Modal (`PauseMenuUI.cs`, `UIManager.cs`)**:
+  - **HUD Button (Top-Right Above Ammo)**: Added a dedicated pause button (`❚❚`) anchored at the top-right corner above the ammo HUD card. Supports `Escape` or `P` keyboard shortcut.
+  - **Pause Menu Modal**:
+    - Displays current stage/level header and boss warning if active.
+    - **Resume Button**: Unpauses and resumes gameplay with button click audio.
+    - **Review Active Buffs Button**: Transitions directly to the Active Buffs Modal while maintaining the pause state.
+    - **Restart Level Button**: Safely resets `Time.timeScale = 1f` and reloads the current scene for quick retries.
+
 ### Bugs Fixed & Improvements
+- **Active Buffs Modal & Pause Menu UI Alignment & Symmetry Fix (`ActiveBuffsModalUI.cs`, `PauseMenuUI.cs`)**:
+  - **HUD Button Wing Column Centering & Overlap Removal**:
+    - The left Health card (`PlayerStatusCard_Side`) spans $X: [0, 80]$ and starts at $Y = -80\text{f}$.
+    - The right Ammo card (`AmmoHUDCard_Side`) spans $X: [-80, 0]$ and starts at $Y = -80\text{f}$.
+    - The top wing header box above each card is an $80\times 80\text{px}$ square ($Y: [0, -80\text{f}]$).
+    - Centered both HUD buttons exactly inside these header spaces at $X = 40\text{f}, Y = -40\text{f}$ (Left Buff button) and $X = -40\text{f}, Y = -40\text{f}$ (Right Pause button) with `sizeDelta = (54f, 54f)` and `pivot = (0.5f, 0.5f)`.
+    - This provides a uniform $13\text{px}$ margin on all 4 sides (screen top, screen side, and card headers), completely eliminating overlap with the health bar and ammo bar.
+  - **Card ScrollView Overlap Fix**: Fixed coordinate math in `ActiveBuffsModalUI.cs` where the cards scroll rect overlapped and obscured Row 2 of the Live Stats grid. Shifted the scroll container to anchor strictly below the stats panel and section header (`y = -375f` down to `-1345f`), ensuring all 6 stat cells (HP, Damage, Crit Rate, Crit DMG, Speed, Armor) remain 100% visible with clean margins.
+  - **Missing Font Glyphs Replacement**: Replaced missing Unicode/Emoji symbols (`🎴`, `❚❚`, `⚔`, `✦`, `💥`, `⚡`, `🛡`, `✕`) that rendered as empty white square boxes (`□`) in LiberationSans SDF:
+    - **Pause Button**: Created dual procedural vector Image bars (white, crisp, independent of font).
+    - **Buff Button**: Created dual layered card shapes (cyan and gold angled cards) with sub-label text and an auto-clamped counter badge.
+    - **Stat Readouts**: Replaced missing emojis with clean, colored text headers (`MAX HP`, `DAMAGE`, `CRIT RATE`, `CRIT DMG`, `SPEED`, `ARMOR`).
+    - **Close Button**: Replaced unicode cross with standard ASCII `X`.
+  - **Card Tile Typography**: Fixed text overlap between card titles and descriptions by explicitly budgeting vertical space (`fontSize = 24` for title, `fontSize = 18` for description, `12px` left accent bar, and `12px` card spacing).
+
 - **Simultaneous Duplicate Upgrade Card Bug Fix (`UpgradeManager.cs`)**:
-  - **Root Cause**:
     - In `UpgradeManager.GetRandomCardOfRarity()`, when filtering candidates against the current hand (`unselected = validCards.FindAll(c => !hand.Contains(c))`), if `unselected.Count == 0` (e.g. only 1 card existed in that rarity, or all valid cards of that rarity were already drawn in the 3-card hand), the method fell through to `return validCards[Random.Range(0, validCards.Count)]` instead of returning `null`. This caused `DrawCards()` to repeatedly draw the identical card (e.g., 2 or 3 copies of "Vitality Boost (Common)") across the 3 draw iterations.
     - Furthermore, `!hand.Contains(c)` only checked object reference equality, rather than checking asset identity or matching display titles (`cardName`).
     - In `GetWeightedBossDrop()`, candidate selection fallback previously bypassed the hand check if the pool became saturated, which could allow duplicate boss cards to appear in hand.
@@ -1014,6 +1043,52 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **Boss Drop Hand Deduplication**: Updated candidate checks in `GetWeightedBossDrop` to strictly enforce `!IsCardAlreadyInHand(card, hand)` and properly prioritize unowned weapon unlock cards.
     - **UI Container Child Cleanup**: Added a loop in `DisplayCardsOnScreen` destroying all existing child GameObjects in `cardContainer` before instantiating new cards, guaranteeing no stale card UI elements remain.
     - **Non-Stacking Distinction in `IsCardAlreadyClaimed`**: Ensured that `IsCardAlreadyClaimed` applies only to non-stackable cards (`CritRate`, `CritDamage`, `WeaponUnlock`), allowing standard stat cards (Health, Damage, Speed) to still be eligible across different level draws while guaranteeing that within any single 3-card selection hand, all 3 cards are strictly unique.
+
+- **Sci-Fi Cyberpunk Tablet Redesign for Active Buffs & Stats Modal (`ActiveBuffsModalUI.cs`, `BuffModalSettings.cs`, `BuffModalSettings.asset`)**:
+  - **Sci-Fi Holographic Tablet Chassis**:
+    - Replaced the basic card-popup modal with a sleek sci-fi cyberpunk tablet interface (`860x1420px`) matching user reference design.
+    - Framed in high-tech glowing cyan borders (`#22D3EE`), dark tactical navy background, angled `/// ACTIVE BUFFS & STATS ///` title header, chamfered `[ X ]` close button, and bottom chassis tech vents (`///   ///   ///`).
+    - Positioned to leave side health and ammo HUD wings fully visible.
+  - **`// CORE STATS` Section**:
+    - 2-column by 3-row structured tech grid featuring 6 core player attributes: `MAX HP`, `DAMAGE`, `CRIT RATE`, `CRIT DMG`, `SPEED`, `ARMOR`.
+    - Each stat card features a glowing icon socket with custom icon or stylized procedural glyph fallback (`+`, `▲`, `%`, `x`, `>>`, `#`), uppercase stat tag, bold white readout value, and an 8-segment dynamic tech pip progress gauge (`///////`) displaying the current ratio.
+  - **`// ACTIVE BUFFS` Section**:
+    - Section header with live active card counter subtitle on right (`X / Y ACTIVE ////`).
+    - Scrollable card container with dark sci-fi card tiles, glowing category-colored neon borders, and faceted icon sockets.
+    - Category pill tags with custom colors: `SURVIVAL` (Green `#22C55E`), `OFFENSE` (Orange `#F59E0B`), `MOBILITY` (Cyan `#06B6D4`), `DEFENSE` (Blue `#3B82F6`), `CRITICAL` (Purple `#A855F7`).
+    - Bold uppercase card title, clear multiline ability description, and right-aligned stack multiplier badge (`[ x1 ]`, `[ x2 ]`).
+  - **HUD Button Integration & Raycast Shielding**:
+    - Centered top-left Buff button and top-right Pause button at `(40, -40)` and `(-40, -40)` with `54x54` dimensions.
+    - Added internal raycast shields to prevent touch bleed-through to the player controller.
+    - Safeguarded weapon reserve ammo lookup in `PlayerController.cs` (`reserveAmmo.ContainsKey`).
+
+- **Data Manager UI & Live Theme Editor Tool (`DataManagerWindow.cs`)**:
+  - Integrated a dedicated `"Active Buffs UI & Theme"` tab in the Data Manager editor window (`Tools > Endless Runner > Data Manager`).
+  - Built with modern UI Toolkit (`CreateGUI`, UXML/USS, `ScrollView`, `Slider`, `ColorField`, `ObjectField`) providing live tweaking:
+    - **Chassis & Dialog Dimensions**: Live sliders for Dialog Width (700-1000px) and Height (1100-1600px), Hologram Border Glow color picker, Tablet Background Color, Frame Background Sprite (Sliced), and Close 'X' Button Sprite.
+    - **Core Stat Icons & Neon Palette**: Individual Sprite selectors and neon Color pickers for Max HP, Damage, Crit Rate, Crit DMG, Speed, and Armor.
+    - **Category Badges & Colors**: Sprite and Color pickers for Survival, Offense, Mobility, Defense, and Critical categories.
+    - **Card Tile & Socket Styling**: Card background sprite, card tile background color, icon socket sprite, and socket border accent color.
+    - **HUD Trigger Buttons**: Live size slider (40-80px), button background color, custom Buff button sprite, and Pause button sprite.
+  - Added live preview block in the Data Manager showing the tablet dimensions, HUD configuration, and palette preview.
+
+- **Boss Multi-Phase Destructible Body Parts & Head Armor Overhaul (`BossBodyPart.cs`, `EnemyController.cs`, `DamageNumberManager.cs`)**:
+  - **Tactical Destructible Leg Mechanics**:
+    - **Broken Part Damage Resistance (-90%)**: When a leg is broken, shooting that same broken part now applies a 90% damage reduction penalty (taking only 10% effective damage) with a grey `<color=#888888>BROKEN</color>` floating damage number. This tactically forces players to swipe lanes and target the remaining intact leg instead of camping in one lane.
+    - **Progressive Locomotion Crippling**: Preserved progressive speed reduction: 1 broken leg = 0.25 speed (75% limping walk), both broken legs = 0.10 speed (40% crawling speed).
+  - **Head Carapace Shielding & Phase 3 Vulnerability**:
+    - **Phase 1 & Phase 2 Heavy Carapace Shielding (90% Damage Reduction)**: While either leg is alive, the head acts as an armored barrier, taking 90% reduced damage with a specialized `<color=#94A3B8><b>ARMOR</b></color>` floating tag. The head's localized HP cannot drop below 100 HP before both legs break, completely eliminating the bug where the head could be destroyed prematurely while the boss was running.
+    - **Phase 3 Weakpoint Exposure (1.25x Damage Multiplier)**: When both legs are destroyed, the boss drops into a crawl and its head carapace shatters open. Head damage reduction drops from 90% to standard 40% and receives a built-in **1.25x weakpoint damage multiplier** (e.g. 10 leg damage = 12.5 head damage) with prominent `<color=#FFCC00><b>WEAKPOINT!</b></color>` and purple critical hit indicators.
+  - **Stat Window Weapon Wheel Theme & Custom Button Sprites (`ActiveBuffsModalUI.cs`, `BuffModalSettings.asset`, `PauseMenuUI.cs`)**:
+    - **Solid Weapon Wheel Slate-Grey Frame**: Updated the modal chassis to render a solid gunmetal slate-grey background (`#2E3541` / `{r: 0.18f, g: 0.21f, b: 0.26f}`) matching the weapon wheel's disc, with a layered sliced border frame preventing black background bleed-through.
+    - **Custom HUD Button Sprites**: Linked `HUD_Pause_Icon.png` and `HUD_Buffs_Icon.png` directly to `BuffModalSettings.asset`, rendering with native alpha transparency and zero outline artifacts.
+  - **Active Buff Card Rarity Theming & Missing Glyph Fix (`ActiveBuffsModalUI.cs`)**:
+    - **Rarity-Based Card Coloring**: Active buff cards in the scrollable gallery now render their glowing outline borders, icon socket backgrounds/borders, and pill badges matching their `CardRarity` tier colors (Common = Silver `#B3B8BF`, Uncommon = Green `#40D959`, Rare = Blue `#4DA6FF`, Epic = Purple `#BF59F2`, Legendary = Gold `#FFB326`, Mythic = Red `#F23333`) instead of generic stat category colors.
+    - **Dynamic Rarity Badges**: The badge tag dynamically displays the card's rarity tier (`COMMON`, `UNCOMMON`, `RARE`, `EPIC`, `LEGENDARY`, `MYTHIC`) with `HorizontalLayoutGroup` and `ContentSizeFitter` auto-sizing to eliminate text clipping.
+    - **Font Glyph Box (`□`) Fix**: Replaced unsupported diamond character (`◆`) on socket fallbacks with supported TMP glyphs (`%` for Critical, `▲` for Offense, `+` for Survival, `>>` for Mobility, `#` for Defense).
+
+
+
 
 
 

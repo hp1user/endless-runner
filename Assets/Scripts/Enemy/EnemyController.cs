@@ -99,6 +99,9 @@ namespace Enemy.Control
         private Animator animator;
         private bool leftLegBroken = false;
         private bool rightLegBroken = false;
+        public bool AreBothLegsBroken => leftLegBroken && rightLegBroken;
+        public bool IsLeftLegBroken => leftLegBroken;
+        public bool IsRightLegBroken => rightLegBroken;
         private int horizontalParamHash = Animator.StringToHash("Horizontal");
         private int verticalParamHash = Animator.StringToHash("Vertical");
         private int deathParamHash = Animator.StringToHash("Death");
@@ -769,26 +772,40 @@ namespace Enemy.Control
                 string colName = hitCollider.name.ToLower();
                 if (colName.Contains("head"))
                 {
-                    float headDmg = (damage * bossHeadMultiplier) * reductionFactor;
-                    OnPartDamaged(BossBodyPartType.Head, headDmg, false);
-                    Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false, isCrit);
-                    return;
+                    bool bothLegsBroken = leftLegBroken && rightLegBroken;
+                    if (!bothLegsBroken)
+                    {
+                        float headDmg = damage * 0.10f; // 90% reduction
+                        OnPartDamaged(BossBodyPartType.Head, headDmg, false);
+                        Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
+                        UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false, isCrit, true);
+                        return;
+                    }
+                    else
+                    {
+                        float headDmg = (damage * 1.25f) * reductionFactor;
+                        OnPartDamaged(BossBodyPartType.Head, headDmg, false);
+                        Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 1.5f);
+                        UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(headDmg, spawnPos, BossBodyPartType.Head, false, isCrit, false);
+                        return;
+                    }
                 }
                 else if (colName.Contains("l_leg") || colName.Contains("left"))
                 {
-                    float legDmg = damage * reductionFactor;
-                    OnPartDamaged(BossBodyPartType.LeftLeg, legDmg, false);
+                    float factor = leftLegBroken ? 0.10f : reductionFactor;
+                    float legDmg = damage * factor;
+                    OnPartDamaged(BossBodyPartType.LeftLeg, legDmg, leftLegBroken);
                     Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.LeftLeg, false, isCrit);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.LeftLeg, leftLegBroken, isCrit, false);
                     return;
                 }
                 else if (colName.Contains("r_leg") || colName.Contains("right"))
                 {
-                    float legDmg = damage * reductionFactor;
-                    OnPartDamaged(BossBodyPartType.RightLeg, legDmg, false);
+                    float factor = rightLegBroken ? 0.10f : reductionFactor;
+                    float legDmg = damage * factor;
+                    OnPartDamaged(BossBodyPartType.RightLeg, legDmg, rightLegBroken);
                     Vector3 spawnPos = (hitPoint != default) ? hitPoint : (transform.position + Vector3.up * 0.5f);
-                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.RightLeg, false, isCrit);
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDmg, spawnPos, BossBodyPartType.RightLeg, rightLegBroken, isCrit, false);
                     return;
                 }
             }

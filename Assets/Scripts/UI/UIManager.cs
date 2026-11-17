@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Player.Control;
+using EndlessRunner.UI;
 
 namespace UI.Control
 {
@@ -172,6 +173,19 @@ namespace UI.Control
         private void Start()
         {
             ApplyVariantActiveState();
+            EnsureHUDUtilitySystems();
+        }
+
+        private void EnsureHUDUtilitySystems()
+        {
+            if (GetComponent<ActiveBuffsModalUI>() == null)
+            {
+                gameObject.AddComponent<ActiveBuffsModalUI>();
+            }
+            if (GetComponent<PauseMenuUI>() == null)
+            {
+                gameObject.AddComponent<PauseMenuUI>();
+            }
         }
 
         private void OnValidate()

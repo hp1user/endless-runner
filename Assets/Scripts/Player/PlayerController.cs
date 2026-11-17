@@ -267,6 +267,8 @@ namespace Player.Control
             bonusCritChance = 0f;
             bonusCritMultiplier = 0f;
             appliedUniqueCardNames.Clear();
+            activeCards.Clear();
+            OnActiveCardsUpdated?.Invoke();
             UpdatePlayerUI();
         }
 
@@ -288,6 +290,8 @@ namespace Player.Control
             bonusCritChance = 0f;
             bonusCritMultiplier = 0f;
             appliedUniqueCardNames.Clear();
+            activeCards.Clear();
+            OnActiveCardsUpdated?.Invoke();
             if (playerStats != null)
             {
                 playerStats.baseHealth = character.baseHealth;
@@ -644,7 +648,9 @@ namespace Player.Control
                 return;
             }
 
-            int currentReserve = currentWeaponData != null ? reserveAmmo[currentWeaponData.category] : 0;
+            int currentReserve = (currentWeaponData != null && reserveAmmo != null && reserveAmmo.ContainsKey(currentWeaponData.category)) 
+                ? reserveAmmo[currentWeaponData.category] 
+                : 0;
             int maxAmmo = currentWeaponData != null ? currentWeaponData.magSize : 0;
 
             // Auto-Reload on empty magazine
@@ -1169,13 +1175,16 @@ namespace Player.Control
             if (ae.stringParameter == "Refill" || ae.stringParameter == "MagIn")
             {
                 int bulletsNeeded = currentWeaponData.magSize - currentAmmo;
-                int bulletsAvailable = reserveAmmo[currentWeaponData.category];
+                int bulletsAvailable = (reserveAmmo != null && reserveAmmo.ContainsKey(currentWeaponData.category)) ? reserveAmmo[currentWeaponData.category] : 0;
 
                 // Take whichever is smaller: the bullets we need, or the bullets we actually have left
                 int bulletsToLoad = Mathf.Min(bulletsNeeded, bulletsAvailable);
 
                 currentAmmo += bulletsToLoad;
-                reserveAmmo[currentWeaponData.category] -= bulletsToLoad; // Deduct from backpack!
+                if (reserveAmmo != null && reserveAmmo.ContainsKey(currentWeaponData.category))
+                {
+                    reserveAmmo[currentWeaponData.category] -= bulletsToLoad; // Deduct from backpack!
+                }
 
                 loadedAmmo[currentWeaponData.weaponID] = currentAmmo; // Sync to memory
 
@@ -1187,7 +1196,7 @@ namespace Player.Control
         {
             if (UIManager.Instance != null && currentWeaponData != null)
             {
-                int currentReserve = reserveAmmo[currentWeaponData.category];
+                int currentReserve = (reserveAmmo != null && reserveAmmo.ContainsKey(currentWeaponData.category)) ? reserveAmmo[currentWeaponData.category] : 0;
                 // Updates the UI to show: CurrentAmmo / ReserveAmmo
                 UIManager.Instance.UpdateAmmo(currentAmmo, currentReserve);
                 UIManager.Instance.UpdateWeapon(currentWeaponData);
@@ -1555,6 +1564,19 @@ namespace Player.Control
         }
 
         private HashSet<string> appliedUniqueCardNames = new HashSet<string>();
+        private List<UpgradeCard> activeCards = new List<UpgradeCard>();
+
+        public IReadOnlyList<UpgradeCard> ActiveCards => activeCards;
+        public static event System.Action OnActiveCardsUpdated;
+
+        public float RuntimeMaxHealth => runtimeMaxHealth;
+        public float RuntimeMovementSpeed => runtimeMovementSpeed;
+        public float BonusCritChance => bonusCritChance;
+        public float BonusCritMultiplier => bonusCritMultiplier;
+        public float BaseCritChance => baseCritChance;
+        public float BaseCritMultiplier => baseCritMultiplier;
+        public float CurrentHealth => currentHealth;
+        public float CurrentArmor => currentArmor;
 
         public bool HasAppliedCard(UpgradeCard card)
         {
@@ -1588,6 +1610,9 @@ namespace Player.Control
             {
                 appliedUniqueCardNames.Add(card.name);
             }
+
+            activeCards.Add(card);
+            OnActiveCardsUpdated?.Invoke();
             
             foreach (var effect in card.effects)
             {

@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a78d91c128ef45b780ea3b21890cafe1, type: 3}
+  m_Name: BuffModalSettings
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.UI::BuffModalSettings
+  dialogWidth: 860
+  dialogHeight: 1420
+  frameBorderColor: {r: 0.13333334, g: 0.827451, b: 0.93333334, a: 1}
+  frameBackgroundColor: {r: 0.16470589, g: 0.19607843, b: 0.24313726, a: 0.98}
+  frameBackgroundSprite: {fileID: 21300000, guid: 3738707951b38b545a5ffecb4cece92e, type: 3}
+  closeButtonSprite: {fileID: 0}
+  hpIcon: {fileID: 21300000, guid: 9eeb812123d217b4b98cae4342ab15e0, type: 3}
+  hpColor: {r: 0.13333334, g: 0.77254903, b: 0.36862746, a: 1}
+  damageIcon: {fileID: 21300000, guid: 6852389fbaec2ea42a5ff80de14a772e, type: 3}
+  damageColor: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+  critRateIcon: {fileID: 0}
+  critRateColor: {r: 0.65882355, g: 0.33333334, b: 0.96862745, a: 1}
+  critDmgIcon: {fileID: 0}
+  critDmgColor: {r: 0.7529412, g: 0.5176471, b: 0.9882353, a: 1}
+  speedIcon: {fileID: 0}
+  speedColor: {r: 0.023529412, g: 0.7137255, b: 0.83137256, a: 1}
+  armorIcon: {fileID: 21300000, guid: 553beb1e253302045bb2e9dcce420931, type: 3}
+  armorColor: {r: 0.23137255, g: 0.50980395, b: 0.9607843, a: 1}
+  survivalColor: {r: 0.13333334, g: 0.77254903, b: 0.36862746, a: 1}
+  survivalIcon: {fileID: 21300000, guid: 9eeb812123d217b4b98cae4342ab15e0, type: 3}
+  offenseColor: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+  offenseIcon: {fileID: 21300000, guid: 6852389fbaec2ea42a5ff80de14a772e, type: 3}
+  mobilityColor: {r: 0.023529412, g: 0.7137255, b: 0.83137256, a: 1}
+  mobilityIcon: {fileID: 0}
+  defenseColor: {r: 0.23137255, g: 0.50980395, b: 0.9607843, a: 1}
+  defenseIcon: {fileID: 21300000, guid: 553beb1e253302045bb2e9dcce420931, type: 3}
+  criticalColor: {r: 0.65882355, g: 0.33333334, b: 0.96862745, a: 1}
+  criticalIcon: {fileID: 0}
+  cardBackgroundSprite: {fileID: 0}
+  socketBackgroundSprite: {fileID: 0}
+  cardTileBackgroundColor: {r: 0.11764706, g: 0.14117648, b: 0.1764706, a: 0.96}
+  socketBorderColor: {r: 0.13333334, g: 0.72156864, b: 0.8784314, a: 0.9}
+  hudButtonSize: 54
+  buffButtonSprite: {fileID: 21300000, guid: 4b45a6c50d2e4222b2cadcdb4bed75d1, type: 3}
+  pauseButtonSprite: {fileID: 21300000, guid: 7c21f004d2ce4611a9cb05ef44a68196, type: 3}
+  hudButtonColor: {r: 1, g: 1, b: 1, a: 1}
+

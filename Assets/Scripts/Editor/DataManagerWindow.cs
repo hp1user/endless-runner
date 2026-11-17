@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using EndlessRunner.Audio;
 using UI.DamageNumbers;
+using EndlessRunner.UI;
 using TMPro;
 
 public class DataManagerWindow : EditorWindow
@@ -49,9 +50,12 @@ public class DataManagerWindow : EditorWindow
 
     // Damage Number Settings Support
     private DamageNumberSettings _damageNumberSettings;
+
+    // Buff Modal Settings Support
+    private BuffModalSettings _buffModalSettings;
     private ToolbarMenu _dataTypeMenu;
 
-    private enum DataType { UpgradeCard, Weapon, Enemy, Audio, DamageNumbers }
+    private enum DataType { UpgradeCard, Weapon, Enemy, Audio, DamageNumbers, BuffModal }
     private DataType _currentDataType = DataType.UpgradeCard;
 
     [MenuItem("Tools/Endless Runner/Data Manager")]
@@ -108,6 +112,7 @@ public class DataManagerWindow : EditorWindow
         _dataTypeMenu.menu.AppendAction("Enemy", (a) => SetDataType(DataType.Enemy), (a) => _currentDataType == DataType.Enemy ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         _dataTypeMenu.menu.AppendAction("Audio & Sound System", (a) => SetDataType(DataType.Audio), (a) => _currentDataType == DataType.Audio ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         _dataTypeMenu.menu.AppendAction("Damage Numbers", (a) => SetDataType(DataType.DamageNumbers), (a) => _currentDataType == DataType.DamageNumbers ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+        _dataTypeMenu.menu.AppendAction("Active Buffs UI & Theme", (a) => SetDataType(DataType.BuffModal), (a) => _currentDataType == DataType.BuffModal ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
         
         _itemListView.makeItem = () => 
         {
@@ -248,8 +253,43 @@ public class DataManagerWindow : EditorWindow
                     label.text = item.name;
                     label.style.display = DisplayStyle.Flex; // ensure visible
 
-                    if (item is UpgradeCard card)
+                    if (item is BuffModalSettings)
                     {
+                        label.text = "Sci-Fi Buff Modal Settings";
+                        badge.style.display = DisplayStyle.Flex;
+                        badge.ClearClassList();
+                        badge.AddToClassList("badge");
+                        badge.AddToClassList("badge-rare");
+                        badge.text = "THEME";
+                        renameBtn.style.display = DisplayStyle.None;
+                        deleteBtn.style.display = DisplayStyle.None;
+                    }
+                    else if (item is DamageNumberSettings)
+                    {
+                        label.text = "Damage Number Settings";
+                        badge.style.display = DisplayStyle.Flex;
+                        badge.ClearClassList();
+                        badge.AddToClassList("badge");
+                        badge.AddToClassList("badge-epic");
+                        badge.text = "CONFIG";
+                        renameBtn.style.display = DisplayStyle.None;
+                        deleteBtn.style.display = DisplayStyle.None;
+                    }
+                    else if (item is AudioDatabase)
+                    {
+                        label.text = "Audio Database";
+                        badge.style.display = DisplayStyle.Flex;
+                        badge.ClearClassList();
+                        badge.AddToClassList("badge");
+                        badge.AddToClassList("badge-legendary");
+                        badge.text = "AUDIO";
+                        renameBtn.style.display = DisplayStyle.None;
+                        deleteBtn.style.display = DisplayStyle.None;
+                    }
+                    else if (item is UpgradeCard card)
+                    {
+                        renameBtn.style.display = DisplayStyle.Flex;
+                        deleteBtn.style.display = DisplayStyle.Flex;
                         badge.style.display = DisplayStyle.Flex;
                         badge.ClearClassList();
                         badge.AddToClassList("badge");
@@ -281,6 +321,8 @@ public class DataManagerWindow : EditorWindow
                     }
                     else
                     {
+                        renameBtn.style.display = DisplayStyle.Flex;
+                        deleteBtn.style.display = DisplayStyle.Flex;
                         badge.style.display = DisplayStyle.None;
                     }
                     
@@ -375,6 +417,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Enemy => "Data Type: Enemy",
                 DataType.Audio => "Data Type: Audio",
                 DataType.DamageNumbers => "Data Type: Damage Numbers",
+                DataType.BuffModal => "Data Type: Buffs UI & Theme",
                 _ => "Data Type"
             };
         }
@@ -388,6 +431,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Enemy => "Enemies",
                 DataType.Audio => "Audio & Sound System",
                 DataType.DamageNumbers => "Damage Numbers",
+                DataType.BuffModal => "Buff Modal Config",
                 _ => "Items"
             };
         }
@@ -401,6 +445,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Enemy => "Enemy Preview",
                 DataType.Audio => "Soundtrack & Audio Controls",
                 DataType.DamageNumbers => "Damage Numbers Preview",
+                DataType.BuffModal => "Sci-Fi Tablet Preview",
                 _ => "Preview"
             };
         }
@@ -414,6 +459,7 @@ public class DataManagerWindow : EditorWindow
                 DataType.Enemy => "New Enemy",
                 DataType.Audio => "Audio System Active",
                 DataType.DamageNumbers => "Damage Numbers Config",
+                DataType.BuffModal => "Buff Modal Settings",
                 _ => "New Item"
             };
         }
@@ -565,6 +611,26 @@ public class DataManagerWindow : EditorWindow
         }
     }
 
+    private void LoadOrCreateBuffModalSettings()
+    {
+        if (_buffModalSettings != null) return;
+
+        _buffModalSettings = BuffModalSettings.Instance;
+        if (_buffModalSettings == null)
+        {
+            string assetPath = "Assets/Resources/BuffModalSettings.asset";
+            _buffModalSettings = AssetDatabase.LoadAssetAtPath<BuffModalSettings>(assetPath);
+            if (_buffModalSettings == null)
+            {
+                string dir = "Assets/Resources";
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                _buffModalSettings = ScriptableObject.CreateInstance<BuffModalSettings>();
+                AssetDatabase.CreateAsset(_buffModalSettings, assetPath);
+                AssetDatabase.SaveAssets();
+            }
+        }
+    }
+
     private void RefreshList()
     {
         if (_currentDataType == DataType.Enemy)
@@ -582,6 +648,12 @@ public class DataManagerWindow : EditorWindow
             LoadOrCreateDamageNumberSettings();
             _items.Clear();
             if (_damageNumberSettings != null) _items.Add(_damageNumberSettings);
+        }
+        else if (_currentDataType == DataType.BuffModal)
+        {
+            LoadOrCreateBuffModalSettings();
+            _items.Clear();
+            if (_buffModalSettings != null) _items.Add(_buffModalSettings);
         }
         else
         {
@@ -677,6 +749,14 @@ public class DataManagerWindow : EditorWindow
                 _selectedEnemy = null;
                 _selectedItem = _damageNumberSettings;
                 BuildDamageNumberInspector(_damageNumberSettings);
+                UpdatePreview();
+                break;
+            }
+            else if (_currentDataType == DataType.BuffModal && _buffModalSettings != null)
+            {
+                _selectedEnemy = null;
+                _selectedItem = _buffModalSettings;
+                BuildBuffModalInspector(_buffModalSettings);
                 UpdatePreview();
                 break;
             }
@@ -1586,6 +1666,239 @@ public class DataManagerWindow : EditorWindow
         _inspectorContainer.Add(scroll);
     }
 
+    private void BuildBuffModalInspector(BuffModalSettings settings)
+    {
+        _inspectorContainer.Clear();
+        if (settings == null) return;
+
+        var scroll = new ScrollView();
+        scroll.style.flexGrow = 1;
+
+        VisualElement CreateHeader(string title)
+        {
+            var h = new Label(title);
+            h.AddToClassList("section-header");
+            return h;
+        }
+
+        // --- CHASSIS & DIALOG DIMENSIONS ---
+        scroll.Add(CreateHeader("Chassis & Dialog Dimensions"));
+
+        var widthSlider = new Slider("Dialog Width", 700f, 1000f) { value = settings.dialogWidth, showInputField = true };
+        widthSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Dialog Width");
+            settings.dialogWidth = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(widthSlider);
+
+        var heightSlider = new Slider("Dialog Height", 1100f, 1600f) { value = settings.dialogHeight, showInputField = true };
+        heightSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Dialog Height");
+            settings.dialogHeight = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(heightSlider);
+
+        var frameBorderColorField = new ColorField("Hologram Border Glow") { value = settings.frameBorderColor };
+        frameBorderColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Border Glow Color");
+            settings.frameBorderColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(frameBorderColorField);
+
+        var frameBgColorField = new ColorField("Tablet Background Color") { value = settings.frameBackgroundColor };
+        frameBgColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Frame Background Color");
+            settings.frameBackgroundColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(frameBgColorField);
+
+        var frameBgSpriteField = new ObjectField("Tablet Frame Background (Sliced)")
+        {
+            objectType = typeof(Sprite),
+            value = settings.frameBackgroundSprite
+        };
+        frameBgSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Frame Background Sprite");
+            settings.frameBackgroundSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(frameBgSpriteField);
+
+        var closeBtnSpriteField = new ObjectField("Close 'X' Button Sprite")
+        {
+            objectType = typeof(Sprite),
+            value = settings.closeButtonSprite
+        };
+        closeBtnSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Close Button Sprite");
+            settings.closeButtonSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(closeBtnSpriteField);
+
+        // --- CORE STAT ICONS & PALETTE ---
+        scroll.Add(CreateHeader("Core Stat Icons & Neon Palette"));
+
+        void AddStatRow(string statName, Sprite iconVal, Color colorVal, System.Action<Sprite> onIconChange, System.Action<Color> onColorChange)
+        {
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, justifyContent = Justify.SpaceBetween, marginBottom = 4 } };
+            
+            var iconField = new ObjectField(statName + " Icon")
+            {
+                objectType = typeof(Sprite),
+                value = iconVal,
+                style = { flexGrow = 1, marginRight = 8 }
+            };
+            iconField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(settings, statName + " Icon");
+                onIconChange(evt.newValue as Sprite);
+                EditorUtility.SetDirty(settings);
+                UpdatePreview();
+            });
+            row.Add(iconField);
+
+            var colorField = new ColorField { value = colorVal, style = { width = 90 } };
+            colorField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(settings, statName + " Color");
+                onColorChange(evt.newValue);
+                EditorUtility.SetDirty(settings);
+                UpdatePreview();
+            });
+            row.Add(colorField);
+
+            scroll.Add(row);
+        }
+
+        AddStatRow("Max HP", settings.hpIcon, settings.hpColor, s => settings.hpIcon = s, c => settings.hpColor = c);
+        AddStatRow("Damage", settings.damageIcon, settings.damageColor, s => settings.damageIcon = s, c => settings.damageColor = c);
+        AddStatRow("Crit Rate", settings.critRateIcon, settings.critRateColor, s => settings.critRateIcon = s, c => settings.critRateColor = c);
+        AddStatRow("Crit DMG", settings.critDmgIcon, settings.critDmgColor, s => settings.critDmgIcon = s, c => settings.critDmgColor = c);
+        AddStatRow("Speed", settings.speedIcon, settings.speedColor, s => settings.speedIcon = s, c => settings.speedColor = c);
+        AddStatRow("Armor", settings.armorIcon, settings.armorColor, s => settings.armorIcon = s, c => settings.armorColor = c);
+
+        // --- CATEGORY BADGES & ICONS ---
+        scroll.Add(CreateHeader("Category Badges & Colors"));
+
+        AddStatRow("Survival", settings.survivalIcon, settings.survivalColor, s => settings.survivalIcon = s, c => settings.survivalColor = c);
+        AddStatRow("Offense", settings.offenseIcon, settings.offenseColor, s => settings.offenseIcon = s, c => settings.offenseColor = c);
+        AddStatRow("Mobility", settings.mobilityIcon, settings.mobilityColor, s => settings.mobilityIcon = s, c => settings.mobilityColor = c);
+        AddStatRow("Defense", settings.defenseIcon, settings.defenseColor, s => settings.defenseIcon = s, c => settings.defenseColor = c);
+        AddStatRow("Critical", settings.criticalIcon, settings.criticalColor, s => settings.criticalIcon = s, c => settings.criticalColor = c);
+
+        // --- CARD TILE & SOCKET STYLING ---
+        scroll.Add(CreateHeader("Card Tile & Socket Styling"));
+
+        var cardBgSpriteField = new ObjectField("Card Background Sprite")
+        {
+            objectType = typeof(Sprite),
+            value = settings.cardBackgroundSprite
+        };
+        cardBgSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Card Background Sprite");
+            settings.cardBackgroundSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(cardBgSpriteField);
+
+        var cardTileBgColor = new ColorField("Card Tile Background") { value = settings.cardTileBackgroundColor };
+        cardTileBgColor.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Card Tile Background");
+            settings.cardTileBackgroundColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(cardTileBgColor);
+
+        var socketBgSpriteField = new ObjectField("Icon Socket Sprite")
+        {
+            objectType = typeof(Sprite),
+            value = settings.socketBackgroundSprite
+        };
+        socketBgSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Socket Background Sprite");
+            settings.socketBackgroundSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(socketBgSpriteField);
+
+        var socketBorderColorField = new ColorField("Socket Border Accent") { value = settings.socketBorderColor };
+        socketBorderColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Socket Border Accent");
+            settings.socketBorderColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(socketBorderColorField);
+
+        // --- HUD TRIGGER BUTTONS ---
+        scroll.Add(CreateHeader("HUD Trigger Buttons (Top HUD)"));
+
+        var btnSizeSlider = new Slider("Button Size (px)", 40f, 80f) { value = settings.hudButtonSize, showInputField = true };
+        btnSizeSlider.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "HUD Button Size");
+            settings.hudButtonSize = evt.newValue;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(btnSizeSlider);
+
+        var hudBtnColorField = new ColorField("HUD Button Background Color") { value = settings.hudButtonColor };
+        hudBtnColorField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "HUD Button Color");
+            settings.hudButtonColor = evt.newValue;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(hudBtnColorField);
+
+        var buffBtnSpriteField = new ObjectField("Buffs Button Icon / Sprite")
+        {
+            objectType = typeof(Sprite),
+            value = settings.buffButtonSprite
+        };
+        buffBtnSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Buff Button Sprite");
+            settings.buffButtonSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+            UpdatePreview();
+        });
+        scroll.Add(buffBtnSpriteField);
+
+        var pauseBtnSpriteField = new ObjectField("Pause Button Icon / Sprite")
+        {
+            objectType = typeof(Sprite),
+            value = settings.pauseButtonSprite
+        };
+        pauseBtnSpriteField.RegisterValueChangedCallback(evt =>
+        {
+            Undo.RecordObject(settings, "Pause Button Sprite");
+            settings.pauseButtonSprite = evt.newValue as Sprite;
+            EditorUtility.SetDirty(settings);
+        });
+        scroll.Add(pauseBtnSpriteField);
+
+        _inspectorContainer.Add(scroll);
+    }
+
     private static void PlayClipPreview(AudioClip clip)
     {
         if (clip == null) return;
@@ -1649,6 +1962,22 @@ public class DataManagerWindow : EditorWindow
             _previewIcon.style.backgroundImage = null;
             _previewBackground.style.backgroundImage = null;
             _previewBackground.style.backgroundColor = new StyleColor(new Color(0.25f, 0.16f, 0.05f));
+            return;
+        }
+
+        if (_currentDataType == DataType.BuffModal)
+        {
+            if (_buffModalSettings == null) LoadOrCreateBuffModalSettings();
+            if (previewContainer != null) previewContainer.style.display = DisplayStyle.Flex;
+            if (_spriteAssignmentsSection != null) _spriteAssignmentsSection.style.display = DisplayStyle.None;
+
+            _previewTitle.text = "ACTIVE BUFFS & STATS";
+            _previewDesc.text = $"Holographic Sci-Fi Tablet HUD\nFrame: {_buffModalSettings.dialogWidth:F0}x{_buffModalSettings.dialogHeight:F0} | HUD Button: {_buffModalSettings.hudButtonSize:F0}px\nCore Stats: HP, Damage, Crit Rate, Crit DMG, Speed, Armor\nCategories: Survival, Offense, Mobility, Defense, Critical";
+            _previewValue.text = "SCI-FI HUD";
+
+            _previewIcon.style.backgroundImage = _buffModalSettings.buffButtonSprite != null ? new StyleBackground(_buffModalSettings.buffButtonSprite) : null;
+            _previewBackground.style.backgroundImage = null;
+            _previewBackground.style.backgroundColor = new StyleColor(new Color(0.04f, 0.08f, 0.14f));
             return;
         }
 
@@ -1782,7 +2111,7 @@ public class DataManagerWindow : EditorWindow
 
     private void CreateNewItem()
     {
-        if (_currentDataType == DataType.DamageNumbers) return;
+        if (_currentDataType == DataType.DamageNumbers || _currentDataType == DataType.BuffModal) return;
 
         if (_currentDataType == DataType.Enemy)
         {
@@ -1870,7 +2199,7 @@ public class DataManagerWindow : EditorWindow
 
     private void DuplicateSelectedItem()
     {
-        if (_currentDataType == DataType.Audio || _currentDataType == DataType.DamageNumbers) return;
+        if (_currentDataType == DataType.Audio || _currentDataType == DataType.DamageNumbers || _currentDataType == DataType.BuffModal) return;
 
         if (_currentDataType == DataType.Enemy)
         {

@@ -238,7 +238,7 @@ namespace UI.DamageNumbers
         /// Spawns a floating damage number for the Boss at the specific body part or hit location.
         /// Formats text and color based on part type (Head, Left Leg, Right Leg, Broken) and critical strike.
         /// </summary>
-        public void SpawnBossDamage(float damage, Vector3 hitPoint, BossBodyPartType partType, bool isBroken, bool isCrit = false)
+        public void SpawnBossDamage(float damage, Vector3 hitPoint, BossBodyPartType partType, bool isBroken, bool isCrit = false, bool isArmored = false)
         {
             if (damage <= 0.05f) return;
 
@@ -250,21 +250,36 @@ namespace UI.DamageNumbers
             Color pCritColor = (settings != null) ? settings.critColor : critColor;
             float pCritScale = (settings != null) ? settings.critScale : 1.55f;
 
-            if (isCrit)
+            if (isArmored)
+            {
+                if (isCrit)
+                {
+                    formattedText = $"<size=70%><color=#94A3B8><b>ARMOR [CRIT]</b></color></size>\n<b>{dmgStr}</b>";
+                    color = pCritColor * 0.85f;
+                    scaleMult = (settings != null ? settings.bossBrokenScale : 0.95f) * 1.1f;
+                }
+                else
+                {
+                    formattedText = $"<size=70%><color=#94A3B8><b>ARMOR</b></color></size>\n{dmgStr}";
+                    color = new Color(0.60f, 0.65f, 0.72f);
+                    scaleMult = (settings != null ? settings.bossBrokenScale : 0.95f);
+                }
+            }
+            else if (isCrit)
             {
                 color = pCritColor;
                 if (isBroken)
                 {
                     formattedText = $"<size=70%><color=#E9D5FF><b>CRIT BROKEN</b></color></size>\n<b>{dmgStr}</b>";
-                    scaleMult = (settings != null ? settings.bossBrokenScale : 0.95f) * 1.25f;
+                    scaleMult = (settings != null ? settings.bossBrokenScale : 0.95f) * 1.15f;
                 }
                 else
                 {
                     switch (partType)
                     {
                         case BossBodyPartType.Head:
-                            formattedText = $"<size=75%><color=#E9D5FF><b>CRIT HEAD!</b></color></size>\n<size=135%><b>{dmgStr}</b></size>";
-                            scaleMult = (settings != null ? settings.bossHeadScale : 1.45f) * 1.25f;
+                            formattedText = $"<size=80%><color=#E9D5FF><b>CRIT WEAKPOINT!</b></color></size>\n<size=140%><b>{dmgStr}</b></size>";
+                            scaleMult = (settings != null ? settings.bossHeadScale : 1.45f) * 1.3f;
                             break;
                         case BossBodyPartType.LeftLeg:
                             formattedText = $"<size=75%><color=#E9D5FF><b>CRIT L-LEG!</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
@@ -294,7 +309,7 @@ namespace UI.DamageNumbers
                     switch (partType)
                     {
                         case BossBodyPartType.Head:
-                            formattedText = $"<size=75%><color=#FFCC00><b>HEAD</b></color></size>\n<size=125%><b>{dmgStr}</b></size>";
+                            formattedText = $"<size=75%><color=#FFCC00><b>WEAKPOINT!</b></color></size>\n<size=130%><b>{dmgStr}</b></size>";
                             color = (settings != null) ? settings.bossHeadColor : bossHeadColor;
                             scaleMult = (settings != null) ? settings.bossHeadScale : 1.45f;
                             break;

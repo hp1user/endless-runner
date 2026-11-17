@@ -72,31 +72,86 @@ namespace Enemy.Control
                 currentHealth = maxHealth > 0f ? maxHealth : ((partType == BossBodyPartType.Head) ? 1000f : 350f);
             }
 
-            float reduction = damageReduction;
-            if (reduction <= 0f && bossController != null && bossController.DamageReduction > 0f)
-            {
-                reduction = bossController.DamageReduction;
-            }
-            float reductionFactor = 1f - Mathf.Clamp01(reduction / 100f);
-            float effectiveDamage = damage * damageMultiplier * reductionFactor;
+            bool bothLegsBroken = bossController != null && bossController.AreBothLegsBroken;
 
-            if (isBroken)
+            // 1. Broken leg check (Non-head parts)
+            if (isBroken && partType != BossBodyPartType.Head)
             {
-                Debug.Log($"<color=yellow>[BossPart]</color> {partType} (Broken) took {effectiveDamage:F1} DMG! {(isCrit ? "<color=#C084FC>[CRIT]</color>" : "")}");
+                // User requirement: "Broken parts take LESS damage 90% percentage reduction for now"
+                float brokenFactor = 0.10f; // 90% reduction
+                float brokenDamage = damage * brokenFactor;
+
+                Debug.Log($"<color=yellow>[BossPart]</color> {partType} (Broken) took {brokenDamage:F1} DMG (-90% reduction)! {(isCrit ? "<color=#C084FC>[CRIT]</color>" : "")}");
                 if (bossController != null)
                 {
-                    bossController.OnPartDamaged(partType, effectiveDamage, true);
+                    bossController.OnPartDamaged(partType, brokenDamage, true);
                 }
                 Vector3 numPos = (hitPoint != default) ? hitPoint : transform.position;
-                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, numPos, partType, true, isCrit);
+                UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(brokenDamage, numPos, partType, true, isCrit, false);
                 return;
             }
 
-            currentHealth -= effectiveDamage;
-            string redInfo = (reduction > 0f) ? $" (-{reduction:F0}% reduction)" : "";
-            string multInfo = (damageMultiplier != 1.0f) ? $" (Part Multiplier: {damageMultiplier:F2}x)" : "";
-            string critInfo = isCrit ? " <color=#C084FC>[CRIT]</color>" : "";
-            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {effectiveDamage:F1} damage (Incoming: {damage:F1}{redInfo}{multInfo}{critInfo}). Remaining Part HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}");
+            // 2. Head logic
+            if (partType == BossBodyPartType.Head)
+            {
+                if (!bothLegsBroken)
+                {
+                    // NOT in Phase 3 yet!
+                    // User requirement: "boss will take very less damage on head like 80 to 90 % reduced damage... lets go with ARMOR tag when we are doing damage to head and not in phase 3"
+                    float armoredFactor = 0.10f; // 90% reduction
+                    float armoredDamage = damage * armoredFactor;
+
+                    currentHealth -= armoredDamage;
+                    if (currentHealth < 100f) currentHealth = 100f; // Head cannot die/break before legs!
+
+                    Debug.Log($"<color=cyan>[BossPart]</color> HEAD [ARMOR] took {armoredDamage:F1} DMG (-90% reduction, legs intact)! {(isCrit ? "<color=#C084FC>[CRIT]</color>" : "")}");
+                    if (bossController != null)
+                    {
+                        bossController.OnPartDamaged(partType, armoredDamage, false);
+                    }
+                    Vector3 numPos = (hitPoint != default) ? hitPoint : transform.position;
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(armoredDamage, numPos, partType, false, isCrit, true);
+                    return;
+                }
+                else
+                {
+                    // IN PHASE 3! Both legs are broken!
+                    // User requirement: "go with option B head will take more damage in build damage multiplier of 1.25x as if legs were taking 10 damage now head will take 12.5 damage (with 40% reduction)"
+                    float reduction = damageReduction > 0f ? damageReduction : (bossController != null && bossController.DamageReduction > 0f ? bossController.DamageReduction : 40f);
+                    float reductionFactor = 1f - Mathf.Clamp01(reduction / 100f); // 0.60f
+                    float weakpointMultiplier = 1.25f; // User specified 1.25x
+                    float effectiveDamage = damage * weakpointMultiplier * reductionFactor;
+
+                    currentHealth -= effectiveDamage;
+                    string critInfo = isCrit ? " <color=#C084FC>[CRIT]</color>" : "";
+                    Debug.Log($"<color=red>[BossPart]</color> HEAD [WEAKPOINT 1.25x] took {effectiveDamage:F1} damage! Remaining HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}{critInfo}");
+
+                    if (currentHealth <= 0f)
+                    {
+                        currentHealth = 0f;
+                        isBroken = true;
+                        Debug.Log("<color=red><b>[BossPart] HEAD DESTROYED!</b></color>");
+                    }
+
+                    if (bossController != null)
+                    {
+                        bossController.OnPartDamaged(partType, effectiveDamage, isBroken);
+                    }
+
+                    Vector3 numPos = (hitPoint != default) ? hitPoint : transform.position;
+                    UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, numPos, partType, false, isCrit, false);
+                    return;
+                }
+            }
+
+            // 3. Intact Leg logic (LeftLeg or RightLeg before breaking)
+            float baseReduction = damageReduction > 0f ? damageReduction : (bossController != null && bossController.DamageReduction > 0f ? bossController.DamageReduction : 40f);
+            float baseFactor = 1f - Mathf.Clamp01(baseReduction / 100f);
+            float legDamage = damage * damageMultiplier * baseFactor;
+
+            currentHealth -= legDamage;
+            string legCritInfo = isCrit ? " <color=#C084FC>[CRIT]</color>" : "";
+            Debug.Log($"<color=yellow>[BossPart]</color> {partType} took {legDamage:F1} damage (Remaining Leg HP: {Mathf.Max(0f, currentHealth):F1}/{maxHealth:F1}){legCritInfo}");
 
             if (currentHealth <= 0f)
             {
@@ -107,11 +162,11 @@ namespace Enemy.Control
 
             if (bossController != null)
             {
-                bossController.OnPartDamaged(partType, effectiveDamage, isBroken);
+                bossController.OnPartDamaged(partType, legDamage, isBroken);
             }
 
             Vector3 damagePos = (hitPoint != default) ? hitPoint : transform.position;
-            UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(effectiveDamage, damagePos, partType, isBroken, isCrit);
+            UI.DamageNumbers.DamageNumberManager.Instance?.SpawnBossDamage(legDamage, damagePos, partType, isBroken, isCrit, false);
         }
     }
 }
