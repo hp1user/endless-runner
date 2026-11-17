@@ -56,6 +56,7 @@ namespace Enemy.Control
         private float nextMinionSpawnTime;
 
         // POOLING TRACKERS
+        private EnemyEntry myData;
         private EnemyManager myManager;
         private GameObject myOriginalPrefab;
 
@@ -99,6 +100,7 @@ namespace Enemy.Control
         private Animator animator;
         private bool leftLegBroken = false;
         private bool rightLegBroken = false;
+        private bool hasTriggeredPhase3Roar = false;
         public bool AreBothLegsBroken => leftLegBroken && rightLegBroken;
         public bool IsLeftLegBroken => leftLegBroken;
         public bool IsRightLegBroken => rightLegBroken;
@@ -159,6 +161,7 @@ namespace Enemy.Control
         // --- INITIALIZATION & LEVEL SCALING ---
         public void Initialize(EnemyEntry data, Transform target, EnemyManager manager, GameObject prefab)
         {
+            myData = data;
             myManager = manager;
             myOriginalPrefab = prefab;
             isDead = false;
@@ -258,6 +261,7 @@ namespace Enemy.Control
                 }
                 leftLegBroken = false;
                 rightLegBroken = false;
+                hasTriggeredPhase3Roar = false;
                 isAttacking = false;
                 nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
                 SetupBossBodyParts();
@@ -632,7 +636,6 @@ namespace Enemy.Control
                     leftLegBroken = true;
                     Debug.Log("<color=red>[Boss]</color> <b>Left Leg is now BROKEN!</b>");
                 }
-                UpdateLegCrippleState();
             }
             else if (partType == BossBodyPartType.RightLeg)
             {
@@ -641,8 +644,21 @@ namespace Enemy.Control
                     rightLegBroken = true;
                     Debug.Log("<color=red>[Boss]</color> <b>Right Leg is now BROKEN!</b>");
                 }
-                UpdateLegCrippleState();
             }
+
+            // Phase 3 Enraged Roar sequence (triggered once when both legs become broken)
+            if (leftLegBroken && rightLegBroken && !hasTriggeredPhase3Roar)
+            {
+                hasTriggeredPhase3Roar = true;
+                bool shouldRoarOnPhase3 = (myData == null || myData.playRoarOnPhase3);
+                if (shouldRoarOnPhase3)
+                {
+                    TriggerPhase3RoarSequence();
+                    return; // RoarIntroRoutine will call UpdateLegCrippleState() upon completion!
+                }
+            }
+
+            UpdateLegCrippleState();
         }
 
         private void UpdateLegCrippleState()
@@ -983,6 +999,119 @@ namespace Enemy.Control
                     Die(); // Normal enemies explode on impact; bosses do not
                 }
             }
+        }
+
+        /// <summary>
+        /// Triggers the cinematic roar sequence when both legs shatter and Phase 3 begins.
+        /// Plays roar audio, triggers roar animation, applies camera shake and haptic feedback.
+        /// </summary>
+        private void TriggerPhase3RoarSequence()
+        {
+            Debug.Log("<color=red><b>[Boss Phase 3]</b></color> Both legs shattered! Triggering Phase 3 Enraged Roar sequence!");
+
+            // 1. Play Roar / Phase Change Audio
+            AudioClip roarClip = (myData != null && myData.bossSpawnRoarClip != null) ? myData.bossSpawnRoarClip : null;
+            if (roarClip != null)
+            {
+                if (EndlessRunner.Audio.AudioManager.Instance != null)
+                {
+                    EndlessRunner.Audio.AudioManager.Instance.PlaySFXAtPosition(roarClip, transform.position, 1.0f);
+                }
+                else
+                {
+                    AudioSource.PlayClipAtPoint(roarClip, transform.position);
+                }
+            }
+            else
+            {
+                // Fallback to PhaseChange sound or Roar sound from AudioDatabase
+                if (EndlessRunner.Audio.AudioManager.Instance != null)
+                {
+                    EndlessRunner.Audio.AudioManager.Instance.PlayBossSound(EndlessRunner.Audio.BossSoundType.PhaseChange, transform.position);
+                    EndlessRunner.Audio.AudioManager.Instance.PlayBossSound(EndlessRunner.Audio.BossSoundType.Roar, transform.position);
+                }
+            }
+
+            // 2. Play Roar Animation & Brief Pause (pauses movement, then transitions to crawling)
+            string roarTrigger = (myData != null && !string.IsNullOrEmpty(myData.bossRoarAnimationTrigger)) ? myData.bossRoarAnimationTrigger : "Roar";
+            float roarDuration = (myData != null && myData.bossRoarAnimationDuration > 0f) ? myData.bossRoarAnimationDuration : 1.5f;
+            bool pauseMovement = (myData != null) ? myData.pauseMovementDuringRoar : true;
+            TriggerRoarIntro(roarTrigger, roarDuration, pauseMovement);
+
+            // 3. Cinematic Camera Shake & Haptics
+            bool shake = (myData != null) ? myData.enableSpawnCameraShake : true;
+            if (shake)
+            {
+                float duration = (myData != null && myData.spawnCameraShakeDuration > 0f) ? myData.spawnCameraShakeDuration : 0.8f;
+                float intensity = (myData != null && myData.spawnCameraShakeIntensity > 0f) ? myData.spawnCameraShakeIntensity : 0.6f;
+                CameraControl.CameraShake.ShakeCamera(duration, intensity);
+            }
+
+            bool haptics = (myData != null) ? myData.enableSpawnHaptics : true;
+            if (haptics)
+            {
+                EndlessRunner.Core.HapticFeedbackManager.TriggerHeavyImpact();
+            }
+        }
+
+        /// <summary>
+        /// Triggers the cinematic roar intro animation for the boss on entrance.
+        /// Safely checks if the trigger/parameter or state exists in the Animator before firing.
+        /// </summary>
+        public void TriggerRoarIntro(string triggerName = "Roar", float duration = 1.5f, bool pauseMovement = true)
+        {
+            if (isDead) return;
+            StartCoroutine(RoarIntroRoutine(triggerName, duration, pauseMovement));
+        }
+
+        private System.Collections.IEnumerator RoarIntroRoutine(string triggerName, float duration, bool pauseMovement)
+        {
+            if (pauseMovement)
+            {
+                isAttacking = true;
+                if (animator != null)
+                {
+                    animator.SetFloat(verticalParamHash, 0f);
+                }
+            }
+
+            if (animator != null && !string.IsNullOrEmpty(triggerName))
+            {
+                if (HasAnimatorParameter(animator, triggerName))
+                {
+                    animator.SetTrigger(triggerName);
+                }
+                else
+                {
+                    // Fallback: check if an animation state with this name exists in layer 0
+                    int stateHash = Animator.StringToHash(triggerName);
+                    if (animator.HasState(0, stateHash))
+                    {
+                        animator.CrossFade(stateHash, 0.15f);
+                    }
+                }
+            }
+
+            if (duration > 0f)
+            {
+                yield return new WaitForSeconds(duration);
+            }
+
+            if (pauseMovement && !isDead)
+            {
+                isAttacking = false;
+                UpdateLegCrippleState();
+            }
+        }
+
+        private bool HasAnimatorParameter(Animator anim, string paramName)
+        {
+            if (anim == null || string.IsNullOrEmpty(paramName)) return false;
+            foreach (var p in anim.parameters)
+            {
+                if (p.name == paramName) return true;
+            }
+            return false;
         }
     }
 }

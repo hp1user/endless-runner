@@ -1068,6 +1068,130 @@ public class DataManagerWindow : EditorWindow
 
             if (!isBoss) return;
 
+            // --- BOSS SPAWN CINEMATIC FX SECTION ---
+            minionsSection.Add(CreateHeader("Boss Spawn Cinematic FX (Entrance)"));
+
+            var roarAudioField = new ObjectField("Boss Roar Audio Clip")
+            {
+                objectType = typeof(AudioClip),
+                value = enemy.bossSpawnRoarClip
+            };
+            roarAudioField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Boss Roar Audio");
+                enemy.bossSpawnRoarClip = evt.newValue as AudioClip;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(roarAudioField);
+
+            var roarAnimTriggerField = new TextField("Roar Animation Trigger")
+            {
+                value = string.IsNullOrEmpty(enemy.bossRoarAnimationTrigger) ? "Roar" : enemy.bossRoarAnimationTrigger
+            };
+            roarAnimTriggerField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Roar Trigger");
+                enemy.bossRoarAnimationTrigger = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(roarAnimTriggerField);
+
+            var roarAnimDurationField = new FloatField("Roar Animation Duration (s)")
+            {
+                value = enemy.bossRoarAnimationDuration > 0f ? enemy.bossRoarAnimationDuration : 1.5f
+            };
+            roarAnimDurationField.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Roar Duration");
+                enemy.bossRoarAnimationDuration = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(roarAnimDurationField);
+
+            var pauseDuringRoarToggle = new Toggle("Pause Movement While Roaring")
+            {
+                value = enemy.pauseMovementDuringRoar
+            };
+            pauseDuringRoarToggle.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Toggle Pause Movement During Roar");
+                enemy.pauseMovementDuringRoar = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(pauseDuringRoarToggle);
+
+            var camShakeToggle = new Toggle("Camera Shake on Entrance") { value = enemy.enableSpawnCameraShake };
+            camShakeToggle.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Toggle Boss Camera Shake");
+                enemy.enableSpawnCameraShake = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(camShakeToggle);
+
+            var shakeIntensitySlider = new Slider("Shake Intensity", 0.05f, 2.0f)
+            {
+                value = enemy.spawnCameraShakeIntensity > 0f ? enemy.spawnCameraShakeIntensity : 0.6f,
+                showInputField = true
+            };
+            shakeIntensitySlider.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Shake Intensity");
+                enemy.spawnCameraShakeIntensity = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(shakeIntensitySlider);
+
+            var shakeDurationSlider = new Slider("Shake Duration (s)", 0.1f, 3.0f)
+            {
+                value = enemy.spawnCameraShakeDuration > 0f ? enemy.spawnCameraShakeDuration : 0.8f,
+                showInputField = true
+            };
+            shakeDurationSlider.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Change Shake Duration");
+                enemy.spawnCameraShakeDuration = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(shakeDurationSlider);
+
+            var hapticsToggle = new Toggle("Haptic Vibration on Entrance") { value = enemy.enableSpawnHaptics };
+            hapticsToggle.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Toggle Boss Haptics");
+                enemy.enableSpawnHaptics = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(hapticsToggle);
+
+            var phase3RoarToggle = new Toggle("Play Roar on Phase 3 (Both Legs Broken)") { value = enemy.playRoarOnPhase3 };
+            phase3RoarToggle.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(_enemyDatabase, "Toggle Phase 3 Roar");
+                enemy.playRoarOnPhase3 = evt.newValue;
+                EditorUtility.SetDirty(_enemyDatabase);
+            });
+            minionsSection.Add(phase3RoarToggle);
+
+            var previewFxBtn = new Button { text = "▶ Preview Camera Shake & Roar FX", style = { height = 24, marginTop = 6, marginBottom = 10 } };
+            previewFxBtn.clicked += () =>
+            {
+                if (Application.isPlaying)
+                {
+                    CameraControl.CameraShake.ShakeCamera(enemy.spawnCameraShakeDuration > 0f ? enemy.spawnCameraShakeDuration : 0.8f, enemy.spawnCameraShakeIntensity > 0f ? enemy.spawnCameraShakeIntensity : 0.6f);
+                    if (enemy.enableSpawnHaptics) EndlessRunner.Core.HapticFeedbackManager.TriggerHeavyImpact();
+                    if (enemy.bossSpawnRoarClip != null && EndlessRunner.Audio.AudioManager.Instance != null)
+                    {
+                        EndlessRunner.Audio.AudioManager.Instance.PlaySFX(enemy.bossSpawnRoarClip);
+                    }
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Preview Boss Cinematic FX", "Please enter Play Mode to preview live camera shake, audio, and haptics.", "OK");
+                }
+            };
+            minionsSection.Add(previewFxBtn);
+
             minionsSection.Add(CreateHeader("Boss Minions Configuration"));
 
             var canSpawnMinionsToggle = new Toggle("Can Spawn Minions") { value = enemy.canSpawnMinions };

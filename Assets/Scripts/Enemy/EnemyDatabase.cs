@@ -60,6 +60,26 @@ public class EnemyEntry
     public float minionSpawnInterval = 5f;
     public List<EnemyEntry> minionTypes = new List<EnemyEntry>();
 
+    [Header("Boss Spawn Cinematic FX")]
+    [Tooltip("Roar audio played when the boss arrives on the bridge.")]
+    public AudioClip bossSpawnRoarClip;
+    [Tooltip("Animator trigger or state name played when the boss arrives (e.g. 'Roar').")]
+    public string bossRoarAnimationTrigger = "Roar";
+    [Tooltip("How long the roar intro lasts in seconds before resuming chase locomotion.")]
+    public float bossRoarAnimationDuration = 1.5f;
+    [Tooltip("Whether the boss pauses movement while roaring upon entrance.")]
+    public bool pauseMovementDuringRoar = true;
+    [Tooltip("Whether to trigger a camera shake when the boss lands/arrives.")]
+    public bool enableSpawnCameraShake = true;
+    [Tooltip("Intensity of the camera shake upon boss arrival.")]
+    public float spawnCameraShakeIntensity = 0.6f;
+    [Tooltip("Duration of the camera shake in seconds.")]
+    public float spawnCameraShakeDuration = 0.8f;
+    [Tooltip("Whether to trigger haptic vibration when the boss arrives.")]
+    public bool enableSpawnHaptics = true;
+    [Tooltip("Whether to trigger the roar sequence (audio, animation, shake) when entering Phase 3 (both legs broken).")]
+    public bool playRoarOnPhase3 = true;
+
     public EnemyEntry Clone()
     {
         EnemyEntry copy = new EnemyEntry();
@@ -86,6 +106,15 @@ public class EnemyEntry
         copy.canSpawnMinions = false;
         copy.minionSpawnInterval = this.minionSpawnInterval;
         copy.minionTypes = new List<EnemyEntry>();
+        copy.bossSpawnRoarClip = this.bossSpawnRoarClip;
+        copy.bossRoarAnimationTrigger = this.bossRoarAnimationTrigger;
+        copy.bossRoarAnimationDuration = this.bossRoarAnimationDuration;
+        copy.pauseMovementDuringRoar = this.pauseMovementDuringRoar;
+        copy.enableSpawnCameraShake = this.enableSpawnCameraShake;
+        copy.spawnCameraShakeIntensity = this.spawnCameraShakeIntensity;
+        copy.spawnCameraShakeDuration = this.spawnCameraShakeDuration;
+        copy.enableSpawnHaptics = this.enableSpawnHaptics;
+        copy.playRoarOnPhase3 = this.playRoarOnPhase3;
         return copy;
     }
 }

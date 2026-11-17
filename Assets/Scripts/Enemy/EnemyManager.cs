@@ -37,6 +37,24 @@ public class EnemyManager : MonoBehaviour
     [Tooltip("How far behind the player should the boss spawn? (Negative number)")]
     public float bossSpawnZOffset = -25f;
 
+    [Header("Boss Spawn Cinematic FX (Entrance Fallbacks)")]
+    [Tooltip("Default roar audio clip played if not specified in Boss EnemyEntry.")]
+    public AudioClip defaultBossRoarClip;
+    [Tooltip("Default roar animator trigger name if not specified in Boss EnemyEntry.")]
+    public string defaultBossRoarAnimationTrigger = "Roar";
+    [Tooltip("Default roar animation duration in seconds before resuming chase.")]
+    public float defaultBossRoarAnimationDuration = 1.5f;
+    [Tooltip("Whether the boss pauses movement during the roar entrance.")]
+    public bool defaultPauseMovementDuringRoar = true;
+    [Tooltip("Whether camera shake is triggered when the boss arrives.")]
+    public bool enableBossSpawnCameraShake = true;
+    [Tooltip("Intensity of the camera shake upon boss arrival.")]
+    public float bossSpawnCameraShakeIntensity = 0.6f;
+    [Tooltip("Duration of the camera shake in seconds.")]
+    public float bossSpawnCameraShakeDuration = 0.8f;
+    [Tooltip("Whether to trigger haptic vibration when the boss arrives.")]
+    public bool enableBossSpawnHaptics = true;
+
     [Header("Difficulty Scaling")]
     [Tooltip("Health multiplier added per level (e.g., 0.15 = +15% per level)")]
     public float healthIncreasePerLevel = 0.15f;
@@ -356,7 +374,74 @@ public class EnemyManager : MonoBehaviour
             UI.Control.UIManager.Instance.ShowBossHealth(true, bossData.enemyName, controller.CurrentHealth, controller.CurrentHealth);
         }
 
+        // --- BOSS SPAWN CINEMATIC FX (Roar Audio, Animation, Camera Shake, Haptic Vibration) ---
+        TriggerBossSpawnCinematicFX(bossData, spawnPos, controller);
+
         Debug.Log($"<color=magenta>[EnemyManager]</color> The {bossData.enemyName} has arrived!");
+    }
+
+    private void TriggerBossSpawnCinematicFX(EnemyEntry bossData, Vector3 bossPosition, EnemyController controller)
+    {
+        // 1. Roar Audio
+        AudioClip roarClip = (bossData != null && bossData.bossSpawnRoarClip != null)
+            ? bossData.bossSpawnRoarClip
+            : defaultBossRoarClip;
+
+        if (roarClip != null)
+        {
+            if (EndlessRunner.Audio.AudioManager.Instance != null)
+            {
+                EndlessRunner.Audio.AudioManager.Instance.PlaySFXAtPosition(roarClip, bossPosition, 1.0f);
+            }
+            else
+            {
+                AudioSource.PlayClipAtPoint(roarClip, bossPosition);
+            }
+        }
+        else
+        {
+            // Fallback to configured AudioDatabase Boss Roar if available
+            EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Roar, bossPosition);
+        }
+
+        // 2. Roar Animation Trigger (Seamlessly plays if 'Roar' trigger or state is added to Animator)
+        if (controller != null)
+        {
+            string animTrigger = (bossData != null && !string.IsNullOrEmpty(bossData.bossRoarAnimationTrigger))
+                ? bossData.bossRoarAnimationTrigger
+                : defaultBossRoarAnimationTrigger;
+
+            float animDuration = (bossData != null && bossData.bossRoarAnimationDuration > 0f)
+                ? bossData.bossRoarAnimationDuration
+                : defaultBossRoarAnimationDuration;
+
+            bool pauseMove = (bossData != null) ? bossData.pauseMovementDuringRoar : defaultPauseMovementDuringRoar;
+
+            controller.TriggerRoarIntro(animTrigger, animDuration, pauseMove);
+        }
+
+        // 3. Camera Shake
+        bool shakeEnabled = bossData != null ? bossData.enableSpawnCameraShake : enableBossSpawnCameraShake;
+        if (shakeEnabled)
+        {
+            float intensity = (bossData != null && bossData.spawnCameraShakeIntensity > 0f)
+                ? bossData.spawnCameraShakeIntensity
+                : bossSpawnCameraShakeIntensity;
+            float duration = (bossData != null && bossData.spawnCameraShakeDuration > 0f)
+                ? bossData.spawnCameraShakeDuration
+                : bossSpawnCameraShakeDuration;
+
+            CameraControl.CameraShake.ShakeCamera(duration, intensity);
+        }
+
+        // 4. Haptic Vibration
+        bool hapticsEnabled = bossData != null ? bossData.enableSpawnHaptics : enableBossSpawnHaptics;
+        if (hapticsEnabled)
+        {
+            EndlessRunner.Core.HapticFeedbackManager.TriggerHeavyImpact();
+        }
+
+        Debug.Log($"<color=red><b>[Boss Cinematic FX]</b></color> Entrance triggered for {bossData?.enemyName ?? "Boss"} (Roar: {(roarClip != null ? roarClip.name : "Default")}, Shake: {shakeEnabled}, Haptics: {hapticsEnabled})");
     }
 
     public void OnEnemyDied()
