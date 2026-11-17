@@ -208,6 +208,22 @@ public class UpgradeManager : MonoBehaviour
 
     // --- THE FULL MATH BRAIN ---
 
+    /// <summary>
+    /// Checks whether an identical upgrade card (same reference, asset name, or display title) is already in the current hand.
+    /// </summary>
+    private bool IsCardAlreadyInHand(UpgradeCard card, List<UpgradeCard> hand)
+    {
+        if (card == null || hand == null || hand.Count == 0) return false;
+        foreach (var h in hand)
+        {
+            if (h == null) continue;
+            if (h == card) return true;
+            if (h.name == card.name) return true;
+            if (!string.IsNullOrEmpty(card.cardName) && !string.IsNullOrEmpty(h.cardName) && h.cardName == card.cardName) return true;
+        }
+        return false;
+    }
+
     private List<UpgradeCard> DrawCards(int amountToDraw, int level, float clearTime, bool isBossDrop)
 
     {
@@ -246,8 +262,6 @@ public class UpgradeManager : MonoBehaviour
 
                     else chosenRarity = CardRarity.Epic;
 
-                    
-
                     drawnCard = GetRandomCardOfRarity(chosenRarity, hand);
 
                 }
@@ -262,18 +276,36 @@ public class UpgradeManager : MonoBehaviour
 
                 drawnCard = GetRandomCardOfRarity(chosenRarity, hand);
 
+                // Fallback 1: Step down through lower rarities
+                CardRarity stepDownRarity = chosenRarity;
+                while (drawnCard == null && stepDownRarity > CardRarity.Common)
+                {
+                    stepDownRarity--;
+                    drawnCard = GetRandomCardOfRarity(stepDownRarity, hand);
+                }
+
+                // Fallback 2: Step up through higher rarities if lower rarities had no unselected cards
+                if (drawnCard == null)
+                {
+                    CardRarity stepUpRarity = chosenRarity;
+                    while (drawnCard == null && stepUpRarity < CardRarity.Mythic)
+                    {
+                        stepUpRarity++;
+                        drawnCard = GetRandomCardOfRarity(stepUpRarity, hand);
+                    }
+                }
+
             }
 
-            // Fallback if we couldn't find a card of that rarity
-
-            while (drawnCard == null && chosenRarity > CardRarity.Common)
-
+            // Universal Fallback: If still null (e.g. boss drop was empty or normal roll found nothing in chosen rarities),
+            // scan all available cards for ANY unselected, unclaimed card
+            if (drawnCard == null)
             {
-
-                chosenRarity--;
-
-                drawnCard = GetRandomCardOfRarity(chosenRarity, hand);
-
+                List<UpgradeCard> anyValid = allAvailableCards.FindAll(c => c != null && !IsCardAlreadyClaimed(c) && !IsCardAlreadyInHand(c, hand));
+                if (anyValid.Count > 0)
+                {
+                    drawnCard = anyValid[Random.Range(0, anyValid.Count)];
+                }
             }
 
             if (drawnCard != null) hand.Add(drawnCard);
@@ -304,11 +336,20 @@ public class UpgradeManager : MonoBehaviour
 
     /// <summary>
     /// Returns true if this card has already been claimed and should not be offered to the player again.
+    /// Only applies to non-stackable cards (Crit Rate, Crit Damage, Weapon Unlocks).
     /// </summary>
     public bool IsCardAlreadyClaimed(UpgradeCard card)
     {
         if (card == null) return false;
-        if (claimedUniqueCards.Contains(card)) return true;
+        if (!IsCardNonStackable(card)) return false;
+
+        foreach (var claimed in claimedUniqueCards)
+        {
+            if (claimed == null) continue;
+            if (claimed == card || claimed.name == card.name || (!string.IsNullOrEmpty(claimed.cardName) && claimed.cardName == card.cardName))
+                return true;
+        }
+
         if (IsWeaponCardAlreadyOwned(card)) return true;
         if (Player.Control.PlayerController.Instance != null && Player.Control.PlayerController.Instance.HasAppliedCard(card)) return true;
         return false;
@@ -371,7 +412,7 @@ public class UpgradeManager : MonoBehaviour
 
         if (bossDropPool == null || bossDropPool.Count == 0) return null;
 
-        // 1. Prioritize unowned weapon cards and cards not already drawn in current hand or claimed
+        // 1. Prioritize unowned weapon unlock cards not in hand and not claimed
         List<UpgradeCard> candidates = new List<UpgradeCard>();
 
         foreach (var card in bossDropPool)
@@ -380,15 +421,31 @@ public class UpgradeManager : MonoBehaviour
 
             if (card == null) continue;
 
-            if (hand != null && hand.Contains(card)) continue;
+            if (IsCardAlreadyInHand(card, hand)) continue;
 
             if (IsCardAlreadyClaimed(card)) continue;
 
-            candidates.Add(card);
+            bool isWeaponUnlock = false;
+            if (card.effects != null)
+            {
+                foreach (var effect in card.effects)
+                {
+                    if (effect.upgradeType == UpgradeType.WeaponUnlock)
+                    {
+                        isWeaponUnlock = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isWeaponUnlock)
+            {
+                candidates.Add(card);
+            }
 
         }
 
-        // 2. If all unowned weapon drops are already claimed, allow other boss cards not in hand and not claimed
+        // 2. If no weapon drops available, pick other boss cards not in hand and not claimed
         if (candidates.Count == 0)
 
         {
@@ -399,7 +456,7 @@ public class UpgradeManager : MonoBehaviour
 
                 if (card == null) continue;
 
-                if (hand != null && hand.Contains(card)) continue;
+                if (IsCardAlreadyInHand(card, hand)) continue;
 
                 if (IsCardAlreadyClaimed(card)) continue;
 
@@ -407,18 +464,6 @@ public class UpgradeManager : MonoBehaviour
 
             }
 
-        }
-
-        // 3. Fallback to unowned boss pool cards if hand is saturated
-        if (candidates.Count == 0)
-        {
-            foreach (var card in bossDropPool)
-            {
-                if (card != null && !IsCardAlreadyClaimed(card))
-                {
-                    candidates.Add(card);
-                }
-            }
         }
 
         if (candidates.Count == 0) return null;
@@ -546,17 +591,8 @@ public class UpgradeManager : MonoBehaviour
         List<UpgradeCard> specificPile = deckByRarity[rarity];
         if (specificPile == null || specificPile.Count == 0) return null;
 
-        List<UpgradeCard> validCards = specificPile.FindAll(c => c != null && !IsCardAlreadyClaimed(c));
+        List<UpgradeCard> validCards = specificPile.FindAll(c => c != null && !IsCardAlreadyClaimed(c) && !IsCardAlreadyInHand(c, hand));
         if (validCards.Count == 0) return null;
-
-        if (hand != null && hand.Count > 0)
-        {
-            List<UpgradeCard> unselected = validCards.FindAll(c => !hand.Contains(c));
-            if (unselected.Count > 0)
-            {
-                return unselected[Random.Range(0, unselected.Count)];
-            }
-        }
 
         return validCards[Random.Range(0, validCards.Count)];
     }
@@ -588,6 +624,14 @@ public class UpgradeManager : MonoBehaviour
         }
 
         activeUICards.Clear();
+
+        if (cardContainer != null)
+        {
+            for (int i = cardContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(cardContainer.GetChild(i).gameObject);
+            }
+        }
 
         foreach (UpgradeCard cardData in cardsToShow)
 

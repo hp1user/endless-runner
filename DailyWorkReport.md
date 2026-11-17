@@ -995,5 +995,25 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
   - **Data Manager Tool Support**:
     - Added `Crit Hit Scale` slider (with numeric input) and `Crit Hit Color (Purple)` picker into the Data Manager under the Damage Numbers tab.
 
+## Date: 2026-11-17
+
+### Bugs Fixed & Improvements
+- **Simultaneous Duplicate Upgrade Card Bug Fix (`UpgradeManager.cs`)**:
+  - **Root Cause**:
+    - In `UpgradeManager.GetRandomCardOfRarity()`, when filtering candidates against the current hand (`unselected = validCards.FindAll(c => !hand.Contains(c))`), if `unselected.Count == 0` (e.g. only 1 card existed in that rarity, or all valid cards of that rarity were already drawn in the 3-card hand), the method fell through to `return validCards[Random.Range(0, validCards.Count)]` instead of returning `null`. This caused `DrawCards()` to repeatedly draw the identical card (e.g., 2 or 3 copies of "Vitality Boost (Common)") across the 3 draw iterations.
+    - Furthermore, `!hand.Contains(c)` only checked object reference equality, rather than checking asset identity or matching display titles (`cardName`).
+    - In `GetWeightedBossDrop()`, candidate selection fallback previously bypassed the hand check if the pool became saturated, which could allow duplicate boss cards to appear in hand.
+    - In `DisplayCardsOnScreen()`, only tracked objects in `activeUICards` were destroyed, which could leave orphaned or leftover card UI GameObjects in `cardContainer`.
+  - **Fixes Applied**:
+    - **`IsCardAlreadyInHand(UpgradeCard card, List<UpgradeCard> hand)`**: Implemented a comprehensive helper checking object reference, ScriptableObject asset name (`card.name`), and display title (`card.cardName`), ensuring no identical or matching cards can ever enter the same hand.
+    - **Strict Null Return in `GetRandomCardOfRarity`**: Directly filtered `validCards` using `!IsCardAlreadyInHand(c, hand)`. If `validCards.Count == 0`, it immediately returns `null` instead of falling through to select a duplicate card.
+    - **Bi-Directional Rarity Fallback in `DrawCards`**:
+      - If the rolled rarity has no unselected cards, `DrawCards` steps downward through lower rarities (`chosenRarity - 1` down to `Common`).
+      - If lower rarities have no unselected cards, it steps upward through higher rarities (`chosenRarity + 1` up to `Mythic`).
+      - If still null, it executes a Universal Fallback scanning `allAvailableCards` for any valid unclaimed and unselected card in the entire deck.
+    - **Boss Drop Hand Deduplication**: Updated candidate checks in `GetWeightedBossDrop` to strictly enforce `!IsCardAlreadyInHand(card, hand)` and properly prioritize unowned weapon unlock cards.
+    - **UI Container Child Cleanup**: Added a loop in `DisplayCardsOnScreen` destroying all existing child GameObjects in `cardContainer` before instantiating new cards, guaranteeing no stale card UI elements remain.
+    - **Non-Stacking Distinction in `IsCardAlreadyClaimed`**: Ensured that `IsCardAlreadyClaimed` applies only to non-stackable cards (`CritRate`, `CritDamage`, `WeaponUnlock`), allowing standard stat cards (Health, Damage, Speed) to still be eligible across different level draws while guaranteeing that within any single 3-card selection hand, all 3 cards are strictly unique.
+
 
 
