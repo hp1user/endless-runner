@@ -152,6 +152,18 @@ namespace Player.Control
         private float lastDamageTime = -999f;
         private bool touchReloadRequested = false;
 
+        [Header("Damage Feedback FX")]
+        [Tooltip("Enable camera shake when player takes damage.")]
+        [SerializeField] private bool enableDamageCameraShake = true;
+        [Tooltip("Base camera shake intensity for player damage.")]
+        [SerializeField] private float damageShakeIntensity = 0.38f;
+        [Tooltip("Duration of camera shake on player hit.")]
+        [SerializeField] private float damageShakeDuration = 0.25f;
+        [Tooltip("Enable haptic rumble on mobile when taking damage.")]
+        [SerializeField] private bool enableDamageHaptics = true;
+        [Tooltip("Enable on-screen blood damage overlay.")]
+        [SerializeField] private bool enableScreenBloodEffect = true;
+
         // Skill Tracking
         private float currentSkillCooldownTimer = 0f;
         private float currentUltimateKillCount = 0f;
@@ -475,6 +487,7 @@ namespace Player.Control
                 }
                 UIManager.Instance.UpdateHealth(currentHealth, maxHP);
                 UIManager.Instance.UpdateArmor(currentArmor, maxArmor);
+                EndlessRunner.UI.ScreenBloodOverlay.UpdateHealthState(currentHealth, maxHP);
             }
         }
 
@@ -1219,6 +1232,9 @@ namespace Player.Control
             currentHealth = Mathf.Max(currentHealth, 0);
             UpdatePlayerUI();
 
+            // Trigger impactful damage feedback: Camera Shake, Mobile Rumble, and Screen Blood Overlay
+            TriggerDamageFeedback(damage);
+
             if (currentHealth <= 0 && !isDead)
             {
                 Die();
@@ -1231,7 +1247,33 @@ namespace Player.Control
             currentHealth = 0;
             currentArmor = 0;
             UpdatePlayerUI();
+            TriggerDamageFeedback(100f);
             Die();
+        }
+
+        private void TriggerDamageFeedback(float damage)
+        {
+            // 1. Camera Shake (scaled with damage intensity)
+            if (enableDamageCameraShake)
+            {
+                float intensity = Mathf.Clamp(damageShakeIntensity + (damage / 80f) * 0.25f, 0.25f, 0.75f);
+                float duration = Mathf.Clamp(damageShakeDuration + (damage / 100f) * 0.15f, 0.2f, 0.45f);
+                CameraControl.CameraShake.ShakeCamera(duration, intensity);
+            }
+
+            // 2. Mobile Vibration / Rumble
+            if (enableDamageHaptics)
+            {
+                EndlessRunner.Core.HapticFeedbackManager.TriggerVibration();
+            }
+
+            // 3. On-Screen Blood Splatter & Red Damage Overlay
+            if (enableScreenBloodEffect)
+            {
+                float maxHP = (playerStats != null) ? runtimeMaxHealth : 100f;
+                if (currentCharacterData != null) maxHP = currentCharacterData.baseHealth;
+                EndlessRunner.UI.ScreenBloodOverlay.ShowDamageFlash(damage, currentHealth, maxHP);
+            }
         }
 
         private void Die()

@@ -151,6 +151,7 @@ public class GameManager : MonoBehaviour
         isBossTransitionActive = false;
         isBossFightActive = true;
         EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Roar);
+        EndlessRunner.Core.HapticFeedbackManager.TriggerHeavyImpact();
         OnBossFightStarted?.Invoke();
         Debug.Log($"<color=red>[GameManager] WARNING:</color> ON THE BRIDGE! BOSS FIGHT INITIATED!");
     }
