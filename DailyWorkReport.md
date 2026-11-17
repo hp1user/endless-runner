@@ -1107,7 +1107,16 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **Readable 1.0s Pre-Attack Windup**: Boss pauses locomotion and displays telegraph warning lines on the bridge floor for a full 1.0s windup prior to launching projectiles, giving the player readable reaction and dodge timing.
     - **Dual-Zone Floor Telegraph (`BossAttackTelegraph.cs`)**: Upgraded telegraph lines to render pulsating crimson danger indicators (`new Color(1f, 0.1f, 0.1f)`) over targeted lanes alongside a distinct pulsating emerald-green safe corridor (`new Color(0.12f, 0.95f, 0.45f)`) over the safe lane.
     - **Boss Fight Obstacle Rate Balancing (`ObstacleManager.cs`)**: Added `balanceObstaclesDuringBossFight` and `bossFightSpawnIntervalRange = (8f, 15f)`, spacing out background obstacle spawns while `GameManager.Instance.isBossFightActive` is true to eliminate bridge clutter during boss battles.
-    - **Strict Protection Constraint**: Preserved `BossProjectile.cs` completely untouched.
+  - **Weapon Wheel Floating Sci-Fi Mini-Dock & Multi-Weapon Category Selection (`WeaponWheelToolkitManager.cs`, `WeaponWheel.uxml`, `WeaponWheel.uss`, `PlayerController.cs`)**:
+    - **Multi-Weapon Category Inventory**: Refactored `PlayerController.UnlockWeapon()` to preserve all unlocked weapons within the player's arsenal instead of overwriting existing slot weapons.
+    - **Slot Pips Indicator**: Each weapon slot on the wheel displays dynamic cyan/slate pip dots (`slot-pip-dot`) representing the number of unlocked weapons in that slot and which weapon is currently active.
+    - **Floating Sci-Fi Mini-Dock Pill Popup (`mini-dock-container`, `mini-dock-chassis`)**:
+      - When hovering/dragging over a slot with multiple weapons (e.g. Slot 2 with SMG, AR, Sniper; or Slot 4 with LMG, Rocket Launcher, Grenade), a chamfered sci-fi pill dock animates into view directly above the slot.
+      - Displays interactive weapon chips featuring weapon icon, uppercase title tag, live backup ammo count, and active cyan glowing outline/background (`mini-dock-chip-active`).
+    - **Dual Interaction Modes (Touch & Desktop)**:
+      - **Fast-Flick Muscle Memory**: Releasing a drag anywhere in the slot slice instantly equips the active weapon without requiring sub-navigation.
+      - **Sub-Sector Drag & Direct Tap**: Tapping/clicking chips in the dock or dragging outward past 175px dynamically switches the active weapon in that slot and live-updates the Center Hub readout.
+      - **Desktop Mouse Scroll & Hotkey Cycling**: Scrolling mouse wheel while hovering or pressing slot hotkeys (`1`, `2`, `3`, `4`) sequentially cycles through all weapons in that slot.
 
 
 

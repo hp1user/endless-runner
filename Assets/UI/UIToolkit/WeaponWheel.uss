@@ -183,3 +183,105 @@
     margin-top: 0px;
     padding: 0;
 }
+
+/* Floating Sci-Fi Mini-Dock Pill Popup */
+.mini-dock-container {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    z-index: 100;
+}
+
+.dock-pos-0 {
+    translate: -250px -150px;
+}
+
+.dock-pos-1 {
+    translate: -89px -290px;
+}
+
+.dock-pos-2 {
+    translate: 89px -290px;
+}
+
+.dock-pos-3 {
+    translate: 250px -150px;
+}
+
+.mini-dock-chassis {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(18, 24, 38, 0.94);
+    border-color: #22D3EE;
+    border-width: 1.5px;
+    border-radius: 20px;
+    padding: 4px 8px;
+}
+
+.mini-dock-chip {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 12px;
+    margin: 2px 4px;
+    border-radius: 14px;
+    background-color: rgba(30, 41, 59, 0.7);
+    border-width: 1px;
+    border-color: rgba(100, 116, 139, 0.4);
+}
+
+.mini-dock-chip-active {
+    background-color: rgba(6, 182, 212, 0.4);
+    border-color: #22D3EE;
+}
+
+.mini-dock-chip-icon {
+    width: 24px;
+    height: 18px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 6px;
+}
+
+.mini-dock-chip-label {
+    color: #94A3B8;
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.mini-dock-chip-label-active {
+    color: #FFFFFF;
+    text-shadow: 0px 0px 6px rgba(34, 211, 238, 0.9);
+}
+
+.mini-dock-chip-ammo {
+    color: #64748B;
+    font-size: 10px;
+    margin-left: 6px;
+}
+
+.mini-dock-chip-ammo-active {
+    color: #67E8F9;
+}
+
+/* Multi-Weapon Slot Pips */
+.slot-pips {
+    position: absolute;
+    bottom: -8px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-pip-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 2.5px;
+    background-color: #475569;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.slot-pip-dot-active {
+    background-color: #22D3EE;
+}

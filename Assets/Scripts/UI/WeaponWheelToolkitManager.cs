@@ -76,6 +76,10 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     private VisualElement iconSlot2;
     private VisualElement iconSlot3;
     private VisualElement iconSlot4;
+    private VisualElement pipsSlot1;
+    private VisualElement pipsSlot2;
+    private VisualElement pipsSlot3;
+    private VisualElement pipsSlot4;
     private Label skillSubtext;
     private Label ultimateSubtext;
 
@@ -85,15 +89,27 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     private Label centerTitle;
     private Label centerDesc;
 
+    // Floating Sci-Fi Mini-Dock Popup
+    private VisualElement miniDockContainer;
+    private VisualElement miniDockChassis;
+
     // Selected Slot Index:
     // 0: Slot 1 (Top Left - Pistol: 270° – 315°)
-    // 1: Slot 2 (Top Center-Left - AR / SMG: 315° – 360°)
+    // 1: Slot 2 (Top Center-Left - AR / SMG / Sniper: 315° – 360°)
     // 2: Slot 3 (Top Center-Right - Shotgun: 0° – 45°)
     // 3: Slot 4 (Mid Right - Minigun / Heavy: 45° – 90°)
     // 4: Ultimate (Bottom Right: 90° – 180°)
     // 5: Skill (Bottom Left: 180° – 270°)
     private int selectedIndex = -1;
     private WeaponData[] weaponSlots = new WeaponData[4];
+    private List<WeaponData>[] slotWeapons = new List<WeaponData>[4]
+    {
+        new List<WeaponData>(),
+        new List<WeaponData>(),
+        new List<WeaponData>(),
+        new List<WeaponData>()
+    };
+    private int[] activeWeaponIndices = new int[4];
     private bool isInitialized = false;
 
     public bool IsOpen => wheelContainer != null && wheelContainer.style.display == DisplayStyle.Flex;
@@ -128,6 +144,14 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         iconSlot2 = root.Q<VisualElement>("icon-2");
         iconSlot3 = root.Q<VisualElement>("icon-3");
         iconSlot4 = root.Q<VisualElement>("icon-4");
+
+        pipsSlot1 = root.Q<VisualElement>("pips-1");
+        pipsSlot2 = root.Q<VisualElement>("pips-2");
+        pipsSlot3 = root.Q<VisualElement>("pips-3");
+        pipsSlot4 = root.Q<VisualElement>("pips-4");
+
+        miniDockContainer = root.Q<VisualElement>("mini-dock-container");
+        miniDockChassis = root.Q<VisualElement>("mini-dock-chassis");
 
         skillSubtext = root.Q<Label>("skill-subtext");
         ultimateSubtext = root.Q<Label>("ultimate-subtext");
@@ -215,23 +239,56 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
     public void SyncUnlockedWeapons()
     {
-        for (int i = 0; i < weaponSlots.Length; i++)
+        for (int i = 0; i < 4; i++)
         {
+            slotWeapons[i].Clear();
             weaponSlots[i] = null;
         }
 
         if (PlayerController.Instance != null)
         {
-            foreach (var weapon in PlayerController.Instance.GetUnlockedWeapons())
+            var unlocked = PlayerController.Instance.GetUnlockedWeapons();
+            if (unlocked != null)
             {
-                AddWeaponToWheel(weapon);
+                foreach (var weapon in unlocked)
+                {
+                    if (weapon == null) continue;
+                    int targetSlot = GetSlotIndexForCategory(weapon.category);
+                    if (targetSlot >= 0 && targetSlot < 4)
+                    {
+                        if (!slotWeapons[targetSlot].Contains(weapon))
+                        {
+                            slotWeapons[targetSlot].Add(weapon);
+                        }
+                    }
+                }
+            }
+
+            // Sync active index with currently equipped weapon if applicable
+            WeaponData equipped = PlayerController.Instance.CurrentWeaponData;
+            if (equipped != null)
+            {
+                int eqSlot = GetSlotIndexForCategory(equipped.category);
+                if (eqSlot >= 0 && eqSlot < 4)
+                {
+                    int idx = slotWeapons[eqSlot].IndexOf(equipped);
+                    if (idx >= 0)
+                    {
+                        activeWeaponIndices[eqSlot] = idx;
+                    }
+                }
             }
         }
 
+        // Clamp indices and sync weaponSlots
         for (int i = 0; i < 4; i++)
         {
+            if (slotWeapons[i].Count == 0) activeWeaponIndices[i] = 0;
+            else activeWeaponIndices[i] = Mathf.Clamp(activeWeaponIndices[i], 0, slotWeapons[i].Count - 1);
+            weaponSlots[i] = GetActiveWeaponForSlot(i);
             UpdateSlotUI(i);
         }
+
         UpdateSliceVisuals();
     }
 
@@ -259,37 +316,92 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     {
         if (newWeapon == null) return;
         int targetSlot = GetSlotIndexForCategory(newWeapon.category);
-        if (targetSlot >= 0 && targetSlot < weaponSlots.Length)
+        if (targetSlot >= 0 && targetSlot < 4)
         {
+            if (!slotWeapons[targetSlot].Contains(newWeapon))
+            {
+                slotWeapons[targetSlot].Add(newWeapon);
+            }
+            activeWeaponIndices[targetSlot] = slotWeapons[targetSlot].IndexOf(newWeapon);
             weaponSlots[targetSlot] = newWeapon;
             UpdateSlotUI(targetSlot);
             UpdateSliceVisuals();
         }
     }
 
+    public WeaponData GetActiveWeaponForSlot(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= 4) return null;
+        if (slotWeapons[slotIndex].Count == 0) return null;
+        int activeIdx = Mathf.Clamp(activeWeaponIndices[slotIndex], 0, slotWeapons[slotIndex].Count - 1);
+        return slotWeapons[slotIndex][activeIdx];
+    }
+
+    public void SelectWeaponInSlot(int slotIndex, int weaponIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= 4) return;
+        if (weaponIndex < 0 || weaponIndex >= slotWeapons[slotIndex].Count) return;
+
+        if (activeWeaponIndices[slotIndex] != weaponIndex)
+        {
+            activeWeaponIndices[slotIndex] = weaponIndex;
+            weaponSlots[slotIndex] = GetActiveWeaponForSlot(slotIndex);
+            EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.WeaponWheelSelect);
+        }
+
+        UpdateSlotUI(slotIndex);
+        UpdateCenterHub(slotIndex);
+        UpdateMiniDock(slotIndex);
+    }
+
     private void UpdateSlotUI(int index)
     {
         VisualElement targetIconElement = null;
+        VisualElement targetPipsElement = null;
 
         switch (index)
         {
-            case 0: targetIconElement = iconSlot1; break;
-            case 1: targetIconElement = iconSlot2; break;
-            case 2: targetIconElement = iconSlot3; break;
-            case 3: targetIconElement = iconSlot4; break;
+            case 0: targetIconElement = iconSlot1; targetPipsElement = pipsSlot1; break;
+            case 1: targetIconElement = iconSlot2; targetPipsElement = pipsSlot2; break;
+            case 2: targetIconElement = iconSlot3; targetPipsElement = pipsSlot3; break;
+            case 3: targetIconElement = iconSlot4; targetPipsElement = pipsSlot4; break;
         }
+
+        WeaponData activeWeapon = GetActiveWeaponForSlot(index);
 
         if (targetIconElement != null)
         {
-            if (weaponSlots[index] != null && weaponSlots[index].icon != null)
+            if (activeWeapon != null && activeWeapon.icon != null)
             {
-                targetIconElement.style.backgroundImage = new StyleBackground(weaponSlots[index].icon);
+                targetIconElement.style.backgroundImage = new StyleBackground(activeWeapon.icon);
                 targetIconElement.style.display = DisplayStyle.Flex;
             }
             else
             {
                 targetIconElement.style.backgroundImage = null;
                 targetIconElement.style.display = DisplayStyle.None;
+            }
+        }
+
+        if (targetPipsElement != null)
+        {
+            targetPipsElement.Clear();
+            int count = slotWeapons[index].Count;
+            if (count > 1)
+            {
+                targetPipsElement.style.display = DisplayStyle.Flex;
+                int activeIdx = Mathf.Clamp(activeWeaponIndices[index], 0, count - 1);
+                for (int p = 0; p < count; p++)
+                {
+                    VisualElement dot = new VisualElement();
+                    dot.AddToClassList("slot-pip-dot");
+                    if (p == activeIdx) dot.AddToClassList("slot-pip-dot-active");
+                    targetPipsElement.Add(dot);
+                }
+            }
+            else
+            {
+                targetPipsElement.style.display = DisplayStyle.None;
             }
         }
     }
@@ -335,6 +447,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         selectedIndex = currentEquippedSlot;
         UpdateSliceVisuals();
         UpdateCenterHub(selectedIndex);
+        UpdateMiniDock(selectedIndex);
 
         if (cooldownLayer != null) cooldownLayer.MarkDirtyRepaint();
     }
@@ -343,6 +456,8 @@ public class WeaponWheelToolkitManager : MonoBehaviour
     {
         if (wheelContainer == null) return;
         wheelContainer.style.display = DisplayStyle.None;
+        if (miniDockContainer != null) miniDockContainer.style.display = DisplayStyle.None;
+
         Time.timeScale = 1.0f;
         EndlessRunner.Audio.AudioManager.Instance?.PlayUISound(EndlessRunner.Audio.UISoundType.WeaponWheelClose);
 
@@ -364,9 +479,13 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         {
             PlayerController.Instance.ActivateSkill();
         }
-        else if (selectedIndex >= 0 && selectedIndex <= 3 && weaponSlots[selectedIndex] != null)
+        else if (selectedIndex >= 0 && selectedIndex <= 3)
         {
-            PlayerController.Instance.EquipWeaponFromWheel(weaponSlots[selectedIndex]);
+            WeaponData chosen = GetActiveWeaponForSlot(selectedIndex);
+            if (chosen != null)
+            {
+                PlayerController.Instance.EquipWeaponFromWheel(chosen);
+            }
         }
     }
 
@@ -389,7 +508,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
             // Mathematical sector mapping matching user's custom sprite sheet:
             // Slot 1 (Pistol): 270° – 315° (Top Left, 45° span)
-            // Slot 2 (Assault Rifle / SMG): 315° – 360° (Top Center-Left, 45° span)
+            // Slot 2 (Assault Rifle / SMG / Sniper): 315° – 360° (Top Center-Left, 45° span)
             // Slot 3 (Shotgun): 0° – 45° (Top Center-Right, 45° span)
             // Slot 4 (Minigun / Heavy): 45° – 90° (Mid Right, 45° span)
             // Ultimate: 90° – 180° (Bottom Right, 90° span)
@@ -397,7 +516,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
             if (clockwiseAngle >= 270f && clockwiseAngle < 315f)
                 selectedIndex = 0; // Slot 1: Pistol
             else if (clockwiseAngle >= 315f && clockwiseAngle <= 360f)
-                selectedIndex = 1; // Slot 2: Assault Rifle / SMG
+                selectedIndex = 1; // Slot 2: Assault Rifle / SMG / Sniper
             else if (clockwiseAngle >= 0f && clockwiseAngle < 45f)
                 selectedIndex = 2; // Slot 3: Shotgun
             else if (clockwiseAngle >= 45f && clockwiseAngle < 90f)
@@ -411,8 +530,48 @@ public class WeaponWheelToolkitManager : MonoBehaviour
             {
                 UpdateSliceVisuals();
                 UpdateCenterHub(selectedIndex);
+                UpdateMiniDock(selectedIndex);
+            }
+            else if (selectedIndex >= 0 && selectedIndex <= 3 && slotWeapons[selectedIndex].Count > 1 && dir.magnitude > 175f)
+            {
+                // Sub-sector radial drag selection for multi-weapon slots
+                float startAng = 0f;
+                float spanAng = 45f;
+                if (selectedIndex == 0) startAng = 270f;
+                else if (selectedIndex == 1) startAng = 315f;
+                else if (selectedIndex == 2) startAng = 0f;
+                else if (selectedIndex == 3) startAng = 45f;
+
+                int count = slotWeapons[selectedIndex].Count;
+                float step = spanAng / count;
+                float rel = clockwiseAngle - startAng;
+                if (rel < 0f) rel += 360f;
+                int subIdx = Mathf.Clamp((int)(rel / step), 0, count - 1);
+                if (subIdx != activeWeaponIndices[selectedIndex])
+                {
+                    SelectWeaponInSlot(selectedIndex, subIdx);
+                }
             }
         }
+
+        HandleScrollInput();
+    }
+
+    private void HandleScrollInput()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (UnityEngine.InputSystem.Mouse.current != null)
+        {
+            float scroll = UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y;
+            if (Mathf.Abs(scroll) > 0.1f && selectedIndex >= 0 && selectedIndex <= 3 && slotWeapons[selectedIndex].Count > 1)
+            {
+                int count = slotWeapons[selectedIndex].Count;
+                int scrollDir = scroll > 0 ? -1 : 1;
+                int newIdx = (activeWeaponIndices[selectedIndex] + scrollDir + count) % count;
+                SelectWeaponInSlot(selectedIndex, newIdx);
+            }
+        }
+#endif
     }
 
     private void UpdateSliceVisuals()
@@ -420,15 +579,15 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         // Slot 1 (Pistol)
         if (sliceSlot1 != null && weapon01Normal != null && weapon01Selected != null)
         {
-            bool isUnlocked = weaponSlots[0] != null;
+            bool isUnlocked = slotWeapons[0].Count > 0;
             sliceSlot1.style.backgroundImage = new StyleBackground((selectedIndex == 0 && isUnlocked) ? weapon01Selected : weapon01Normal);
             sliceSlot1.style.opacity = isUnlocked ? 1.0f : 0.35f;
         }
 
-        // Slot 2 (AR / SMG)
+        // Slot 2 (AR / SMG / Sniper)
         if (sliceSlot2 != null && weapon02Normal != null && weapon02Selected != null)
         {
-            bool isUnlocked = weaponSlots[1] != null;
+            bool isUnlocked = slotWeapons[1].Count > 0;
             sliceSlot2.style.backgroundImage = new StyleBackground((selectedIndex == 1 && isUnlocked) ? weapon02Selected : weapon02Normal);
             sliceSlot2.style.opacity = isUnlocked ? 1.0f : 0.35f;
         }
@@ -436,7 +595,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         // Slot 3 (Shotgun)
         if (sliceSlot3 != null && weapon03Normal != null && weapon03Selected != null)
         {
-            bool isUnlocked = weaponSlots[2] != null;
+            bool isUnlocked = slotWeapons[2].Count > 0;
             sliceSlot3.style.backgroundImage = new StyleBackground((selectedIndex == 2 && isUnlocked) ? weapon03Selected : weapon03Normal);
             sliceSlot3.style.opacity = isUnlocked ? 1.0f : 0.35f;
         }
@@ -444,7 +603,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         // Slot 4 (Minigun / Heavy)
         if (sliceSlot4 != null && weapon04Normal != null && weapon04Selected != null)
         {
-            bool isUnlocked = weaponSlots[3] != null;
+            bool isUnlocked = slotWeapons[3].Count > 0;
             sliceSlot4.style.backgroundImage = new StyleBackground((selectedIndex == 3 && isUnlocked) ? weapon04Selected : weapon04Normal);
             sliceSlot4.style.opacity = isUnlocked ? 1.0f : 0.35f;
         }
@@ -454,6 +613,73 @@ public class WeaponWheelToolkitManager : MonoBehaviour
 
         if (sliceSkill != null && skillNormal != null && skillSelected != null)
             sliceSkill.style.backgroundImage = new StyleBackground(selectedIndex == 5 ? skillSelected : skillNormal);
+    }
+
+    private void UpdateMiniDock(int slotIndex)
+    {
+        if (miniDockContainer == null || miniDockChassis == null) return;
+
+        if (slotIndex < 0 || slotIndex >= 4 || slotWeapons[slotIndex].Count <= 1)
+        {
+            miniDockContainer.style.display = DisplayStyle.None;
+            return;
+        }
+
+        miniDockContainer.RemoveFromClassList("dock-pos-0");
+        miniDockContainer.RemoveFromClassList("dock-pos-1");
+        miniDockContainer.RemoveFromClassList("dock-pos-2");
+        miniDockContainer.RemoveFromClassList("dock-pos-3");
+        miniDockContainer.AddToClassList($"dock-pos-{slotIndex}");
+
+        miniDockChassis.Clear();
+
+        var weaponsInSlot = slotWeapons[slotIndex];
+        int activeIdx = Mathf.Clamp(activeWeaponIndices[slotIndex], 0, weaponsInSlot.Count - 1);
+
+        for (int i = 0; i < weaponsInSlot.Count; i++)
+        {
+            int capturedSlot = slotIndex;
+            int capturedIdx = i;
+            var w = weaponsInSlot[i];
+            bool isActive = (i == activeIdx);
+
+            VisualElement chip = new VisualElement();
+            chip.AddToClassList("mini-dock-chip");
+            if (isActive) chip.AddToClassList("mini-dock-chip-active");
+
+            // Weapon icon
+            VisualElement chipIcon = new VisualElement();
+            chipIcon.AddToClassList("mini-dock-chip-icon");
+            if (w.icon != null) chipIcon.style.backgroundImage = new StyleBackground(w.icon);
+            chip.Add(chipIcon);
+
+            // Weapon Label
+            Label chipLabel = new Label(w.weaponName.ToUpper());
+            chipLabel.AddToClassList("mini-dock-chip-label");
+            if (isActive) chipLabel.AddToClassList("mini-dock-chip-label-active");
+            chip.Add(chipLabel);
+
+            // Ammo readout
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.GetReserveAmmo(w.category) : 0;
+            Label chipAmmo = new Label(w.category == WeaponCategory.Pistol ? "∞" : $"{reserve}");
+            chipAmmo.AddToClassList("mini-dock-chip-ammo");
+            if (isActive) chipAmmo.AddToClassList("mini-dock-chip-ammo-active");
+            chip.Add(chipAmmo);
+
+            // Pointer/Click callbacks
+            chip.RegisterCallback<PointerDownEvent>(evt => {
+                SelectWeaponInSlot(capturedSlot, capturedIdx);
+                evt.StopPropagation();
+            });
+            chip.RegisterCallback<ClickEvent>(evt => {
+                SelectWeaponInSlot(capturedSlot, capturedIdx);
+                evt.StopPropagation();
+            });
+
+            miniDockChassis.Add(chip);
+        }
+
+        miniDockContainer.style.display = DisplayStyle.Flex;
     }
 
     private void UpdateCenterHub(int index)
@@ -494,7 +720,7 @@ public class WeaponWheelToolkitManager : MonoBehaviour
         }
         else if (index >= 0 && index <= 3) // Weapons (Slots 1, 2, 3, 4)
         {
-            WeaponData weapon = weaponSlots[index];
+            WeaponData weapon = GetActiveWeaponForSlot(index);
 
             if (weapon != null)
             {

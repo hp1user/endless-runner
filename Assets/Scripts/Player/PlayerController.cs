@@ -1380,11 +1380,45 @@ namespace Player.Control
 
         public void SwitchToSlot(int slotIndex)
         {
-            var match = unlockedWeapons.Find(w => w != null && WeaponWheelToolkitManager.GetSlotIndexForCategory(w.category) == slotIndex);
-            if (match != null && match != currentWeaponData)
+            var matches = unlockedWeapons.FindAll(w => w != null && WeaponWheelToolkitManager.GetSlotIndexForCategory(w.category) == slotIndex);
+            if (matches.Count == 0) return;
+
+            // If a weapon from this slot is already equipped and there are multiple weapons, cycle to the next one!
+            if (matches.Contains(currentWeaponData) && matches.Count > 1)
             {
-                EquipWeaponFromWheel(match);
+                int nextIdx = (matches.IndexOf(currentWeaponData) + 1) % matches.Count;
+                EquipWeaponFromWheel(matches[nextIdx]);
+                if (WeaponWheelToolkitManager.Instance != null)
+                {
+                    WeaponWheelToolkitManager.Instance.SelectWeaponInSlot(slotIndex, nextIdx);
+                }
             }
+            else
+            {
+                // Equip active weapon for that slot
+                WeaponData target = null;
+                if (WeaponWheelToolkitManager.Instance != null)
+                {
+                    target = WeaponWheelToolkitManager.Instance.GetActiveWeaponForSlot(slotIndex);
+                }
+                if (target == null) target = matches[0];
+                if (target != currentWeaponData)
+                {
+                    EquipWeaponFromWheel(target);
+                }
+            }
+        }
+
+        public int GetReserveAmmo(WeaponCategory cat)
+        {
+            if (reserveAmmo != null && reserveAmmo.ContainsKey(cat)) return reserveAmmo[cat];
+            return 0;
+        }
+
+        public int GetLoadedAmmo(string weaponID)
+        {
+            if (loadedAmmo != null && loadedAmmo.ContainsKey(weaponID)) return loadedAmmo[weaponID];
+            return -1;
         }
 
         public void SwitchToCategory(WeaponCategory category)
@@ -1566,22 +1600,9 @@ namespace Player.Control
                 return;
             }
 
-            // 2. Option C: Direct Category / Slot Replacement
+            // 2. Add weapon to inventory (multi-weapon slots preserve all unlocked weapons)
             int targetSlot = WeaponWheelToolkitManager.GetSlotIndexForCategory(newGun.category);
-
-            // Find if any currently owned weapon already occupies this slot
-            WeaponData oldWeaponInSlot = unlockedWeapons.Find(w => w != null && WeaponWheelToolkitManager.GetSlotIndexForCategory(w.category) == targetSlot);
-
-            if (oldWeaponInSlot != null)
-            {
-                Debug.Log($"<color=yellow>[Weapon Upgrade]</color> Slot {targetSlot + 1} ({oldWeaponInSlot.weaponName}) replaced with {newGun.weaponName}!");
-                unlockedWeapons.Remove(oldWeaponInSlot);
-            }
-            else
-            {
-                Debug.Log($"<color=green>[Weapon Unlock]</color> Unlocked new {newGun.weaponName} into Slot {targetSlot + 1}!");
-            }
-
+            Debug.Log($"<color=green>[Weapon Unlock]</color> Unlocked new {newGun.weaponName} into Slot {targetSlot + 1}!");
             unlockedWeapons.Add(newGun);
 
             // 3. Grant starting reserve ammo for the newly unlocked/upgraded weapon (1 mag for heavy/rare weapons, 2 mags for standard)

@@ -28,18 +28,22 @@
             <!-- Weapon Slot Icons (anchored at exact centroids) -->
             <ui:VisualElement name="slot-1" class="slot-container slot-1-pos">
                 <ui:VisualElement name="icon-1" class="slot-weapon-icon" />
+                <ui:VisualElement name="pips-1" class="slot-pips" picking-mode="Ignore" />
             </ui:VisualElement>
 
             <ui:VisualElement name="slot-2" class="slot-container slot-2-pos">
                 <ui:VisualElement name="icon-2" class="slot-weapon-icon" />
+                <ui:VisualElement name="pips-2" class="slot-pips" picking-mode="Ignore" />
             </ui:VisualElement>
 
             <ui:VisualElement name="slot-3" class="slot-container slot-3-pos">
                 <ui:VisualElement name="icon-3" class="slot-weapon-icon" />
+                <ui:VisualElement name="pips-3" class="slot-pips" picking-mode="Ignore" />
             </ui:VisualElement>
 
             <ui:VisualElement name="slot-4" class="slot-container slot-4-pos">
                 <ui:VisualElement name="icon-4" class="slot-weapon-icon" />
+                <ui:VisualElement name="pips-4" class="slot-pips" picking-mode="Ignore" />
             </ui:VisualElement>
 
             <!-- Ability Labels (anchored at exact centroids) -->
@@ -58,6 +62,11 @@
                 <ui:VisualElement name="center-hero-icon" class="center-hero-icon" />
                 <ui:Label name="center-title" text="Pistol" class="center-title" />
                 <ui:Label name="center-desc" text="Rapid fire handgun good for close range." class="center-desc" />
+            </ui:VisualElement>
+
+            <!-- Floating Sci-Fi Mini-Dock / Pill Popup for Multi-Weapon Slots -->
+            <ui:VisualElement name="mini-dock-container" class="mini-dock-container" picking-mode="Ignore">
+                <ui:VisualElement name="mini-dock-chassis" class="mini-dock-chassis" picking-mode="Position" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
