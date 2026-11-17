@@ -154,7 +154,7 @@ public class Obstacle : MonoBehaviour
         }
     }
 
-    private void Recycle()
+    public void Recycle()
     {
         if (originalPrefab != null && PoolManager.Instance != null)
             PoolManager.Instance.ReturnToPool(gameObject, originalPrefab);

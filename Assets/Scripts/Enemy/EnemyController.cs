@@ -420,15 +420,81 @@ namespace Enemy.Control
             }
         }
 
+        private int SelectOptimalSafeLane(float[] allLanes)
+        {
+            Obstacle[] activeObstacles = Object.FindObjectsByType<Obstacle>(FindObjectsSortMode.None);
+            float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
+            float bossZ = transform.position.z;
+            float minZ = Mathf.Min(playerZ, bossZ) - 2f;
+            float maxZ = Mathf.Max(playerZ, bossZ) + 5f;
+
+            int[] obstacleCountPerLane = new int[allLanes.Length];
+            for (int i = 0; i < allLanes.Length; i++)
+            {
+                float laneX = allLanes[i];
+                foreach (Obstacle obs in activeObstacles)
+                {
+                    if (obs == null || !obs.gameObject.activeInHierarchy) continue;
+                    Vector3 pos = obs.transform.position;
+                    if (pos.z >= minZ && pos.z <= maxZ)
+                    {
+                        if (Mathf.Abs(pos.x - laneX) < 0.8f)
+                        {
+                            obstacleCountPerLane[i]++;
+                        }
+                    }
+                }
+            }
+
+            int minObstacles = int.MaxValue;
+            System.Collections.Generic.List<int> bestLanes = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < allLanes.Length; i++)
+            {
+                if (obstacleCountPerLane[i] < minObstacles)
+                {
+                    minObstacles = obstacleCountPerLane[i];
+                    bestLanes.Clear();
+                    bestLanes.Add(i);
+                }
+                else if (obstacleCountPerLane[i] == minObstacles)
+                {
+                    bestLanes.Add(i);
+                }
+            }
+
+            return bestLanes[Random.Range(0, bestLanes.Count)];
+        }
+
+        private void ClearObstaclesInSafeLane(float safeLaneX)
+        {
+            Obstacle[] activeObstacles = Object.FindObjectsByType<Obstacle>(FindObjectsSortMode.None);
+            float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
+            float bossZ = transform.position.z;
+            float minZ = Mathf.Min(playerZ, bossZ) - 5f;
+            float maxZ = Mathf.Max(playerZ, bossZ) + 10f;
+
+            foreach (Obstacle obs in activeObstacles)
+            {
+                if (obs == null || !obs.gameObject.activeInHierarchy) continue;
+                Vector3 pos = obs.transform.position;
+                if (pos.z >= minZ && pos.z <= maxZ && Mathf.Abs(pos.x - safeLaneX) < 0.8f)
+                {
+                    obs.Recycle();
+                }
+            }
+        }
+
         private System.Collections.IEnumerator PerformProjectileAttackRoutine()
         {
             if (isDead || playerTransform == null) yield break;
 
             isAttacking = true;
 
-            // 1. Pick 2 random lanes out of 3 (-2, 0, 2)
+            // 1. Intelligently pick safe lane that is clear of obstacles
             float[] allLanes = new float[] { -2f, 0f, 2f };
-            int safeLaneIndex = Random.Range(0, 3); // 1 lane is guaranteed safe!
+            int safeLaneIndex = SelectOptimalSafeLane(allLanes);
+            float safeLaneX = allLanes[safeLaneIndex];
+
             System.Collections.Generic.List<float> targetedLanesList = new System.Collections.Generic.List<float>();
             for (int i = 0; i < 3; i++)
             {
@@ -436,7 +502,15 @@ namespace Enemy.Control
             }
             float[] targetedLanes = targetedLanesList.ToArray();
 
-            Debug.Log($"<color=red><b>[Boss Attack]</b></color> Boss fired 2-lane projectile! (Safe Lane: {allLanes[safeLaneIndex]})");
+            // Lock safe lane in SpawnTracker to prevent ObstacleManager from spawning into it
+            float windupDuration = 1.0f;
+            float recoveryDuration = 4.5f;
+            SpawnTracker.SetBossSafeLane(safeLaneIndex, windupDuration + recoveryDuration);
+
+            // Clean up any remaining obstacle in safe lane corridor so escape is 100% fair
+            ClearObstaclesInSafeLane(safeLaneX);
+
+            Debug.Log($"<color=red><b>[Boss Attack]</b></color> Boss telegraphing 2-lane projectile! (Safe Lane: {safeLaneX})");
 
             // Halt walk animation during attack stop
             if (animator != null)
@@ -444,22 +518,32 @@ namespace Enemy.Control
                 animator.SetFloat(verticalParamHash, 0f);
             }
 
-            // 2. Launch the 2-lane projectile barrage immediately
+            // 2. Visual telegraph overlay matching attack trajectory & safe lane corridor
+            float startZ = transform.position.z;
+            float endZ = playerTransform.position.z - 5f;
+            float telegraphDuration = windupDuration + 2.0f;
+            BossAttackTelegraph.Create(targetedLanes, safeLaneX, startZ, endZ, telegraphDuration);
+
+            // Yield readable 1.0s windup before firing
+            yield return new WaitForSeconds(windupDuration);
+
+            if (isDead)
+            {
+                SpawnTracker.ClearBossSafeLane();
+                yield break;
+            }
+
+            // 3. Launch the 2-lane projectile barrage
             Vector3 spawnOrigin = transform.position;
             spawnOrigin.y += 0.8f;
             spawnOrigin.z -= 1.5f;
 
             BossProjectile.Spawn(targetedLanes, spawnOrigin, projectileSpeed, projectileDamage, playerTransform, deathVFX);
 
-            // Visual telegraph overlay matching the attack trajectory
-            float telegraphDuration = 2.0f;
-            float startZ = transform.position.z;
-            float endZ = playerTransform.position.z - 5f;
-            BossAttackTelegraph.Create(targetedLanes, startZ, endZ, telegraphDuration);
-
-            // 3. Post-shot recovery: wait 4.5 seconds stationary before resuming chase
-            float recoveryDuration = 4.5f;
+            // 4. Post-shot recovery: wait stationary before resuming chase
             yield return new WaitForSeconds(recoveryDuration);
+
+            SpawnTracker.ClearBossSafeLane();
 
             isAttacking = false;
             if (isBoss && !isDead)

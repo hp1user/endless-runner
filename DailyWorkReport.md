@@ -1099,6 +1099,16 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **On-Screen Blood Damage Overlay (`ScreenBloodOverlay.cs`)**: Created auto-instantiating full-screen blood vignette and peripheral splatter overlay. Flashes high-contrast deep crimson blood splatters along screen edges that smoothly fade out over 0.65s without obscuring gameplay crosshair or blocking UI touches (`raycastTarget = false`, `blocksRaycasts = false`).
     - **Critical Health Heartbeat Pulse**: Added low-health state tracking (< 30% HP) pulsing a rhythmic heartbeat blood vignette to heighten survival tension until the player heals.
 
+  - **Obstacle & Boss Attack Alignment & Safe Lane Balancing (`SpawnTracker.cs`, `ObstacleManager.cs`, `BossAttackTelegraph.cs`, `EnemyController.cs`, `Obstacle.cs`)**:
+    - **Intelligent Safe Lane Selection (`EnemyController.SelectOptimalSafeLane`)**: Boss attack routine analyzes active obstacle positions across all lanes between the player and boss, automatically choosing a lane with 0 (or minimum) obstacles as the designated Safe Lane.
+    - **Active Safe Lane Reservation (`SpawnTracker.cs`)**: Implemented `SetBossSafeLane`, `IsBossSafeLane`, and `ClearBossSafeLane` locking the designated safe lane for the duration of the attack sequence.
+    - **Safe Lane Obstacle Immunity (`ObstacleManager.cs`)**: Configured `SpawnObstacle()` to query `SpawnTracker.IsBossSafeLane(i)` and strictly prohibit spawning obstacles into the player's dodge corridor during boss projectile attacks.
+    - **Safe Lane Obstacle Clearance (`EnemyController.ClearObstaclesInSafeLane`, `Obstacle.Recycle`)**: Made `Obstacle.Recycle()` public and implemented an automated cleanup sweep deactivating any pre-existing obstacles in the designated safe lane corridor, guaranteeing a 100% fair escape path.
+    - **Readable 1.0s Pre-Attack Windup**: Boss pauses locomotion and displays telegraph warning lines on the bridge floor for a full 1.0s windup prior to launching projectiles, giving the player readable reaction and dodge timing.
+    - **Dual-Zone Floor Telegraph (`BossAttackTelegraph.cs`)**: Upgraded telegraph lines to render pulsating crimson danger indicators (`new Color(1f, 0.1f, 0.1f)`) over targeted lanes alongside a distinct pulsating emerald-green safe corridor (`new Color(0.12f, 0.95f, 0.45f)`) over the safe lane.
+    - **Boss Fight Obstacle Rate Balancing (`ObstacleManager.cs`)**: Added `balanceObstaclesDuringBossFight` and `bossFightSpawnIntervalRange = (8f, 15f)`, spacing out background obstacle spawns while `GameManager.Instance.isBossFightActive` is true to eliminate bridge clutter during boss battles.
+    - **Strict Protection Constraint**: Preserved `BossProjectile.cs` completely untouched.
+
 
 
 

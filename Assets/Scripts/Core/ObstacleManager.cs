@@ -10,6 +10,14 @@ public class ObstacleManager : MonoBehaviour
     public float[] lanePositions = new float[] { -2f, 0f, 2f };
     public float spawnYPosition = 0f;
 
+    [Header("Boss Fight Balancing")]
+    [Tooltip("If true, reduces obstacle spawn rate and protects safe lanes during boss fights")]
+    public bool balanceObstaclesDuringBossFight = true;
+    [Tooltip("X = Min time, Y = Max time between obstacle spawns while boss fight is active")]
+    public Vector2 bossFightSpawnIntervalRange = new Vector2(8f, 15f);
+    [Tooltip("If true, obstacles are strictly prohibited from spawning in the active Boss Safe Lane")]
+    public bool protectBossSafeLane = true;
+
     [Header("Movement Overrides")]
     public Obstacle.MoveDirection obstacleDirection = Obstacle.MoveDirection.Forward;
     public float obstacleDespawnThreshold = 20f;
@@ -57,7 +65,14 @@ public class ObstacleManager : MonoBehaviour
 
     private void PickNewSpawnInterval()
     {
-        currentTargetInterval = Random.Range(spawnIntervalRange.x, spawnIntervalRange.y);
+        if (balanceObstaclesDuringBossFight && GameManager.Instance != null && GameManager.Instance.isBossFightActive)
+        {
+            currentTargetInterval = Random.Range(bossFightSpawnIntervalRange.x, bossFightSpawnIntervalRange.y);
+        }
+        else
+        {
+            currentTargetInterval = Random.Range(spawnIntervalRange.x, spawnIntervalRange.y);
+        }
     }
 
     /// <summary>
@@ -113,6 +128,12 @@ public class ObstacleManager : MonoBehaviour
             List<int> availableLanes = new List<int>();
             for (int i = 0; i < lanePositions.Length; i++)
             {
+                // Never spawn obstacles in the Boss Safe Lane during an active boss attack!
+                if (protectBossSafeLane && SpawnTracker.IsBossSafeLane(i))
+                {
+                    continue;
+                }
+
                 float laneX = lanePositions[i];
                 if (IsLaneAllowed(laneX, restriction) && SpawnTracker.IsLaneSafe(i, 2.0f))
                 {

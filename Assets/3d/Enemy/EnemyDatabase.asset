@@ -36,6 +36,15 @@ MonoBehaviour:
     canSpawnMinions: 0
     minionSpawnInterval: 5
     minionTypes: []
+    bossSpawnRoarClip: {fileID: 0}
+    bossRoarAnimationTrigger: Roar
+    bossRoarAnimationDuration: 1.5
+    pauseMovementDuringRoar: 1
+    enableSpawnCameraShake: 1
+    spawnCameraShakeIntensity: 0.6
+    spawnCameraShakeDuration: 0.8
+    enableSpawnHaptics: 1
+    playRoarOnPhase3: 1
   - enemyName: Bug
     prefab: {fileID: 899366677854948109, guid: c7d4d5b6a59d73a4383db496f802396b, type: 3}
     category: 0
@@ -59,6 +68,15 @@ MonoBehaviour:
     canSpawnMinions: 0
     minionSpawnInterval: 5
     minionTypes: []
+    bossSpawnRoarClip: {fileID: 0}
+    bossRoarAnimationTrigger: Roar
+    bossRoarAnimationDuration: 1.5
+    pauseMovementDuringRoar: 1
+    enableSpawnCameraShake: 1
+    spawnCameraShakeIntensity: 0.6
+    spawnCameraShakeDuration: 0.8
+    enableSpawnHaptics: 1
+    playRoarOnPhase3: 1
   - enemyName: '[Bug]Boss'
     prefab: {fileID: 144714973247079198, guid: 34ee627d6f9259a4a87c90c88d7c5f52, type: 3}
     category: 2
@@ -105,3 +123,21 @@ MonoBehaviour:
       canSpawnMinions: 0
       minionSpawnInterval: 5
       minionTypes: []
+      bossSpawnRoarClip: {fileID: 0}
+      bossRoarAnimationTrigger: Roar
+      bossRoarAnimationDuration: 1.5
+      pauseMovementDuringRoar: 1
+      enableSpawnCameraShake: 1
+      spawnCameraShakeIntensity: 0.6
+      spawnCameraShakeDuration: 0.8
+      enableSpawnHaptics: 1
+      playRoarOnPhase3: 1
+    bossSpawnRoarClip: {fileID: 0}
+    bossRoarAnimationTrigger: Roar
+    bossRoarAnimationDuration: 3
+    pauseMovementDuringRoar: 1
+    enableSpawnCameraShake: 1
+    spawnCameraShakeIntensity: 0.6
+    spawnCameraShakeDuration: 3
+    enableSpawnHaptics: 1
+    playRoarOnPhase3: 1
