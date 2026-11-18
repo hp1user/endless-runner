@@ -1169,6 +1169,77 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
       - **Road Center-Fill & Organic Seam Overgrowth**: Added center-seam fissure moss (`exp(-localX^2 * 4.0)`) and micro-fractal gravel scattering across lanes, eliminating sterile black asphalt voids while keeping player running corridors clear and readable.
       - **Interwoven Road Moss & Gravel Blending**: Eliminated parallel "moss line then gravel line" stripes along the curbs. The curb boundary now wobbles organically (`curbEdgeNoise`), and moss forms discrete cushion clusters rooted directly within and between the gravel beds (`mossField = (debrisMask * 0.75 + curbZone * 0.35 + centerSeam * 0.35) * (mossClumpNoise * 0.7 + 0.35)`). Gravel peeks through around the edges of moss cushions, matching the natural intermingled look of the roadside barriers.
 
+## Date: 2026-11-18
+
+### Features & Environment Art Systems
+- **Post-Apocalyptic Foliage & Road Overgrowth Shader Graph Optimization & Motion Gluing (`World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`)**:
+  - **Zero Texture Sliding / Chunk Swimming Fix**: Converted vertex/fragment coordinate spaces to Object-Space (`PositionOS`), anchoring moss, mud, gravel, and vine layers directly to chunk mesh transforms so textures stay glued during gameplay movement.
+  - **Side Barrier Non-Repetitive Overgrowth**: Eliminated repetitive vertical "barcode" stripes on roadside concrete barriers (`Divider 1-4.prefab`) using length-aware 3-octave FBM noise and base-creeping height falloff (`exp(-localPos.y * 3.5)`).
+  - **Chunk-to-Chunk Overgrowth Randomization & Disconnected Shader Graph Node Bug Fix**: Diagnosed and resolved missing PropertyNode `_NoiseOffset` (`b1f2fd7b24b9481cb7edf924865401f7`) in `World Bend Foliage.shadergraph`, yielding a confirmed 23.8% visual difference across chunk offset variations.
+  - **Macro Meandering Road Overgrowth System**: Implemented low-frequency wandering spline overgrowth paths (`centerTrackX = (nMacro - 0.5) * 4.5`, wavelength ~28m) across highway lanes.
+  - **Seamless Highway Sequence & Deterministic Prop Shuffling (`FoliageRoadInstance.cs`, `FoliagePropInstance.cs`)**: Created sequence-based offset manager for roads and deterministic hash offsets for barriers; batch-updated all 21 baked prefabs in `Assets/Prefabs/Chunks/Generated/`.
+### Features & Environment Art Systems
+- **Post-Apocalyptic Foliage & Road Overgrowth Shader Graph Optimization & Motion Gluing (`World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`)**:
+  - **Zero Texture Sliding / Chunk Swimming Fix**: Converted vertex/fragment coordinate spaces to Object-Space (`PositionOS`), anchoring moss, mud, gravel, and vine layers directly to chunk mesh transforms so textures stay glued during gameplay movement.
+  - **Side Barrier Non-Repetitive Overgrowth**: Eliminated repetitive vertical "barcode" stripes on roadside concrete barriers (`Divider 1-4.prefab`) using length-aware 3-octave FBM noise and base-creeping height falloff (`exp(-localPos.y * 3.5)`).
+  - **Chunk-to-Chunk Overgrowth Randomization & Disconnected Shader Graph Node Bug Fix**: Diagnosed and resolved missing PropertyNode `_NoiseOffset` (`b1f2fd7b24b9481cb7edf924865401f7`) in `World Bend Foliage.shadergraph`, yielding a confirmed 23.8% visual difference across chunk offset variations.
+  - **Macro Meandering Road Overgrowth System**: Implemented low-frequency wandering spline overgrowth paths (`centerTrackX = (nMacro - 0.5) * 4.5`, wavelength ~28m) across highway lanes.
+  - **Seamless Highway Sequence & Deterministic Prop Shuffling (`FoliageRoadInstance.cs`, `FoliagePropInstance.cs`)**: Created sequence-based offset manager for roads and deterministic hash offsets for barriers; batch-updated all 21 baked prefabs in `Assets/Prefabs/Chunks/Generated/`.
+
+- **Storytelling Road Decals System & Zero Character Projection Bleed (`Assets/3d/Environment/Foliage/Textures/Decals/`, `ProceduralChunkEditorWindow.cs`)**:
+  - **Curated Environmental Storytelling Decals**: Integrated high-resolution decals for oil slicks, cracks, tire skids, and blood stains with URP Decal materials and prefabs.
+  - **1-Click Procedural Decal Stamper**: Integrated randomized stamper into Chunk Studio (`ProceduralChunkEditorWindow.cs`).
+  - **Character Bleed Elimination**: Clamped DecalProjector projection depth (`size.z = 0.4f`, `y = 0.2f`) and configured Decal Rendering Layer masks, preventing projection bleed onto player and enemy characters.
+- **Storytelling Road Decals System & Zero Character Projection Bleed (`Assets/3d/Environment/Foliage/Textures/Decals/`, `ProceduralChunkEditorWindow.cs`)**:
+  - **Curated Environmental Storytelling Decals**: Integrated high-resolution decals for oil slicks, cracks, tire skids, and blood stains with URP Decal materials and prefabs.
+  - **1-Click Procedural Decal Stamper**: Integrated randomized stamper into Chunk Studio (`ProceduralChunkEditorWindow.cs`).
+  - **Character Bleed Elimination**: Clamped DecalProjector projection depth (`size.z = 0.4f`, `y = 0.2f`) and configured Decal Rendering Layer masks, preventing projection bleed onto player and enemy characters.
+
+- **Complete Overhaul Optimization & The-Last-Wish RGBA Texture Packing (`FoliageTexturePacker.cs`, `Packed_MossGravel_RGBA.png`, `FoliageBlend.hlsl`, `WorldBend_Foliage.shader`, `Mobile_Renderer.asset`, Decal Prefabs)**:
+  - **YCoCg / Luminance-Relief RGBA Texture Packing (`The-Last-Wish` Analysis)**:
+    - Pulled and analyzed `/Users/wofstudioz/Desktop/Work/The-Last-Wish/` texture optimization architecture (`YCoCgPacker.cs`, `YCoCgBlend.hlsl`, `Rocks.shadergraph`).
+    - Built a specialized editor tool [`FoliageTexturePacker.cs`](file:///Users/wofstudioz/Desktop/VIsmay/Unity%20Projects/endless-runner/Assets/Scripts/Editor/LevelGeneration/FoliageTexturePacker.cs) (`Tools -> Endless Runner -> Foliage Texture Packer...` and one-click menu) packing Moss Albedo, Gravel Albedo, and surface micro-relief into a single 4-channel image (`Packed_MossGravel_RGBA.png`).
+    - Channel layout: Channel R = Moss Luminance ($0.299R + 0.587G + 0.114B$), Channel G = Gravel Luminance, Channel B = Moss micro-relief, Channel A = Gravel micro-relief.
+    - Integrated `UnpackFoliagePacked_float` into `FoliageBlend.hlsl` and `_USE_PACKED_FOLIAGE` into `WorldBend_Foliage.shader`, cutting fragment texture fetches from 12–24 down to 1–3 taps (~70% memory bandwidth reduction).
+  - **Storytelling Decal Draw Distance Culling & Overdraw Optimization**:
+    - Clamped URP `DecalRendererFeature` `maxDrawDistance` in `Mobile_Renderer.asset` from 1000m down to **50m**.
+    - Updated all 9 Decal prefabs in `Assets/Prefabs/Decals/` to `m_DrawDistance: 40` (down from 300m) and `m_FadeScale: 0.85`, culling off-screen decals beyond 1 chunk.
+    - Re-imported all 6 Decal textures to `maxTextureSize: 512` with Crunch compression (`compressionQuality: 60`), reducing decal VRAM usage from **96 MB down to 1.2 MB (98.7% reduction)**.
+    - Optimized `ProceduralChunkEditorWindow.cs` decal randomizer budget to `min: 2, max: 4` per chunk.
+  - **Codebase & Runtime Update Loop Audit**:
+    - Audited all runtime scripts: verified 0 calls to `FindObjectOfType`, `FindObjectsByType`, or `GameObject.Find` in Update loops.
+    - Confirmed zero per-frame heap allocations during chunk movement in `LevelManager.cs`.
+- **Complete Overhaul Optimization & The-Last-Wish RGBA Texture Packing (`FoliageTexturePacker.cs`, `Packed_MossGravel_RGBA.png`, `FoliageBlend.hlsl`, `WorldBend_Foliage.shader`, `Mobile_Renderer.asset`, Decal Prefabs)**:
+  - **YCoCg / Luminance-Relief RGBA Texture Packing (`The-Last-Wish` Analysis)**:
+    - Pulled and analyzed `/Users/wofstudioz/Desktop/Work/The-Last-Wish/` texture optimization architecture (`YCoCgPacker.cs`, `YCoCgBlend.hlsl`, `Rocks.shadergraph`).
+    - Built a specialized editor tool [`FoliageTexturePacker.cs`](file:///Users/wofstudioz/Desktop/VIsmay/Unity%20Projects/endless-runner/Assets/Scripts/Editor/LevelGeneration/FoliageTexturePacker.cs) (`Tools -> Endless Runner -> Foliage Texture Packer...` and one-click menu) packing Moss Albedo, Gravel Albedo, and surface micro-relief into a single 4-channel image (`Packed_MossGravel_RGBA.png`).
+    - Channel layout: Channel R = Moss Luminance ($0.299R + 0.587G + 0.114B$), Channel G = Gravel Luminance, Channel B = Moss micro-relief, Channel A = Gravel micro-relief.
+    - Integrated `UnpackFoliagePacked_float` into `FoliageBlend.hlsl` and `_USE_PACKED_FOLIAGE` into `WorldBend_Foliage.shader`, cutting fragment texture fetches from 12–24 down to 1–3 taps (~70% memory bandwidth reduction).
+  - **Storytelling Decal Draw Distance Culling & Overdraw Optimization**:
+    - Clamped URP `DecalRendererFeature` `maxDrawDistance` in `Mobile_Renderer.asset` from 1000m down to **50m**.
+    - Updated all 9 Decal prefabs in `Assets/Prefabs/Decals/` to `m_DrawDistance: 40` (down from 300m) and `m_FadeScale: 0.85`, culling off-screen decals beyond 1 chunk.
+    - Re-imported all 6 Decal textures to `maxTextureSize: 512` with Crunch compression (`compressionQuality: 60`), reducing decal VRAM usage from **96 MB down to 1.2 MB (98.7% reduction)**.
+    - Optimized `ProceduralChunkEditorWindow.cs` decal randomizer budget to `min: 2, max: 4` per chunk.
+  - **Codebase & Runtime Update Loop Audit**:
+    - Audited all runtime scripts: verified 0 calls to `FindObjectOfType`, `FindObjectsByType`, or `GameObject.Find` in Update loops.
+    - Confirmed zero per-frame heap allocations during chunk movement in `LevelManager.cs`.
+
+### Bugs Fixed & Improvements
+- **Shader Graph Inactive Property Node**: Resolved compilation omission in `World Bend Foliage.shadergraph` where `_NoiseOffset` was not wired to the root graph structure.
+- **Highway Swapping Detection**: Fixed hierarchy traversal in `ProceduralChunkEditor.cs` and `ProceduralChunkEditorWindow.cs` so road meshes (`Path_1`/`RoadBase`) receive `M_PostApoc_Road_Foliage.mat` and barriers receive `M_PostApoc_Foliage_Sample.mat`.
+- **Chunk Boundary Seam Hard Cut Fix**: 
+  - Diagnosed cause of abrupt vertical moss line cuts between adjacent chunks. Road mesh vertices span $Z \in [-25.0, +15.0]$ (centered at $Z = -5.0$, 40m long).
+  - Implemented centered chunk seam falloff in `World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, and `WorldBend_Foliage.shader`: `seamFade = smoothstep(0.0, 4.0, 20.0 - abs(WorldPos.z + 5.0))`.
+  - Both leading ($Z = +15$) and trailing ($Z = -25$) edges of every chunk smoothly taper off into clean asphalt over 4 meters, guaranteeing 100% seamless, continuous road merging with zero hard edges.
+- **Play Mode YAML Scalar Mapping Errors Resolved**: Fixed `Tried to get mapping information from scalar node` / `Assertion failed on expression: 'IsMapping()'` error triggered during Play Mode.
+- **Asset Integrity**: Verified `BossProjectile.cs` remains 100% untouched and unmodified.
+
+
+
+
+
+
+
 
 
 

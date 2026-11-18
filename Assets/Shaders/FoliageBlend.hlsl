@@ -96,13 +96,18 @@ void FoliageSurfaceBlend_float(
     float edgeBoost = smoothstep(1.0, 3.2, abs(WorldPos.x)) * 0.35;
     float roadNoise = surfaceNoise * 0.65 + fineNoise * 0.35 + edgeBoost;
 
+    // Seamless Chunk Boundary Seam Transition (leaves clean road at chunk seams so chunks merge smoothly)
+    // Road mesh vertices span Z from -25.0 to +15.0 (centered at Z = -5.0)
+    float distFromChunkSeam = 20.0 - abs(WorldPos.z + 5.0);
+    float seamFade = smoothstep(0.0, 4.0, distFromChunkSeam);
+
     // 2. Layer 2: Debris & Gravel Mask
     float debThresh = 1.0 - saturate(DebrisCoverage);
-    float debrisMask = slope * smoothstep(debThresh - 0.12, debThresh + 0.12, roadNoise);
+    float debrisMask = slope * smoothstep(debThresh - 0.12, debThresh + 0.12, roadNoise) * seamFade;
 
     // 3. Layer 3: Moss Mask
     float mossThresh = 1.0 - saturate(MossCoverage);
-    float mossOnRoad = slope * smoothstep(mossThresh - 0.12, mossThresh + 0.12, roadNoise);
+    float mossOnRoad = slope * smoothstep(mossThresh - 0.12, mossThresh + 0.12, roadNoise) * seamFade;
 
     // 4. Barrier & Wall Overgrowth
     float wallClimb = saturate(1.8 - WorldPos.y * 0.5);
@@ -150,6 +155,32 @@ void FoliageSurfaceBlend_float(
     OutMetallic = met;
     OutSmoothness = smt;
     OutAO = ao;
+}
+
+// =============================================================================
+// YCoCg / Packed RGBA Foliage Texture Sampler
+// Inspired by The-Last-Wish packed texture optimization
+// R: Moss Albedo Luminance
+// G: Debris / Gravel Albedo Luminance
+// B: Moss Relief / Normal Depth
+// A: Debris Relief / Normal Depth
+// =============================================================================
+void UnpackFoliagePacked_float(
+    UnityTexture2D PackedTex,
+    float2 UV,
+    float3 MossColor,
+    float3 DebrisColor,
+    out float3 OutMossAlbedo,
+    out float3 OutDebrisAlbedo,
+    out float OutMossRelief,
+    out float OutDebrisRelief
+)
+{
+    float4 packedData = PackedTex.tex.Sample(PackedTex.samplerstate, UV);
+    OutMossAlbedo = packedData.r * MossColor;
+    OutDebrisAlbedo = packedData.g * DebrisColor;
+    OutMossRelief = packedData.b;
+    OutDebrisRelief = packedData.a;
 }
 
 #endif // FOLIAGE_BLEND_INCLUDED

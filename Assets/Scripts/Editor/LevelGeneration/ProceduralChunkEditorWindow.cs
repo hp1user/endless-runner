@@ -28,9 +28,9 @@ namespace EndlessRunner.LevelGen.Editor
         private int previewChunkIndex = 0;
         private readonly Dictionary<Renderer, Material[]> originalMaterialsCache = new Dictionary<Renderer, Material[]>();
 
-        // Decal Randomizer Settings
-        private int minDecalsPerChunk = 3;
-        private int maxDecalsPerChunk = 6;
+        // Decal Randomizer Settings (Optimized Budget)
+        private int minDecalsPerChunk = 2;
+        private int maxDecalsPerChunk = 4;
         private bool includeDecalCracks = true;
         private bool includeDecalMud = true;
         private bool includeDecalMoss = true;

@@ -19,6 +19,12 @@ Shader "EndlessRunner/WorldBend_Foliage"
         _Curvature("World Curvature", Float) = -0.0008
         _DistanceOffset("Bend Distance Offset", Float) = 12.0
 
+        [Header(Packed RGBA Foliage Optimization)]
+        [Toggle(_USE_PACKED_FOLIAGE)] _UsePackedFoliage("Use Packed RGBA Foliage (The-Last-Wish)", Float) = 1
+        _PackedFoliageTex("Packed Foliage RGBA (Moss + Gravel)", 2D) = "white" {}
+        _FoliageTiling("Packed Foliage Tiling", Float) = 2.0
+        _DebrisColor("Debris Tint Color", Color) = (0.75, 0.70, 0.65, 1.0)
+
         [Header(Layer 2 Debris Mud and Gravel)]
         _DebrisTex("Debris / Gravel Albedo", 2D) = "white" {}
         _DebrisNorm("Debris Normal Map", 2D) = "bump" {}
@@ -64,6 +70,8 @@ Shader "EndlessRunner/WorldBend_Foliage"
             float4 _BaseColor;
             float4 _Tint;
             float4 _MossColor;
+            float4 _DebrisColor;
+            float _FoliageTiling;
             float _BumpScale;
             float _Metallic;
             float _Smoothness;
@@ -97,6 +105,7 @@ Shader "EndlessRunner/WorldBend_Foliage"
             #pragma multi_compile _ _SHADOWS_SOFT
             #pragma multi_compile_instancing
             #pragma shader_feature_local _USE_NAMR
+            #pragma shader_feature_local _USE_PACKED_FOLIAGE
 
             struct Attributes
             {
@@ -124,6 +133,7 @@ Shader "EndlessRunner/WorldBend_Foliage"
             TEXTURE2D(_Ba);         SAMPLER(sampler_Ba);
             TEXTURE2D(_BumpMap);    SAMPLER(sampler_BumpMap);
             TEXTURE2D(_NAMR);       SAMPLER(sampler_NAMR);
+            TEXTURE2D(_PackedFoliageTex); SAMPLER(sampler_PackedFoliageTex);
             TEXTURE2D(_DebrisTex);  SAMPLER(sampler_DebrisTex);
             TEXTURE2D(_DebrisNorm); SAMPLER(sampler_DebrisNorm);
             TEXTURE2D(_MossTex);    SAMPLER(sampler_MossTex);
@@ -230,17 +240,29 @@ Shader "EndlessRunner/WorldBend_Foliage"
                 float2 uvX = float2(worldPos.z, worldPos.y);   // Barrier side walls along Z
                 float2 uvZ = float2(worldPos.x, worldPos.y);   // Walls/ends facing Z
 
-                // Sample Layer 2: Debris, Mud & Crushed Rocks (Triplanar)
-                half4 debY = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvY * _DebrisTiling);
-                half4 debX = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvX * _DebrisTiling);
-                half4 debZ = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvZ * _DebrisTiling);
-                half4 debrisSample = debY * triWeights.y + debX * triWeights.x + debZ * triWeights.z;
+                #if defined(_USE_PACKED_FOLIAGE)
+                    // High-performance single-texture sample (YCoCg-style luminance & relief packing)
+                    // Road surface (triWeights.y > 0.8) avoids side fetches; barriers avoid top fetches
+                    half4 pY = SAMPLE_TEXTURE2D(_PackedFoliageTex, sampler_PackedFoliageTex, uvY * _FoliageTiling);
+                    half4 pX = (triWeights.x > 0.05) ? SAMPLE_TEXTURE2D(_PackedFoliageTex, sampler_PackedFoliageTex, uvX * _FoliageTiling) : pY;
+                    half4 pZ = (triWeights.z > 0.05) ? SAMPLE_TEXTURE2D(_PackedFoliageTex, sampler_PackedFoliageTex, uvZ * _FoliageTiling) : pY;
+                    half4 packedSample = pY * triWeights.y + pX * triWeights.x + pZ * triWeights.z;
 
-                // Sample Layer 3: Lush Green Moss Carpet (Triplanar)
-                half4 mossY = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvY * _MossTiling) * _MossColor;
-                half4 mossX = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvX * _MossTiling) * _MossColor;
-                half4 mossZ = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvZ * _MossTiling) * _MossColor;
-                half4 mossSample = mossY * triWeights.y + mossX * triWeights.x + mossZ * triWeights.z;
+                    half4 mossSample = half4(packedSample.rrr * _MossColor.rgb, 1.0);
+                    half4 debrisSample = half4(packedSample.ggg * _DebrisColor.rgb, 1.0);
+                #else
+                    // Fallback: Sample Layer 2: Debris, Mud & Crushed Rocks (Triplanar)
+                    half4 debY = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvY * _DebrisTiling);
+                    half4 debX = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvX * _DebrisTiling);
+                    half4 debZ = SAMPLE_TEXTURE2D(_DebrisTex, sampler_DebrisTex, uvZ * _DebrisTiling);
+                    half4 debrisSample = debY * triWeights.y + debX * triWeights.x + debZ * triWeights.z;
+
+                    // Sample Layer 3: Lush Green Moss Carpet (Triplanar)
+                    half4 mossY = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvY * _MossTiling) * _MossColor;
+                    half4 mossX = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvX * _MossTiling) * _MossColor;
+                    half4 mossZ = SAMPLE_TEXTURE2D(_MossTex, sampler_MossTex, uvZ * _MossTiling) * _MossColor;
+                    half4 mossSample = mossY * triWeights.y + mossX * triWeights.x + mossZ * triWeights.z;
+                #endif
 
                 // 3. Post-Apocalyptic Road Overgrowth (Interwoven Gravel + Moss)
                 float slope = saturate(worldNormal.y);
@@ -262,17 +284,22 @@ Shader "EndlessRunner/WorldBend_Foliage"
                 float nMid   = FBM_Organic(worldPos.xz * 2.2 + float2(14.2, 28.7));
                 float nMicro = FBM_Organic(worldPos.xz * 4.8);
 
+                // Seamless Chunk Boundary Seam Transition (leaves clean road at chunk seams so chunks merge smoothly)
+                // Road mesh vertices span Z from -25.0 to +15.0 (centered at Z = -5.0)
+                float distFromChunkSeam = 20.0 - abs(input.positionOS.z + 5.0);
+                float seamFade = smoothstep(0.0, 4.0, distFromChunkSeam);
+
                 // --- ROAD DEBRIS & GRAVEL BED ---
                 // Mud, dirt, and gravel settle along curbs, center seams, and scattered road patches
                 float debrisField = curbZone * 0.65 + centerSeam * 0.40 + (nMacro * 0.45 + nMid * 0.25 + nMicro * 0.15 - 0.22);
-                float debrisMask = slope * smoothstep(1.0 - _DebrisCoverage, 1.0 - _DebrisCoverage + 0.18, debrisField);
+                float debrisMask = slope * smoothstep(1.0 - _DebrisCoverage, 1.0 - _DebrisCoverage + 0.18, debrisField) * seamFade;
 
                 // --- ROAD MOSS LAYER (INTERMINGLED WITH GRAVEL) ---
                 // Moss clumps root directly within and around the debris beds rather than in a separate band.
                 // High-frequency clump noise determines where moss cushion clusters emerge inside gravel
                 float mossClumpNoise = FBM_Organic(worldPos.xz * 2.8 + float2(37.5, 19.2));
                 float mossField = (debrisMask * 0.75 + curbZone * 0.35 + centerSeam * 0.35) * (mossClumpNoise * 0.70 + 0.35);
-                float mossOnRoad = slope * smoothstep(1.0 - _MossCoverage, 1.0 - _MossCoverage + 0.16, mossField);
+                float mossOnRoad = slope * smoothstep(1.0 - _MossCoverage, 1.0 - _MossCoverage + 0.16, mossField) * seamFade;
 
                 // --- BARRIER & WALL OVERGROWTH (GRAVEL BASE + CLIMBING MOSS) ---
                 float wallBase = saturate(1.2 - worldPos.y * 1.1);
