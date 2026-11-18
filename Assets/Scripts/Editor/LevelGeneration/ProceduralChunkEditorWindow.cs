@@ -390,15 +390,15 @@ namespace EndlessRunner.LevelGen.Editor
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("💥 Cracked 1", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Cracked_1", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Cracked_1", new Vector3(Random.Range(-2.8f, 2.8f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("💥 Cracked 2", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Cracked_2", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Cracked_2", new Vector3(Random.Range(-2.8f, 2.8f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("💥 Road Crack", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_RoadCrack", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_RoadCrack", new Vector3(Random.Range(-2.8f, 2.8f), 0.01f, Random.Range(-15f, 15f)));
             }
             EditorGUILayout.EndHorizontal();
 
@@ -406,15 +406,15 @@ namespace EndlessRunner.LevelGen.Editor
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("🪨 Mud Decal 1", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Mud_Decal_1", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Mud_Decal_1", new Vector3(Random.Range(-3.5f, 3.5f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("🪨 Mud Decal 2", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Mud_Decal_2", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Mud_Decal_2", new Vector3(Random.Range(-3.5f, 3.5f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("🪨 Mud Debris", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_MudDebris", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_MudDebris", new Vector3(Random.Range(-3.5f, 3.5f), 0.01f, Random.Range(-15f, 15f)));
             }
             EditorGUILayout.EndHorizontal();
 
@@ -422,15 +422,15 @@ namespace EndlessRunner.LevelGen.Editor
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("🌿 Moss 1", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Moss_1", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Moss_1", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("🌿 Moss 2", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_Moss_2", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_Moss_2", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.01f, Random.Range(-15f, 15f)));
             }
             if (GUILayout.Button("🌿 Moss Cluster", GUILayout.Height(22)))
             {
-                StampDecalOnPreview("Decal_MossPatch", new Vector3(Random.Range(-4.2f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+                StampDecalOnPreview("Decal_MossPatch", new Vector3(Random.Range(-4.2f, 4.2f), 0.01f, Random.Range(-15f, 15f)));
             }
             EditorGUILayout.EndHorizontal();
 
@@ -698,6 +698,7 @@ namespace EndlessRunner.LevelGen.Editor
 
             GameObject decalInstance = (GameObject)PrefabUtility.InstantiatePrefab(decalPrefab, decalsRoot);
             decalInstance.name = $"{prefabName}_{decalsRoot.childCount:D2}";
+            localPos.y = 0.01f;
             decalInstance.transform.localPosition = localPos;
             decalInstance.transform.localRotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
             float scale = Random.Range(0.85f, 1.35f);
@@ -786,7 +787,7 @@ namespace EndlessRunner.LevelGen.Editor
                 }
 
                 float posZ = Random.Range(-24f, 24f);
-                float posY = 0.25f;
+                float posY = 0.01f;
 
                 inst.transform.localPosition = new Vector3(posX, posY, posZ);
                 inst.transform.localRotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
