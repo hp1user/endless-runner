@@ -106,12 +106,14 @@ namespace EndlessRunner.LevelGen
             if (profile.roadBasePrefab != null && roadBaseContainer.childCount == 0)
             {
                 // Playable Highway
-                InstantiateProp(profile.roadBasePrefab, profile.roadBaseOffset, Quaternion.identity, roadBaseContainer);
+                var mainRoad = InstantiateProp(profile.roadBasePrefab, profile.roadBaseOffset, Quaternion.identity, roadBaseContainer);
+                SetupRoadFoliage(mainRoad);
 
                 // Parallel Visual Highway
                 if (profile.dualHighway.enableSecondaryHighway)
                 {
-                    InstantiateProp(profile.roadBasePrefab, profile.dualHighway.secondaryRoadOffset, Quaternion.identity, roadBaseContainer);
+                    var secRoad = InstantiateProp(profile.roadBasePrefab, profile.dualHighway.secondaryRoadOffset, Quaternion.identity, roadBaseContainer);
+                    SetupRoadFoliage(secRoad);
                 }
             }
 
@@ -428,6 +430,8 @@ namespace EndlessRunner.LevelGen
                     instance.transform.localPosition = localPos;
                     instance.transform.localRotation = localRot;
                     if (scale.HasValue) instance.transform.localScale = Vector3.Scale(instance.transform.localScale, scale.Value);
+                    var fol = instance.GetComponentInChildren<FoliagePropInstance>();
+                    if (fol != null) fol.ApplyNoiseOffset();
                     UnityEditor.Undo.RegisterCreatedObjectUndo(instance, "Procedural Prop Spawn");
                     return instance;
                 }
@@ -437,7 +441,32 @@ namespace EndlessRunner.LevelGen
             instance.transform.localPosition = localPos;
             instance.transform.localRotation = localRot;
             if (scale.HasValue) instance.transform.localScale = Vector3.Scale(instance.transform.localScale, scale.Value);
+            var runtimeFol = instance.GetComponentInChildren<FoliagePropInstance>();
+            if (runtimeFol != null) runtimeFol.ApplyNoiseOffset();
             return instance;
+        }
+
+        private void SetupRoadFoliage(GameObject roadGO)
+        {
+            if (roadGO == null) return;
+            Renderer[] rends = roadGO.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in rends)
+            {
+                var propFol = r.GetComponent<FoliagePropInstance>();
+                if (propFol != null)
+                {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying) DestroyImmediate(propFol);
+                    else Destroy(propFol);
+#else
+                    Destroy(propFol);
+#endif
+                }
+
+                var roadFol = r.GetComponent<FoliageRoadInstance>();
+                if (roadFol == null) roadFol = r.gameObject.AddComponent<FoliageRoadInstance>();
+                roadFol.ApplyRoadOffset();
+            }
         }
     }
 }

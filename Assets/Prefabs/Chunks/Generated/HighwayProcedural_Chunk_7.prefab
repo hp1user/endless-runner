@@ -449,13 +449,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 924480351850038990}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 25956677731831376}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6085906133456484564}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2633770839661572496}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3035054654389857903}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8667319978458164465}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &1226997712763958482 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &924480351850038990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226997712763958482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3848087499129069420 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &25956677731831376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3848087499129069420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4167601784002428750 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2633770839661572496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4167601784002428750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5095659067610632286 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3035054654389857903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5095659067610632286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6301268971871730487 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6085906133456484564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301268971871730487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &7079949274027168476 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 10423215753439642}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8886878106252052648 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 10423215753439642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8667319978458164465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8886878106252052648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &218818200648608836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -515,8 +635,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3668244504398676070, guid: e63a339973fd26a47ac0aff71f68e7f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6993316067103374498}
   m_SourcePrefab: {fileID: 100100000, guid: e63a339973fd26a47ac0aff71f68e7f8, type: 3}
+--- !u!1 &3594256298939165730 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3668244504398676070, guid: e63a339973fd26a47ac0aff71f68e7f8, type: 3}
+  m_PrefabInstance: {fileID: 218818200648608836}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6993316067103374498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3594256298939165730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &5260261443424890914 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5334889891069877350, guid: e63a339973fd26a47ac0aff71f68e7f8, type: 3}
@@ -581,8 +721,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2552084865816126167, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 576066481379316115}
   m_SourcePrefab: {fileID: 100100000, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
+--- !u!1 &2840566360684129825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2552084865816126167, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
+  m_PrefabInstance: {fileID: 288630220127112438}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &576066481379316115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2840566360684129825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3179656384118535323 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2891595757590067309, guid: f4dd38de489c4d145829f5f8d7d031e7, type: 3}
@@ -640,6 +800,14 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5c578d5346ca4d0f8056c813a1fa0449, type: 2}
+    - target: {fileID: 3079403395649068688, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
+      propertyPath: chunkSequenceOffset
+      value: 240
+      objectReference: {fileID: 0}
+    - target: {fileID: 3079403395649068688, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
+      propertyPath: autoDetectFromHierarchy
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7051464841809001761, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
       propertyPath: m_Name
       value: Path_1
@@ -713,8 +881,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1704040253684044557, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6189748961765130912}
   m_SourcePrefab: {fileID: 100100000, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
+--- !u!1 &1169739812944523656 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1704040253684044557, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
+  m_PrefabInstance: {fileID: 548937487829787269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6189748961765130912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1169739812944523656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &1977098400176335666 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2084646805592443319, guid: 2e86cc418422b83468b24a5c4e12173f, type: 3}
@@ -787,13 +975,73 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1966865090453365872}
+    - targetCorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1067387724150477882}
+    - targetCorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1241967776751654959}
   m_SourcePrefab: {fileID: 100100000, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+--- !u!1 &793561700258365684 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 568913386802067777}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1067387724150477882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 793561700258365684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &4930511834182279943 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4866594414480742982, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
   m_PrefabInstance: {fileID: 568913386802067777}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5212276402303279254 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 568913386802067777}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1241967776751654959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5212276402303279254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6408785080272471929 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 568913386802067777}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1966865090453365872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6408785080272471929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &594926267130782384
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -931,13 +1179,73 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7762878082077467187, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 690712843002220064}
+    - targetCorrespondingSourceObject: {fileID: 5508350388607362222, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7785204153675412026}
+    - targetCorrespondingSourceObject: {fileID: 4384588904237720207, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3871379723896421441}
   m_SourcePrefab: {fileID: 100100000, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
 --- !u!4 &1469803476042738798 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1879897511592043755, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
   m_PrefabInstance: {fileID: 1041306415659796613}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3650808282484419082 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4384588904237720207, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 1041306415659796613}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3871379723896421441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3650808282484419082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4756612459470482475 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5508350388607362222, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 1041306415659796613}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7785204153675412026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4756612459470482475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7334181084354603702 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7762878082077467187, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 1041306415659796613}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &690712843002220064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7334181084354603702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &1252074042729101636
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1017,8 +1325,128 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8901431458968668107}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4486581901388684074}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6749863577467682696}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8357792386318509050}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7728354331137974542}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6377691527395049790}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &18698855046407180 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8901431458968668107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18698855046407180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2603751664922513330 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4486581901388684074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2603751664922513330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2923696889230782352 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8357792386318509050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2923696889230782352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5059758824167484393 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6749863577467682696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5059758824167484393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6337179877167480960 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7728354331137974542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6337179877167480960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7643116424988579958 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1252074042729101636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6377691527395049790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7643116424988579958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &8287834099181208066 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
@@ -1103,8 +1531,128 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8482310901823723606}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8875830235584461528}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8832462079572222107}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1799769629858677004}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4186377183226398334}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7941930641765892156}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &147401305043801878 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8482310901823723606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147401305043801878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2768482793496657064 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8875830235584461528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2768482793496657064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3088005767155686538 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1799769629858677004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3088005767155686538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4935415094076594419 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8832462079572222107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4935415094076594419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6177792667166815130 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4186377183226398334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6177792667166815130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7518776972752333676 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 1380776063234542174}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7941930641765892156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7518776972752333676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &8164338951151104280 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
@@ -1169,13 +1717,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4753575514300302558}
   m_SourcePrefab: {fileID: 100100000, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
 --- !u!4 &1462037448669644863 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
   m_PrefabInstance: {fileID: 1423289409317941204}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2234317564357743237 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
+  m_PrefabInstance: {fileID: 1423289409317941204}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4753575514300302558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2234317564357743237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &1497741272583751462
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1251,13 +1819,113 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 277355945957844088}
+    - targetCorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6298642497652374381}
+    - targetCorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1603793961001353096}
+    - targetCorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2827464154589927666}
+    - targetCorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2139908507076746738}
   m_SourcePrefab: {fileID: 100100000, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
 --- !u!4 &1283256656329342717 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 361977789670341083, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
   m_PrefabInstance: {fileID: 1497741272583751462}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4973336075645293793 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 1497741272583751462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6298642497652374381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4973336075645293793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7615450350985412474 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 1497741272583751462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2827464154589927666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7615450350985412474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8357034367301138343 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 1497741272583751462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2139908507076746738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8357034367301138343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &9031647786624199720 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 1497741272583751462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &277355945957844088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9031647786624199720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &9190145292660798953 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 1497741272583751462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1603793961001353096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9190145292660798953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &1698799382751403592
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1317,13 +1985,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6863615604867271289}
   m_SourcePrefab: {fileID: 100100000, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
 --- !u!4 &8109512500104908495 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7429144632813621383, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
   m_PrefabInstance: {fileID: 1698799382751403592}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8917432975900513397 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
+  m_PrefabInstance: {fileID: 1698799382751403592}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6863615604867271289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8917432975900513397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &2482528996832578283
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1403,13 +2091,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7743653327204764502}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7281578462192128782}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8642379486020699786}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7028416233660013775}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 302064706096478053}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6642054221015674097}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &1671281955590847517 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7281578462192128782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671281955590847517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1981859375039978559 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7028416233660013775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981859375039978559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3697906983051302819 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7743653327204764502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3697906983051302819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &4618363896705200557 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 2482528996832578283}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6413752220527832025 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6642054221015674097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6413752220527832025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7269332928777728815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &302064706096478053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7269332928777728815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8440919545214687302 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2482528996832578283}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8642379486020699786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440919545214687302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &2627912179951050612
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1469,13 +2277,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 51672642125483722}
   m_SourcePrefab: {fileID: 100100000, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
 --- !u!4 &4855346157263294451 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7429144632813621383, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
   m_PrefabInstance: {fileID: 2627912179951050612}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5200099795436098889 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7805387975225461309, guid: 556a63b0d32f737428f9f1e4e540158e, type: 3}
+  m_PrefabInstance: {fileID: 2627912179951050612}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &51672642125483722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5200099795436098889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &2948362878041902391
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1555,13 +2383,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7553058323518850637}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 853712164450669183}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6368339232146166757}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2387133767305540402}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6395084776453216753}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2191871515057891547}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &1232293098487012323 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2387133767305540402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232293098487012323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2137116936254913473 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &853712164450669183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137116936254913473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4163749781690601599 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7553058323518850637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4163749781690601599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &5372442426183579249 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 2948362878041902391}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6024478449637125125 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2191871515057891547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6024478449637125125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7960355720458302707 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6395084776453216753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7960355720458302707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &9204562726207004570 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 2948362878041902391}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6368339232146166757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9204562726207004570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3134143932606421246
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1641,13 +2589,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1972887919800364502}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2541675376604764689}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8595124742948828616}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2461401801919578979}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7147325584950334363}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4500785777536903975}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &1337000834909244970 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2461401801919578979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337000834909244970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2178783034996731400 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2541675376604764689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2178783034996731400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4205407100615394742 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1972887919800364502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4205407100615394742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &5267725899062158264 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3134143932606421246}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5768891343360014796 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4500785777536903975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5768891343360014796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7920946077811548474 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7147325584950334363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7920946077811548474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8946728518902860371 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3134143932606421246}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8595124742948828616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8946728518902860371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3254609695429648467
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1700,6 +2768,14 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5c578d5346ca4d0f8056c813a1fa0449, type: 2}
+    - target: {fileID: 3079403395649068688, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
+      propertyPath: chunkSequenceOffset
+      value: 240
+      objectReference: {fileID: 0}
+    - target: {fileID: 3079403395649068688, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
+      propertyPath: autoDetectFromHierarchy
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7051464841809001761, guid: e85f4206c6d9f9141aaaf99291c41ac3, type: 3}
       propertyPath: m_Name
       value: Path_1
@@ -1789,13 +2865,113 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8752927691645296186}
+    - targetCorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2346397107756707409}
+    - targetCorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7041838653586486193}
+    - targetCorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1769574811992541836}
+    - targetCorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6109653261857740502}
   m_SourcePrefab: {fileID: 100100000, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
 --- !u!4 &2914546352441069341 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 361977789670341083, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
   m_PrefabInstance: {fileID: 3275397408959805126}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4966164826787077576 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 3275397408959805126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8752927691645296186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4966164826787077576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5058794887244481545 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 3275397408959805126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7041838653586486193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5058794887244481545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5352423895459972679 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 3275397408959805126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6109653261857740502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5352423895459972679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5769679469670862490 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 3275397408959805126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1769574811992541836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5769679469670862490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8987304252992546049 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 3275397408959805126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2346397107756707409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8987304252992546049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3607068281637796020
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1875,13 +3051,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1263442585248051806}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3279487133806093997}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7140259375643385708}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8968637288229850549}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6768337338918328605}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5948951652416240899}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &526008084972850754 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3279487133806093997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526008084972850754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &864037040960859744 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8968637288229850549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864037040960859744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2534626410270352892 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1263442585248051806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2534626410270352892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5296072822918371718 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5948951652416240899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5296072822918371718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &5794706633407022066 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3607068281637796020}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7303004744172513817 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7140259375643385708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7303004744172513817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8402745267955286384 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3607068281637796020}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6768337338918328605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8402745267955286384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3688505780619975140
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1961,13 +3257,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9017561423499128500}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4797530304893361097}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 984818501483594746}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8493338490899636858}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4643577660710985952}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2266543400403086032}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &464456364564360978 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4797530304893361097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464456364564360978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &775595600229764912 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8493338490899636858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775595600229764912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2455051410902975660 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9017561423499128500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2455051410902975660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5206648418263054550 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2266543400403086032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5206648418263054550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &5860374923798520482 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3688505780619975140}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7234937236253854537 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &984818501483594746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234937236253854537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8476435612304187424 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3688505780619975140}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4643577660710985952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8476435612304187424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3732206541561775642
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2027,13 +3443,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2399793376129462714}
   m_SourcePrefab: {fileID: 100100000, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
 --- !u!4 &3765518835559473649 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
   m_PrefabInstance: {fileID: 3732206541561775642}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4542478095296297803 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 07c4fd3f5b95f8b478572684fb089889, type: 3}
+  m_PrefabInstance: {fileID: 3732206541561775642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2399793376129462714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4542478095296297803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3836336185184236719
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2113,13 +3549,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1698114587989686312}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2791514747546251299}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6959140221834950891}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7923050742378017305}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8255824033102718766}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5379006673314490278}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &35825945960055385 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2791514747546251299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35825945960055385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &922722315206861435 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7923050742378017305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 922722315206861435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2602881952936077799 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1698114587989686312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2602881952936077799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5642139789426496925 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5379006673314490278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5642139789426496925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &6294177307630768105 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3836336185184236719}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7091755500246558210 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6959140221834950891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091755500246558210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8335892841677622635 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3836336185184236719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8255824033102718766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8335892841677622635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3987201128299346179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2199,13 +3755,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4930354645856052083}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7571100752692016418}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5743290571673067302}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1782085363614684258}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3230785775807226200}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8199938695292980371}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &150662369079627765 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7571100752692016418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 150662369079627765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1055581932408582103 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1782085363614684258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055581932408582103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2771770382195369035 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4930354645856052083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2771770382195369035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5486770952998918193 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8199938695292980371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5486770952998918193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &6138808488381088325 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3987201128299346179}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6918372557383920558 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5743290571673067302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6918372557383920558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8198538678635135175 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3987201128299346179}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3230785775807226200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8198538678635135175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &3993224351755598932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2285,13 +3961,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6812622621913309957}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 651167519548735350}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4005880517446698023}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 401356400194435727}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8578844156388290356}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3914422924622805486}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &155629863737739938 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &651167519548735350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155629863737739938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1052017148300225152 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &401356400194435727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052017148300225152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2758705817488285980 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6812622621913309957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2758705817488285980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5484055266761366886 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3914422924622805486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5484055266761366886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &6129055918934902546 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 3993224351755598932}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6934792487964290809 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4005880517446698023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6934792487964290809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8212495703253730704 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 3993224351755598932}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8578844156388290356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8212495703253730704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &4165823230597125555
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2371,13 +4167,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7134872229258833185}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7645314117018919772}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1095708722605565221}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 173865643878533427}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7850348307461275655}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1907509692293404760}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &17088927346639719 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &173865643878533427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 17088927346639719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &904619641603416901 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7645314117018919772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 904619641603416901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2949248759917857019 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7134872229258833185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2949248759917857019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4809410617413792897 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1907509692293404760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4809410617413792897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &6605643409002983157 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 4165823230597125555}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7969233110945728286 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1095708722605565221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969233110945728286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &9177657747767258231 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4165823230597125555}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7850348307461275655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9177657747767258231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &4248021263459880071
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2437,8 +4353,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1226322cdc0fa084284410d465db7516, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5316093083834934045}
   m_SourcePrefab: {fileID: 100100000, guid: 1226322cdc0fa084284410d465db7516, type: 3}
+--- !u!1 &3906143721520378326 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 1226322cdc0fa084284410d465db7516, type: 3}
+  m_PrefabInstance: {fileID: 4248021263459880071}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5316093083834934045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3906143721520378326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &4431183216604900204 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1226322cdc0fa084284410d465db7516, type: 3}
@@ -2523,13 +4459,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1150414953950598992}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8400385009868690321}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9133044411655807056}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3967896407793344618}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1303552946524932749}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2508490572761368481}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &444352512392767540 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1303552946524932749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 444352512392767540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1724694023010894685 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9133044411655807056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1724694023010894685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &2512105856376220342 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 4663694507512009200}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4308056021870227650 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2508490572761368481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4308056021870227650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5880268753779035320 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1150414953950598992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5880268753779035320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8501359707869587206 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8400385009868690321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8501359707869587206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8740230204358166308 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4663694507512009200}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3967896407793344618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8740230204358166308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &4784669476731663765
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2609,13 +4665,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8841879801458001161}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6845450655040139062}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4763695997723339330}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8289238102820737834}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4836608041625295544}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6286626073792698069}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &357159556632415313 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4836608041625295544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 357159556632415313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1527022551174407992 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4763695997723339330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527022551174407992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &2306546763134439123 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 4784669476731663765}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4113757714302211239 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6286626073792698069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4113757714302211239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6000100643255822557 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8841879801458001161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6000100643255822557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8585179636834337635 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6845450655040139062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8585179636834337635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8905239240014013249 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 4784669476731663765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8289238102820737834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905239240014013249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &4802393700953737702
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2765,13 +4941,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3932844565893075105}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 727442998214348794}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7657213869395497536}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 539994419246168986}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5111953894438864183}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7362835169855581287}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &1063939984466813528 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5111953894438864183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063939984466813528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &2235526583770040625 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7657213869395497536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2235526583770040625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3041545418186432730 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 5211143021553392540}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3684012280045714094 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7362835169855581287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3684012280045714094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6445670042667812564 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3932844565893075105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6445670042667812564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8188386993611935048 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &539994419246168986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8188386993611935048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &9012707922536377706 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5211143021553392540}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &727442998214348794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9012707922536377706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &5417528067978368160
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2831,13 +5127,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7514662256673694169, guid: 4020c9b6ab1cbc14ebbbecfe7432b210, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8823095156795871673}
   m_SourcePrefab: {fileID: 100100000, guid: 4020c9b6ab1cbc14ebbbecfe7432b210, type: 3}
 --- !u!4 &1486149601495470643 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6895345432918410899, guid: 4020c9b6ab1cbc14ebbbecfe7432b210, type: 3}
   m_PrefabInstance: {fileID: 5417528067978368160}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2551179860590278009 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7514662256673694169, guid: 4020c9b6ab1cbc14ebbbecfe7432b210, type: 3}
+  m_PrefabInstance: {fileID: 5417528067978368160}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8823095156795871673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2551179860590278009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &5629326659987861207
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2917,13 +5233,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1489427742749754122}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2725624314392647490}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3637927827017826051}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4066045144362896972}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4681980800992697408}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3140298193411849729}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &616166269233583891 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4681980800992697408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 616166269233583891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1821987142328007802 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3637927827017826051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821987142328007802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3205275694862718353 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 5629326659987861207}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3850275951628341221 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3140298193411849729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3850275951628341221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6862728211236909983 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1489427742749754122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6862728211236909983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8641333068032866307 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4066045144362896972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8641333068032866307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8889333982813313057 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5629326659987861207}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2725624314392647490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8889333982813313057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &5906504447541529890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3003,13 +5439,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 451391210623616971}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 962812008186149559}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1080192150698608898}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6843220014305212146}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8824422208797750571}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2382712468564921451}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &481748695143292815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1080192150698608898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481748695143292815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1687288213492921574 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8824422208797750571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1687288213492921574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3065141351571352592 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2382712468564921451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3065141351571352592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3718866113152448100 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 5906504447541529890}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4673103326825402474 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &451391210623616971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4673103326825402474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7258182387495435220 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &962812008186149559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7258182387495435220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7497177133545118710 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 5906504447541529890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6843220014305212146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7497177133545118710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &5952109404612648701
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3139,13 +5695,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4578308251286423793, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7654582362981001488}
   m_SourcePrefab: {fileID: 100100000, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
 --- !u!4 &7491156456997446497 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3801807418910478923, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
   m_PrefabInstance: {fileID: 5996354543702405418}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7835770456925059547 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4578308251286423793, guid: f55095e3cf49aec4b944c97dfa469f2e, type: 3}
+  m_PrefabInstance: {fileID: 5996354543702405418}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7654582362981001488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7835770456925059547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &6273280400262984267
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3225,13 +5801,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5297304538779865921}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2301475332842721492}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5642277057186837573}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8738540079009551531}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1522324928051493769}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 870573475841391955}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &24970097724760294 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5642277057186837573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24970097724760294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1269248159504190351 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1522324928051493769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269248159504190351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3206180411732874105 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &870573475841391955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3206180411732874105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3849210781758540045 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 6273280400262984267}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5056706195897577219 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5297304538779865921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5056706195897577219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7083330588468004029 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2301475332842721492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7083330588468004029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7997380462999856287 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 6273280400262984267}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8738540079009551531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7997380462999856287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &7172314397056635595
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3291,13 +5987,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5976317783167252822}
   m_SourcePrefab: {fileID: 100100000, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
 --- !u!4 &7206767161820738848 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
   m_PrefabInstance: {fileID: 7172314397056635595}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8018734042540552090 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 48d05afd101c06345bb540e6c869c9d3, type: 3}
+  m_PrefabInstance: {fileID: 7172314397056635595}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5976317783167252822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8018734042540552090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &7433690441642579866
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3365,8 +6081,68 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7762878082077467187, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6375984758394530770}
+    - targetCorrespondingSourceObject: {fileID: 5508350388607362222, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6795722625683388556}
+    - targetCorrespondingSourceObject: {fileID: 4384588904237720207, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4564313550533699966}
   m_SourcePrefab: {fileID: 100100000, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+--- !u!1 &905943079036794281 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7762878082077467187, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 7433690441642579866}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6375984758394530770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905943079036794281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3123335866735473460 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5508350388607362222, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 7433690441642579866}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6795722625683388556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123335866735473460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6625066025566598421 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4384588904237720207, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
+  m_PrefabInstance: {fileID: 7433690441642579866}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4564313550533699966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6625066025566598421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &9025067151392191345 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1879897511592043755, guid: 00dd8d2d9c81e2042a3bdaebe3ab9d66, type: 3}
@@ -3447,8 +6223,108 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9103463806337502079}
+    - targetCorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2815956801537687054}
+    - targetCorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6117915313122807488}
+    - targetCorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2973722109520157800}
+    - targetCorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2574455479399299751}
   m_SourcePrefab: {fileID: 100100000, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+--- !u!1 &62671307341634290 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7611030662147369742, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 7584474326587634172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9103463806337502079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 62671307341634290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &144546765631046451 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7728458106015691471, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 7584474326587634172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6117915313122807488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144546765631046451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1040994027646714237 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7436337687738249345, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 7584474326587634172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2574455479399299751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1040994027646714237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &1452410095299414432 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9036059778904766556, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 7584474326587634172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2973722109520157800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1452410095299414432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4074818920910004795 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5894610544273576903, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
+  m_PrefabInstance: {fileID: 7584474326587634172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2815956801537687054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4074818920910004795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &7802336644705732647 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 361977789670341083, guid: 6253bec22c6e1ac4d96ca8e6647ea8e4, type: 3}
@@ -3533,13 +6409,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5775000428561805638}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4033953177913041705}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1558603490061937646}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2746204654255905940}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6836662739402565795}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5345828846194360557}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
 --- !u!4 &623088381356531988 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 7692614435535837778}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1274561867239979872 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5345828846194360557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274561867239979872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3194113314534679446 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6836662739402565795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3194113314534679446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4437793241980176639 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1558603490061937646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4437793241980176639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5995105239726738566 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2746204654255905940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5995105239726738566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6882495284928375972 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4033953177913041705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6882495284928375972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8927124182333015834 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7692614435535837778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5775000428561805638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8927124182333015834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &7757002940323997041
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3619,13 +6615,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1305045757838270415}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1666098997110679318}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1307990733992715720}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1383608792177432506}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 36444888734778003}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7624756808588063596}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
 --- !u!4 &703237285749333559 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 7757002940323997041}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1213691799744480323 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7624756808588063596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213691799744480323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3257232982869843125 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &36444888734778003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3257232982869843125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4391559881812899804 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1307990733992715720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4391559881812899804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5932689258899125157 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1383608792177432506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5932689258899125157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &6837671490096141191 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1666098997110679318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6837671490096141191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8828257191988934713 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 7757002940323997041}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1305045757838270415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8828257191988934713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8338136134824801229
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3705,13 +6821,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4924109305597104032}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1933289355898221616}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8178487735296356419}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4554498142301575887}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8207224859462739345}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4411875372671655308}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &632348870900945663 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4411875372671655308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632348870900945663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &1284384774237882507 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 8338136134824801229}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2657299434176045408 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8178487735296356419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2657299434176045408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &3829589737985542665 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8207224859462739345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3829589737985542665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5113030672218817851 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1933289355898221616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5113030672218817851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5351488856410400025 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4554498142301575887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5351488856410400025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7103635200788213381 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8338136134824801229}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4924109305597104032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7103635200788213381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8413149384386484819
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3779,13 +7015,73 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6628989975010930233}
+    - targetCorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4483177564092365945}
+    - targetCorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8129512293699005278}
   m_SourcePrefab: {fileID: 100100000, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+--- !u!1 &3158212388094534763 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8413149384386484819}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6628989975010930233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3158212388094534763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3983468091628666901 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4866594414480742982, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
   m_PrefabInstance: {fileID: 8413149384386484819}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4283227509645509508 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8413149384386484819}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8129512293699005278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4283227509645509508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8658136564530635750 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8413149384386484819}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4483177564092365945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8658136564530635750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8430384450054773098
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3853,13 +7149,73 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3318117997775333216}
+    - targetCorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3136070404739842349}
+    - targetCorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3276225856229858663}
   m_SourcePrefab: {fileID: 100100000, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+--- !u!1 &3164630140571756370 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6851588726787407416, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8430384450054773098}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3318117997775333216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3164630140571756370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &3996698551231677228 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4866594414480742982, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
   m_PrefabInstance: {fileID: 8430384450054773098}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4273400987173044413 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5742254948486027735, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8430384450054773098}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3276225856229858663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4273400987173044413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &8653911199608578271 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 929539909713951157, guid: be044522c8820ce4091f7bf17c7b9d87, type: 3}
+  m_PrefabInstance: {fileID: 8430384450054773098}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3136070404739842349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653911199608578271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8760479851417428316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3939,13 +7295,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6640830997154590890}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 534262940974605592}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8504383851048522311}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4379639484978000589}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1845793329475922142}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8404416650091076905}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &207998269652779118 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8404416650091076905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 207998269652779118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &2015208568335751706 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 8760479851417428316}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3370072820738405361 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8504383851048522311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3370072820738405361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4539935402894252184 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1845793329475922142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4539935402894252184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4638767416387237768 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4379639484978000589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4638767416387237768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5535305403046352810 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &534262940974605592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5535305403046352810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7543905639481113620 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8760479851417428316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6640830997154590890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7543905639481113620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8800389231858846108
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4025,13 +7501,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3982001665773855325}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1682580655321101972}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6517299153083460629}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7542623725341125831}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 402217153631829053}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5380537926545808698}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &94800102046148782 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5380537926545808698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 94800102046148782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &1748888588685456090 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 8800389231858846108}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3276049886728084273 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6517299153083460629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3276049886728084273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4373890591874232408 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &402217153631829053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4373890591874232408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4886985040854490952 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7542623725341125831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4886985040854490952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5720525404776546154 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1682580655321101972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5720525404776546154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7711129404092126420 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 8800389231858846108}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3982001665773855325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7711129404092126420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &8894002982915941425
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4251,13 +7847,133 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2816261675743718295}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6074146130598101735}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3566050155902385810}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1159132000553542326}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2076323778508985695}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7533468268620940108}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &293377831168615089 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7533468268620940108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293377831168615089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &2091861838528690373 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 9179399013965267843}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2897041229902827822 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3566050155902385810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2897041229902827822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4175307395149347399 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2076323778508985695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4175307395149347399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5084716420879717719 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1159132000553542326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5084716420879717719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5341803699166229877 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6074146130598101735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5341803699166229877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7944889551202098891 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9179399013965267843}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2816261675743718295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944889551202098891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!1001 &9208629254087673880
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4337,10 +8053,130 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3225381802787293899}
+    - targetCorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 519358631745620476}
+    - targetCorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4476179189152342875}
+    - targetCorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1657201497350803505}
+    - targetCorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 11594040470371026}
+    - targetCorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 996898098786696858}
   m_SourcePrefab: {fileID: 100100000, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+--- !u!1 &340603232643819818 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8895048319324070194, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &996898098786696858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 340603232643819818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
 --- !u!4 &2139086690254369630 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7089808783908158278, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
   m_PrefabInstance: {fileID: 9208629254087673880}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2926217048521890485 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6293672050770596525, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4476179189152342875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2926217048521890485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &4132600991807844828 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085246984412510660, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &11594040470371026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132600991807844828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5060027164854034124 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4175765262569117396, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1657201497350803505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5060027164854034124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &5371034489054674670 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3837666035999389430, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &519358631745620476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5371034489054674670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance
+--- !u!1 &7992116596599362896 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1234597863424892232, guid: 62c72165c9e18e149ac2e410d868ca49, type: 3}
+  m_PrefabInstance: {fileID: 9208629254087673880}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3225381802787293899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7992116596599362896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b502fce7f6ea94ff6966a0535bac2a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EndlessRunner.LevelGen.FoliagePropInstance

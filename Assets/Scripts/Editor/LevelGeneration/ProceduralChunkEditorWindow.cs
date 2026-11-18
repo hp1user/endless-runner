@@ -23,7 +23,7 @@ namespace EndlessRunner.LevelGen.Editor
         // Foliage Material Swapper
         private Material foliageMaterial;
         private Material roadFoliageMaterial;
-        private bool autoApplyFoliageToPreview = false;
+        private bool autoApplyFoliageToPreview = true;
         private bool isFoliageAppliedToPreview = false;
         private int previewChunkIndex = 0;
         private readonly Dictionary<Renderer, Material[]> originalMaterialsCache = new Dictionary<Renderer, Material[]>();
@@ -511,6 +511,23 @@ namespace EndlessRunner.LevelGen.Editor
                     newMats[i] = targetMat;
                 }
                 r.sharedMaterials = newMats;
+
+                if (isRoad)
+                {
+                    var propFol = r.GetComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                    if (propFol != null) DestroyImmediate(propFol);
+
+                    var roadFol = r.GetComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                    if (roadFol == null) roadFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                    roadFol.SetManualOffset(previewChunkIndex * 40f);
+                }
+                else
+                {
+                    var propFol = r.GetComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                    if (propFol == null) propFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                    propFol.ApplyNoiseOffset();
+                }
+
                 count++;
             }
 
@@ -660,14 +677,16 @@ namespace EndlessRunner.LevelGen.Editor
         private void ApplyChunkNoiseOffsetToPreview(GameObject target, float offset)
         {
             if (target == null) return;
-            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
             Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
             foreach (var r in renderers)
             {
                 if (r == null) continue;
-                r.GetPropertyBlock(mpb);
-                mpb.SetFloat("_NoiseOffset", offset);
-                r.SetPropertyBlock(mpb);
+                if (IsRoadRenderer(r))
+                {
+                    var roadFol = r.GetComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                    if (roadFol == null) roadFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                    roadFol.SetManualOffset(offset);
+                }
             }
             SceneView.RepaintAll();
         }
@@ -909,6 +928,14 @@ namespace EndlessRunner.LevelGen.Editor
                 GameObject prefab = PrefabUtility.LoadPrefabContents(path);
                 if (prefab == null) continue;
 
+                int chunkIndex = modifiedCount + 1;
+                string fname = Path.GetFileNameWithoutExtension(path);
+                int lastUnder = fname.LastIndexOf('_');
+                if (lastUnder >= 0 && int.TryParse(fname.Substring(lastUnder + 1), out int parsedIdx))
+                {
+                    chunkIndex = parsedIdx;
+                }
+
                 Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
                 foreach (var r in renderers)
                 {
@@ -923,6 +950,23 @@ namespace EndlessRunner.LevelGen.Editor
                         newMats[i] = targetMat;
                     }
                     r.sharedMaterials = newMats;
+
+                    if (isRoad)
+                    {
+                        var propFol = r.GetComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                        if (propFol != null) DestroyImmediate(propFol, true);
+
+                        var roadFol = r.GetComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                        if (roadFol == null) roadFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                        roadFol.chunkSequenceOffset = (chunkIndex - 1) * 40f;
+                        roadFol.ApplyRoadOffset();
+                    }
+                    else
+                    {
+                        var propFol = r.GetComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                        if (propFol == null) propFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                        propFol.ApplyNoiseOffset();
+                    }
                 }
 
                 PrefabUtility.SaveAsPrefabAsset(prefab, path);
@@ -1001,6 +1045,34 @@ namespace EndlessRunner.LevelGen.Editor
                 proc.GenerateRandomLayout(UnityEngine.Random.Range(1000, 999999));
 
                 DestroyImmediate(proc);
+
+                if (foliageMaterial != null && roadFoliageMaterial != null)
+                {
+                    Renderer[] rends = tempGO.GetComponentsInChildren<Renderer>(true);
+                    foreach (var r in rends)
+                    {
+                        bool isRoad = IsRoadRenderer(r);
+                        Material targetMat = isRoad ? roadFoliageMaterial : foliageMaterial;
+                        Material[] newMats = new Material[r.sharedMaterials.Length];
+                        for (int m = 0; m < newMats.Length; m++) newMats[m] = targetMat;
+                        r.sharedMaterials = newMats;
+
+                        if (isRoad)
+                        {
+                            var roadFol = r.GetComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                            if (roadFol == null) roadFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliageRoadInstance>();
+                            roadFol.chunkSequenceOffset = (i - 1) * 40f;
+                            roadFol.autoDetectFromHierarchy = false;
+                            roadFol.ApplyRoadOffset();
+                        }
+                        else
+                        {
+                            var propFol = r.GetComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                            if (propFol == null) propFol = r.gameObject.AddComponent<EndlessRunner.LevelGen.FoliagePropInstance>();
+                            propFol.ApplyNoiseOffset();
+                        }
+                    }
+                }
 
                 string prefabPath = $"{bakeFolder}/{chunkName}.prefab";
                 GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(tempGO, prefabPath);
