@@ -1118,6 +1118,57 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
       - **Sub-Sector Drag & Direct Tap**: Tapping/clicking chips in the dock or dragging outward past 175px dynamically switches the active weapon in that slot and live-updates the Center Hub readout.
       - **Desktop Mouse Scroll & Hotkey Cycling**: Scrolling mouse wheel while hovering or pressing slot hotkeys (`1`, `2`, `3`, `4`) sequentially cycles through all weapons in that slot.
 
+  - **Post-Apocalyptic Foliage & Overgrowth Shader Graph (`World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, `WorldBend_Foliage.shader`, `M_PostApoc_Foliage_Sample.mat`)**:
+    - **Unity Shader Graph Implementation (`World Bend Foliage.shadergraph`)**:
+      - Converted procedural foliage logic into a native Unity URP **Shader Graph** asset based on the runner's master `World Bend BA_NAMR` graph.
+      - Integrated runner vertex bending (`_Curvature` & `_DistanceOffset`) with UniversalLitSubTarget PBR rendering (shadows, GI indirect lighting, reflections, specular).
+      - Added a dedicated "Foliage Overlay" Blackboard category with inspector properties for Moss and Vine textures, tints, tiling, coverage thresholds, and smoothness.
+    - **Dedicated Seamless Texture Pipeline (`Assets/3d/Environment/Foliage/Textures/`)**:
+      - `Seamless Lush Green Moss Carpet.png` (1254x1254): User-provided high-resolution lush moss carpet albedo with natural leafy clump variations.
+      - `Seamless Lush Green Moss Carpet_normal.png` (1254x1254): Generated Sobel-filtered normal map calibrated for moss depth and micro-surface scattering.
+      - `brown_mud_rocks_01_diff_1k.jpg` & `brown_mud_rocks_01_nor_gl_1k.jpg` (1024x1024): Debris, mud, and gravel rock textures breaking up flat asphalt surfaces.
+      - `T_Vine_Albedo.png` & `T_Vine_Normal.png` (512x512): Creeping ivy tendrils with twisting woody stems and transparent alpha cutout.
+      - Configured `.meta` files ensuring proper normal map decoding (`TextureImporterType.NormalMap`) and repeat tiling.
+    - **Anti-Stretching Barrier Projection & Anti-Camouflage Road Layering (`FoliageBlend.hlsl`, `World Bend Foliage.shadergraph`, `WorldBend_Foliage.shader`)**:
+      - **Non-Stretching Barrier Coordinates (`WorldPos.zy`)**: Replaced planar XY projection on side barriers with length-height mapping (`WorldPos.zy`), completely eliminating horizontal line stretching on roadside barriers and guardrails.
+      - **Realistic 3-Layer Road Accumulation**: Eliminated artificial circular "camouflage" blobs by blending:
+        1. Base asphalt road.
+        2. Debris & gravel mud layer (`brown_mud_rocks_01`) scattering along cracks and road shoulders (`|WorldPos.x| > 2.5`).
+        3. Moss layer (`Seamless Lush Green Moss Carpet`) rooting organically inside gravel/debris beds and climbing up barrier bases.
+      - **High-Frequency Fractal Noise (4-Octave FBM)**: Replaced smooth Perlin noise with fine fractal grain to create natural ragged edges and organic creeping shapes.
+    - **1-Click Chunk Studio Material Swapper (`ProceduralChunkEditorWindow.cs`, `ProceduralChunkEditor.cs`)**:
+      - **"🌿 Apply Foliage Material" Button**: Added 1-click preview switching in Chunk Studio and in `ProceduralChunk` Inspector, instantly overriding renderers with `M_PostApoc_Foliage_Sample.mat` while caching original materials.
+      - **"↩️ Revert to Original" Button**: Restores original highway materials across all chunk renderers from cache.
+      - **Auto-Apply Toggle**: Option to automatically swap new scene preview chunks to the overgrown foliage look as they generate.
+      - **Batch Apply to Baked Prefabs**: Added a utility button to batch apply the foliage material to all baked chunk prefabs in the destination folder.
+    - **Dual-Zone Foliage Blending (`FoliageBlend.hlsl`)**:
+      - **Upward-Slope Moss Layer**: Samples seamless world horizontal coordinates (`WorldPos.xz * MossTiling`) masked by `dot(WorldNormal, up)` and 2-octave FBM noise for realistic organic clumping.
+      - **Vertical Creeping Vine Layer**: Samples world vertical coordinates (`WorldPos.y * VineTiling`) combined with texture alpha cutout to naturally populate bridge columns, retaining walls, and highway barriers.
+      - **PBR Overrides**: Modulates base prop metallic down to 0 on foliage areas, clamps smoothness to velvety organic roughness (`MossSmoothness = 0.08`), and applies crevice ambient occlusion.
+    - **Full Native Triplanar Mapping & Dual Material Splitting (`World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, `ProceduralChunkEditor.cs`, `ProceduralChunkEditorWindow.cs`)**:
+      - **Native Unity Triplanar Nodes (`TriplanarNode`)**: Replaced all 2D planar projection samples in `World Bend Foliage.shadergraph` with native Unity `TriplanarNode` instances for Debris Albedo, Debris Normal, Moss Albedo, Moss Normal, Vine Albedo, and Vine Normal.
+      - **Zero Texture Stretching Across All Orientations**: Textures are now mapped simultaneously along X (side barrier walls), Y (horizontal road surface), and Z (end caps, signs, poles) with smooth Ben Golus whiteout normal blending, completely eliminating stretching on vertical walls and beveled curbs.
+      - **Triplanar 3D-Aware Noise (`FoliageBlend.hlsl`)**: Made organic FBM noise triplanar-weighted across all three coordinate planes (`WorldPos.zy` for walls, `WorldPos.xz` for road surfaces, `WorldPos.xy` for cross faces), eradicating horizontal streak bands on roadside barriers.
+      - **Smart Road vs. Props Dual Material Swapper**:
+        - Split foliage into two purpose-built materials: `M_PostApoc_Road_Foliage.mat` (preserving `Road Stylized.jpg` base asphalt and painted lane markings) and `M_PostApoc_Foliage_Sample.mat` (using `Highway_Props_Bs.tga` for props, rails, and barriers).
+        - Updated `ProceduralChunkEditor.cs` and `ProceduralChunkEditorWindow.cs` to detect road meshes via `IsRoadRenderer()` and automatically apply the asphalt-preserving material to the road and the prop material to barriers, preventing prop atlases from smearing across the driving lanes.
+        - Preserved 1-click revert capability to cleanly restore all chunk renderers to their original materials.
+    - **Fix for Dark/Black Road Surface & Texture Stretching Resolution (`WorldBend_Foliage.shader`, `M_PostApoc_Road_Foliage.mat`, `M_PostApoc_Foliage_Sample.mat`)**:
+      - **Root Cause Analysis**: The road appeared pitch black / with no visible foliage because `M_PostApoc_Road_Foliage.mat` was referencing mismatched property aliases (`_Ba` vs `_BaseMap`), and the previous Shader Graph inline math had broken slot coordinates (evaluating in Tangent Space rather than World Space).
+      - **Property Aliasing & Base Texture Fallbacks**: Added full support for `_BaseMap`, `_Base`, `_Ba`, and `_MainTex` in `WorldBend_Foliage.shader` with seamless multi-property fallback so highway lane markings and asphalt are always loaded regardless of the material's saved texture slot.
+      - **High-Sharpness Triplanar (`pow(absN, 6.0)`)**: Completely eliminated barrier edge stretching and ghosting by using an orthogonal blending power of 6.0. Guardrails, side walls, and posts now receive crisp vertical texture mapping with identical aspect ratios.
+      - **Natural Shoulder & Curb Road Accumulation**: Eliminated artificial circular "camouflage" blobs by weighting mud/gravel (`brown_mud_rocks_01_diff_1k`) and moss carpet (`Seamless Lush Green Moss Carpet`) heavily along road curbs (`|X| >= 1.5m`) and median seams while leaving the active player runner driving lanes clean with realistic light road wear.
+      - **Climbing Vines on Vertical Geometry**: Integrated alpha-cutout vine crawling (`T_Vine_Albedo.png`) ascending naturally from the barrier bases.
+    - **Dual-Highway Local Alignment & Prop Texture Atlas Correction (`WorldBend_Foliage.shader`, `M_PostApoc_Foliage_Sample.mat`, `M_PostApoc_Road_Foliage.mat`)**:
+      - **Secondary Highway Solid Green Moss Fix**: Fixed a bug where curb accumulation checked global `abs(worldPos.x)`. On parallel secondary highways (offset at $X = -10.5\text{ m}$), global $|X|$ was constantly $> 3.2$, causing the entire parallel road to turn solid green like a golf course. Switched curb detection to object-space local coordinates (`positionOS.x`), making both the main playable highway and secondary visual highways independently accumulate debris/moss along their outer curbs while keeping driving corridors clear.
+      - **Overhead Sign Rainbow Palette Fix**: Corrected base texture assignment on `M_PostApoc_Foliage_Sample.mat` to use the intended highway prop atlas `Highway_Props_Bs.tga` and packed normal/occlusion `Highway_Props_Naoh.tga`, eradicating unwanted gradient/rainbow colors from overhead signs and truss metal frames.
+      - **Natural Grounded Moss Color Calibration**: Adjusted `_MossColor` from hyper-saturated fluorescent green to natural earthy foliage tone (`(0.85, 0.95, 0.75)`), yielding realistic post-apocalyptic overgrown scenery.
+    - **World Bend Direction Calibration & Barrier Gravel/Moss Overgrowth (`WorldBend_Foliage.shader`, `M_PostApoc_Road_Foliage.mat`, `M_PostApoc_Foliage_Sample.mat`)**:
+      - **Downward Horizon Curvature**: Fixed inverted World Bend sign where `- dist * dist * (-Curvature)` caused the road to launch upwards into the sky. Changed to `worldPos.y += dist * dist * _Curvature` with `_Curvature = -0.0008` and `_DistanceOffset = 12.0`, creating a smooth, classic downward curve over the horizon while keeping the immediate 12m running lane flat and playable.
+      - **Barrier Foliage Natural Overgrowth**: Removed squiggly vertical crawling vine lines from barriers. Replaced with organic layered buildup: dirt/gravel rocks (`brown_mud_rocks_01_diff_1k`) collecting at the barrier base with lush green moss (`Seamless Lush Green Moss Carpet`) creeping up natural concrete crevices.
+      - **Road Center-Fill & Organic Seam Overgrowth**: Added center-seam fissure moss (`exp(-localX^2 * 4.0)`) and micro-fractal gravel scattering across lanes, eliminating sterile black asphalt voids while keeping player running corridors clear and readable.
+      - **Interwoven Road Moss & Gravel Blending**: Eliminated parallel "moss line then gravel line" stripes along the curbs. The curb boundary now wobbles organically (`curbEdgeNoise`), and moss forms discrete cushion clusters rooted directly within and between the gravel beds (`mossField = (debrisMask * 0.75 + curbZone * 0.35 + centerSeam * 0.35) * (mossClumpNoise * 0.7 + 0.35)`). Gravel peeks through around the edges of moss cushions, matching the natural intermingled look of the roadside barriers.
+
 
 
 

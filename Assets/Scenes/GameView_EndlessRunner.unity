@@ -15110,6 +15110,9 @@ MonoBehaviour:
   - 0
   - 2.5
   spawnYPosition: 0
+  balanceObstaclesDuringBossFight: 1
+  bossFightSpawnIntervalRange: {x: 8, y: 15}
+  protectBossSafeLane: 1
   obstacleDirection: 1
   obstacleDespawnThreshold: 20
   obstaclePool:
@@ -17009,6 +17012,14 @@ MonoBehaviour:
   newLevelSpawnDelay: 5
   clearEnemiesOnLevelComplete: 1
   bossSpawnZOffset: 25
+  defaultBossRoarClip: {fileID: 0}
+  defaultBossRoarAnimationTrigger: Roar
+  defaultBossRoarAnimationDuration: 1.5
+  defaultPauseMovementDuringRoar: 1
+  enableBossSpawnCameraShake: 1
+  bossSpawnCameraShakeIntensity: 0.6
+  bossSpawnCameraShakeDuration: 0.8
+  enableBossSpawnHaptics: 1
   healthIncreasePerLevel: 0.15
   damageIncreasePerLevel: 0.2
   speedIncreasePerLevel: 0.05
@@ -17694,10 +17705,19 @@ MonoBehaviour:
   weaponVolume: 1
   damageMultiplier: 1
   armorPerKill: 0
+  baseCritChance: 10
+  baseCritMultiplier: 1.25
+  bonusCritChance: 0
+  bonusCritMultiplier: 0
   equippedSkill: {fileID: 11400000, guid: e0f70518c9adc5444b03af8c46711ac7, type: 2}
   equippedUltimate: {fileID: 11400000, guid: eb82dfaa8704255469b579da1404a1cd, type: 2}
   debugMode: 0
   autoFireHoldDelay: 0.22
+  enableDamageCameraShake: 1
+  damageShakeIntensity: 0.38
+  damageShakeDuration: 0.25
+  enableDamageHaptics: 1
+  enableScreenBloodEffect: 1
 --- !u!82 &5151152874240605974
 AudioSource:
   m_ObjectHideFlags: 0

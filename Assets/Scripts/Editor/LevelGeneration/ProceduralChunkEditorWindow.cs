@@ -20,6 +20,21 @@ namespace EndlessRunner.LevelGen.Editor
         private GameObject currentPreviewChunk;
         private SerializedObject serializedProfile;
 
+        // Foliage Material Swapper
+        private Material foliageMaterial;
+        private Material roadFoliageMaterial;
+        private bool autoApplyFoliageToPreview = false;
+        private bool isFoliageAppliedToPreview = false;
+        private int previewChunkIndex = 0;
+        private readonly Dictionary<Renderer, Material[]> originalMaterialsCache = new Dictionary<Renderer, Material[]>();
+
+        // Decal Randomizer Settings
+        private int minDecalsPerChunk = 3;
+        private int maxDecalsPerChunk = 6;
+        private bool includeDecalCracks = true;
+        private bool includeDecalMud = true;
+        private bool includeDecalMoss = true;
+
         // Tab 1: Obstacle Manager
         private ObstacleManager sceneObstacleManager;
         private SerializedObject serializedObstacleManager;
@@ -52,6 +67,15 @@ namespace EndlessRunner.LevelGen.Editor
             if (profile != null)
             {
                 serializedProfile = new SerializedObject(profile);
+            }
+
+            if (foliageMaterial == null)
+            {
+                foliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Foliage_Sample.mat");
+            }
+            if (roadFoliageMaterial == null)
+            {
+                roadFoliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Road_Foliage.mat");
             }
 
             FindSceneObstacleManager();
@@ -259,8 +283,163 @@ namespace EndlessRunner.LevelGen.Editor
 
             EditorGUILayout.Space(8);
 
+            // Foliage / Post-Apocalyptic Material Quick Swapper
+            EditorGUILayout.LabelField("🌿 Foliage / Overgrown Material (1-Click Preview)", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical("box");
+            foliageMaterial = (Material)EditorGUILayout.ObjectField("Props Foliage Mat", foliageMaterial, typeof(Material), false);
+            roadFoliageMaterial = (Material)EditorGUILayout.ObjectField("Road Foliage Mat", roadFoliageMaterial, typeof(Material), false);
+            autoApplyFoliageToPreview = EditorGUILayout.Toggle(new GUIContent("Auto-Apply to New Previews", "Automatically swap preview chunk renderers to the foliage material whenever a preview is generated."), autoApplyFoliageToPreview);
+
+            EditorGUILayout.Space(4);
+            EditorGUI.BeginChangeCheck();
+            previewChunkIndex = EditorGUILayout.IntSlider(new GUIContent("Preview Chunk Sequence (0-10)", "Simulates placing chunks sequentially along the highway (0m, 40m, 80m, 120m...). The overgrowth pattern evolves seamlessly across 3-4 chunks."), previewChunkIndex, 0, 10);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ApplyChunkNoiseOffsetToPreview(GetTargetPreviewChunk(), previewChunkIndex * 40f);
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = isFoliageAppliedToPreview ? new Color(0.3f, 0.9f, 0.4f) : new Color(0.6f, 1f, 0.6f);
+            if (GUILayout.Button("🌿 Apply Foliage Material", GUILayout.Height(32)))
+            {
+                ApplyFoliageMaterialToTarget(GetTargetPreviewChunk());
+                ApplyChunkNoiseOffsetToPreview(GetTargetPreviewChunk(), previewChunkIndex * 40f);
+            }
+
+            GUI.backgroundColor = new Color(0.9f, 0.9f, 0.9f);
+            if (GUILayout.Button("↩️ Revert to Original", GUILayout.Height(32), GUILayout.Width(150)))
+            {
+                RevertFoliageMaterialOnTarget(GetTargetPreviewChunk());
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            string statusText = isFoliageAppliedToPreview
+                ? "Status: <color=#33dd33><b>🌿 Foliage Shader Active</b></color> (overgrown moss & debris visible in Preview)"
+                : "Status: <color=#888888>Original Highway Materials Active</color>";
+            EditorGUILayout.LabelField(statusText, new GUIStyle(EditorStyles.miniLabel) { richText = true });
+
+            EditorGUILayout.Space(2);
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("📦 Apply Foliage to All Baked Prefabs", GUILayout.Height(24)))
+            {
+                ApplyFoliageToAllBakedPrefabs();
+            }
+            GUI.backgroundColor = new Color(1f, 0.85f, 0.85f);
+            if (GUILayout.Button("↩️ Revert All Baked Prefabs", GUILayout.Height(24)))
+            {
+                RevertAllBakedPrefabsToOriginal();
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space(8);
+
+            // Hybrid Storytelling Decals (1-Click Stamper & Batch Randomizer)
+            EditorGUILayout.LabelField("🎯 Storytelling Road Decals (Cracks, Mud & Moss)", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.HelpBox("Project decals onto the road surface. Decals use Layer 'Ignore Raycast' and shallow vertical projection bounds so they never interfere with player vehicles or colliders.", MessageType.Info);
+
+            EditorGUILayout.BeginHorizontal();
+            minDecalsPerChunk = EditorGUILayout.IntSlider("Min Decals / Chunk", minDecalsPerChunk, 0, 10);
+            maxDecalsPerChunk = EditorGUILayout.IntSlider("Max Decals / Chunk", maxDecalsPerChunk, 1, 15);
+            if (maxDecalsPerChunk < minDecalsPerChunk) maxDecalsPerChunk = minDecalsPerChunk;
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            includeDecalCracks = EditorGUILayout.ToggleLeft("💥 Asphalt Cracks", includeDecalCracks, GUILayout.Width(130));
+            includeDecalMud = EditorGUILayout.ToggleLeft("🪨 Mud & Debris", includeDecalMud, GUILayout.Width(130));
+            includeDecalMoss = EditorGUILayout.ToggleLeft("🌿 Moss Patches", includeDecalMoss, GUILayout.Width(130));
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(4);
+
+            // 1-Click Batch Buttons
+            GUI.backgroundColor = new Color(0.4f, 0.85f, 1f);
+            if (GUILayout.Button("🎲 Spawn Random Decals in All Baked Prefabs (1-Click)", GUILayout.Height(30)))
+            {
+                SpawnRandomDecalsOnAllBakedPrefabs();
+            }
+            GUI.backgroundColor = new Color(0.6f, 1f, 0.7f);
+            if (GUILayout.Button("🎲 Spawn Random Decals on Active Preview Chunk", GUILayout.Height(26)))
+            {
+                int count = Random.Range(minDecalsPerChunk, maxDecalsPerChunk + 1);
+                SpawnRandomDecalsOnTarget(GetTargetPreviewChunk(), count);
+                SceneView.RepaintAll();
+            }
+            GUI.backgroundColor = Color.white;
+
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = new Color(1f, 0.85f, 0.85f);
+            if (GUILayout.Button("🧹 Clear Decals from All Baked Prefabs", GUILayout.Height(22)))
+            {
+                ClearDecalsFromAllBakedPrefabs();
+            }
+            if (GUILayout.Button("🧹 Clear Decals from Preview Chunk", GUILayout.Height(22)))
+            {
+                ClearDecalsOnPreview(GetTargetPreviewChunk());
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Manual 1-Click Stampers (Active Preview):", EditorStyles.miniBoldLabel);
+
+            // Row 1: Cracks
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("💥 Cracked 1", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Cracked_1", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("💥 Cracked 2", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Cracked_2", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("💥 Road Crack", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_RoadCrack", new Vector3(Random.Range(-2.8f, 2.8f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // Row 2: Mud
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("🪨 Mud Decal 1", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Mud_Decal_1", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("🪨 Mud Decal 2", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Mud_Decal_2", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("🪨 Mud Debris", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_MudDebris", new Vector3(Random.Range(-3.5f, 3.5f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // Row 3: Moss
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("🌿 Moss 1", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Moss_1", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("🌿 Moss 2", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_Moss_2", new Vector3((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            if (GUILayout.Button("🌿 Moss Cluster", GUILayout.Height(22)))
+            {
+                StampDecalOnPreview("Decal_MossPatch", new Vector3(Random.Range(-4.2f, 4.2f), 0.25f, Random.Range(-15f, 15f)));
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space(8);
+
             // Batch Baking
-            EditorGUILayout.LabelField("📦 1-Click Batch Prefab Baker", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("📦 1-Batch Prefab Baker", EditorStyles.boldLabel);
             bakeCount = EditorGUILayout.IntSlider("Number of Prefabs", bakeCount, 1, 30);
             bakeFolder = EditorGUILayout.TextField("Save Folder", bakeFolder);
             targetThemeToAssign = (LevelThemeData)EditorGUILayout.ObjectField("Assign to Theme (Optional)", targetThemeToAssign, typeof(LevelThemeData), false);
@@ -283,6 +462,479 @@ namespace EndlessRunner.LevelGen.Editor
             EditorGUILayout.EndVertical();
         }
 
+        private GameObject GetTargetPreviewChunk()
+        {
+            if (currentPreviewChunk != null) return currentPreviewChunk;
+            GameObject existing = GameObject.Find("[PROD_CHUNK_PREVIEW]");
+            if (existing != null) return existing;
+            if (Selection.activeGameObject != null && Selection.activeGameObject.GetComponent<ProceduralChunk>() != null)
+            {
+                return Selection.activeGameObject;
+            }
+            return null;
+        }
+
+        private void ApplyFoliageMaterialToTarget(GameObject target)
+        {
+            if (target == null)
+            {
+                EditorUtility.DisplayDialog("Foliage Preview", "No preview chunk found in scene. Generate a preview chunk first or select one in the hierarchy.", "OK");
+                return;
+            }
+
+            if (foliageMaterial == null)
+            {
+                foliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Foliage_Sample.mat");
+            }
+            if (roadFoliageMaterial == null)
+            {
+                roadFoliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Road_Foliage.mat");
+            }
+
+            Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+            int count = 0;
+            foreach (var r in renderers)
+            {
+                if (r == null) continue;
+                if (!originalMaterialsCache.ContainsKey(r))
+                {
+                    originalMaterialsCache[r] = r.sharedMaterials;
+                }
+
+                bool isRoad = IsRoadRenderer(r);
+                Material targetMat = (isRoad && roadFoliageMaterial != null) ? roadFoliageMaterial : foliageMaterial;
+                if (targetMat == null) continue;
+
+                Material[] newMats = new Material[r.sharedMaterials.Length];
+                for (int i = 0; i < newMats.Length; i++)
+                {
+                    newMats[i] = targetMat;
+                }
+                r.sharedMaterials = newMats;
+                count++;
+            }
+
+            isFoliageAppliedToPreview = true;
+            SceneView.RepaintAll();
+            Debug.Log($"<color=green>[ChunkStudio]</color> Applied Foliage Material to {count} renderers on '{target.name}'.");
+        }
+
+        private bool IsRoadRenderer(Renderer r)
+        {
+            if (r == null) return false;
+            string objName = r.name;
+            if (objName.IndexOf("Road", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                objName.IndexOf("Path", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            Transform parent = r.transform.parent;
+            while (parent != null && parent != r.transform.root)
+            {
+                if (parent.name.IndexOf("Road", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    parent.name.IndexOf("Path", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+                parent = parent.parent;
+            }
+
+            if (r.sharedMaterial != null)
+            {
+                string matName = r.sharedMaterial.name;
+                if (matName.IndexOf("Road", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void RevertFoliageMaterialOnTarget(GameObject target)
+        {
+            if (target == null)
+            {
+                target = GetTargetPreviewChunk();
+            }
+
+            if (target == null)
+            {
+                EditorUtility.DisplayDialog("Foliage Preview", "No preview chunk found in scene.", "OK");
+                return;
+            }
+
+            Material defaultRoad = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Road.mat");
+            Material defaultProps = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Highway/Mats/Highway Props.mat");
+
+            Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+            int count = 0;
+
+            foreach (var r in renderers)
+            {
+                if (r == null) continue;
+                if (originalMaterialsCache.TryGetValue(r, out Material[] cached) && cached != null && cached.Length > 0 && cached[0] != null)
+                {
+                    r.sharedMaterials = cached;
+                    count++;
+                }
+                else
+                {
+                    Material fallback = GetOriginalMaterialForRenderer(r, defaultRoad, defaultProps);
+                    Material[] newMats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < newMats.Length; i++)
+                    {
+                        newMats[i] = fallback;
+                    }
+                    r.sharedMaterials = newMats;
+                    count++;
+                }
+            }
+
+            originalMaterialsCache.Clear();
+            isFoliageAppliedToPreview = false;
+            SceneView.RepaintAll();
+            Debug.Log($"<color=yellow>[ChunkStudio]</color> Reverted {count} renderers back to original highway materials.");
+        }
+
+        private Material GetOriginalMaterialForRenderer(Renderer r, Material defaultRoad, Material defaultProps)
+        {
+            if (r == null) return defaultProps;
+            if (IsRoadRenderer(r)) return defaultRoad;
+
+            string rName = r.name.ToLower();
+            Transform parent = r.transform.parent;
+            string pName = parent != null ? parent.name.ToLower() : "";
+
+            if (rName.Contains("van") || pName.Contains("van"))
+                return AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Vehicles/Materials/M_Van_Rusted.mat") ?? defaultProps;
+            if (rName.Contains("bus") || pName.Contains("bus"))
+                return AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Vehicles/Materials/M_Bus_Rusted.mat") ?? defaultProps;
+            if (rName.Contains("suv") || pName.Contains("suv"))
+                return AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Vehicles/Materials/M_SUV_Rusted.mat") ?? defaultProps;
+            if (rName.Contains("car") || pName.Contains("car"))
+                return AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Vehicles/Materials/M_Car_Rusted.mat") ?? defaultProps;
+
+            return defaultProps;
+        }
+
+        private void RevertAllBakedPrefabsToOriginal()
+        {
+            if (string.IsNullOrEmpty(bakeFolder) || !Directory.Exists(bakeFolder))
+            {
+                EditorUtility.DisplayDialog("Revert Prefabs", $"Folder '{bakeFolder}' not found.", "OK");
+                return;
+            }
+
+            Material defaultRoad = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Road.mat");
+            Material defaultProps = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/Highway/Mats/Highway Props.mat");
+
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { bakeFolder });
+            int modifiedCount = 0;
+
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefab = PrefabUtility.LoadPrefabContents(path);
+                if (prefab == null) continue;
+
+                Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
+                foreach (var r in renderers)
+                {
+                    if (r == null) continue;
+                    Material fallback = GetOriginalMaterialForRenderer(r, defaultRoad, defaultProps);
+                    Material[] newMats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < newMats.Length; i++)
+                    {
+                        newMats[i] = fallback;
+                    }
+                    r.sharedMaterials = newMats;
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(prefab, path);
+                PrefabUtility.UnloadPrefabContents(prefab);
+                modifiedCount++;
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"<color=yellow>[ChunkStudio]</color> Reverted {modifiedCount} chunk prefabs in '{bakeFolder}' back to original highway materials.");
+            EditorUtility.DisplayDialog("Revert Complete", $"Successfully reverted {modifiedCount} chunk prefabs in '{bakeFolder}' back to original highway materials!", "OK");
+        }
+
+        private void ApplyChunkNoiseOffsetToPreview(GameObject target, float offset)
+        {
+            if (target == null) return;
+            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+            Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers)
+            {
+                if (r == null) continue;
+                r.GetPropertyBlock(mpb);
+                mpb.SetFloat("_NoiseOffset", offset);
+                r.SetPropertyBlock(mpb);
+            }
+            SceneView.RepaintAll();
+        }
+
+        private void StampDecalOnPreview(string prefabName, Vector3 localPos)
+        {
+            GameObject target = GetTargetPreviewChunk();
+            if (target == null)
+            {
+                EditorUtility.DisplayDialog("Decal Stamper", "Please generate a preview chunk in the scene first.", "OK");
+                return;
+            }
+
+            GameObject decalPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Prefabs/Decals/{prefabName}.prefab");
+            if (decalPrefab == null)
+            {
+                EditorUtility.DisplayDialog("Decal Stamper", $"Prefab 'Assets/Prefabs/Decals/{prefabName}.prefab' not found.", "OK");
+                return;
+            }
+
+            Transform decalsRoot = target.transform.Find("Decals");
+            if (decalsRoot == null)
+            {
+                GameObject go = new GameObject("Decals");
+                go.transform.SetParent(target.transform, false);
+                decalsRoot = go.transform;
+            }
+
+            GameObject decalInstance = (GameObject)PrefabUtility.InstantiatePrefab(decalPrefab, decalsRoot);
+            decalInstance.name = $"{prefabName}_{decalsRoot.childCount:D2}";
+            decalInstance.transform.localPosition = localPos;
+            decalInstance.transform.localRotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
+            float scale = Random.Range(0.85f, 1.35f);
+            decalInstance.transform.localScale = new Vector3(scale, scale, 1.0f);
+
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+            decalInstance.layer = ignoreRaycastLayer;
+
+            Collider col = decalInstance.GetComponent<Collider>();
+            if (col != null) DestroyImmediate(col);
+
+            Selection.activeGameObject = decalInstance;
+            SceneView.RepaintAll();
+            Debug.Log($"<color=cyan>[ChunkStudio]</color> Stamped {decalInstance.name} at {localPos} (Layer: Ignore Raycast).");
+        }
+
+        private void SpawnRandomDecalsOnTarget(GameObject target, int count)
+        {
+            if (target == null) return;
+
+            Transform decalsRoot = target.transform.Find("Decals");
+            if (decalsRoot == null)
+            {
+                GameObject go = new GameObject("Decals");
+                go.transform.SetParent(target.transform, false);
+                decalsRoot = go.transform;
+            }
+            else
+            {
+                for (int i = decalsRoot.childCount - 1; i >= 0; i--)
+                {
+                    DestroyImmediate(decalsRoot.GetChild(i).gameObject);
+                }
+            }
+
+            List<string> candidatePrefabs = new List<string>();
+            if (includeDecalCracks)
+            {
+                candidatePrefabs.Add("Decal_Cracked_1");
+                candidatePrefabs.Add("Decal_Cracked_2");
+                candidatePrefabs.Add("Decal_RoadCrack");
+            }
+            if (includeDecalMud)
+            {
+                candidatePrefabs.Add("Decal_Mud_Decal_1");
+                candidatePrefabs.Add("Decal_Mud_Decal_2");
+                candidatePrefabs.Add("Decal_MudDebris");
+            }
+            if (includeDecalMoss)
+            {
+                candidatePrefabs.Add("Decal_Moss_1");
+                candidatePrefabs.Add("Decal_Moss_2");
+                candidatePrefabs.Add("Decal_MossPatch");
+            }
+
+            if (candidatePrefabs.Count == 0) return;
+
+            int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignoreRaycastLayer < 0) ignoreRaycastLayer = 2;
+
+            for (int i = 0; i < count; i++)
+            {
+                string chosenName = candidatePrefabs[Random.Range(0, candidatePrefabs.Count)];
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Prefabs/Decals/{chosenName}.prefab");
+                if (prefab == null) continue;
+
+                GameObject inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab, decalsRoot);
+                inst.name = $"{chosenName}_{i + 1:D2}";
+                inst.layer = ignoreRaycastLayer;
+
+                float posX = 0f;
+                if (chosenName.Contains("Moss"))
+                {
+                    posX = (Random.value < 0.65f)
+                        ? ((Random.value < 0.5f ? -1f : 1f) * Random.Range(2.5f, 4.3f))
+                        : Random.Range(-1.2f, 1.2f);
+                }
+                else if (chosenName.Contains("Mud"))
+                {
+                    posX = Random.Range(-3.8f, 3.8f);
+                }
+                else
+                {
+                    posX = Random.Range(-3.2f, 3.2f);
+                }
+
+                float posZ = Random.Range(-24f, 24f);
+                float posY = 0.25f;
+
+                inst.transform.localPosition = new Vector3(posX, posY, posZ);
+                inst.transform.localRotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
+                float scale = Random.Range(0.85f, 1.35f);
+                inst.transform.localScale = new Vector3(scale, scale, 1.0f);
+
+                Collider col = inst.GetComponent<Collider>();
+                if (col != null) DestroyImmediate(col);
+            }
+        }
+
+        private void SpawnRandomDecalsOnAllBakedPrefabs()
+        {
+            if (string.IsNullOrEmpty(bakeFolder) || !Directory.Exists(bakeFolder))
+            {
+                EditorUtility.DisplayDialog("Spawn Decals", $"Folder '{bakeFolder}' not found.", "OK");
+                return;
+            }
+
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { bakeFolder });
+            int modifiedCount = 0;
+            int totalDecalsCount = 0;
+
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefab = PrefabUtility.LoadPrefabContents(path);
+                if (prefab == null) continue;
+
+                int decalCount = Random.Range(minDecalsPerChunk, maxDecalsPerChunk + 1);
+                SpawnRandomDecalsOnTarget(prefab, decalCount);
+                totalDecalsCount += decalCount;
+
+                PrefabUtility.SaveAsPrefabAsset(prefab, path);
+                PrefabUtility.UnloadPrefabContents(prefab);
+                modifiedCount++;
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"<color=cyan>[ChunkStudio]</color> Spawned {totalDecalsCount} decals across {modifiedCount} chunk prefabs in '{bakeFolder}'.");
+            EditorUtility.DisplayDialog("Decals Spawned", $"Successfully spawned {totalDecalsCount} random decals across {modifiedCount} chunk prefabs in '{bakeFolder}'!\n\nAll decals assigned to Layer 'Ignore Raycast' with zero physics collisions.", "OK");
+        }
+
+        private void ClearDecalsFromAllBakedPrefabs()
+        {
+            if (string.IsNullOrEmpty(bakeFolder) || !Directory.Exists(bakeFolder))
+            {
+                EditorUtility.DisplayDialog("Clear Decals", $"Folder '{bakeFolder}' not found.", "OK");
+                return;
+            }
+
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { bakeFolder });
+            int modifiedCount = 0;
+
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefab = PrefabUtility.LoadPrefabContents(path);
+                if (prefab == null) continue;
+
+                Transform decalsRoot = prefab.transform.Find("Decals");
+                if (decalsRoot != null)
+                {
+                    DestroyImmediate(decalsRoot.gameObject);
+                    PrefabUtility.SaveAsPrefabAsset(prefab, path);
+                    modifiedCount++;
+                }
+
+                PrefabUtility.UnloadPrefabContents(prefab);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"<color=yellow>[ChunkStudio]</color> Cleared decals from {modifiedCount} chunk prefabs in '{bakeFolder}'.");
+            EditorUtility.DisplayDialog("Decals Cleared", $"Successfully cleared decals from {modifiedCount} chunk prefabs in '{bakeFolder}'.", "OK");
+        }
+
+        private void ClearDecalsOnPreview(GameObject target)
+        {
+            if (target == null) return;
+            Transform decalsRoot = target.transform.Find("Decals");
+            if (decalsRoot != null)
+            {
+                Undo.DestroyObjectImmediate(decalsRoot.gameObject);
+                SceneView.RepaintAll();
+                Debug.Log("<color=yellow>[ChunkStudio]</color> Cleared decals from preview chunk.");
+            }
+        }
+
+        private void ApplyFoliageToAllBakedPrefabs()
+        {
+            if (foliageMaterial == null)
+            {
+                foliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Foliage_Sample.mat");
+            }
+            if (roadFoliageMaterial == null)
+            {
+                roadFoliageMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/3d/Environment/M_PostApoc_Road_Foliage.mat");
+            }
+            if (foliageMaterial == null)
+            {
+                EditorUtility.DisplayDialog("Foliage Batch Apply", "No Foliage Material assigned.", "OK");
+                return;
+            }
+
+            if (!Directory.Exists(bakeFolder))
+            {
+                EditorUtility.DisplayDialog("Foliage Batch Apply", $"Folder '{bakeFolder}' not found.", "OK");
+                return;
+            }
+
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { bakeFolder });
+            int modifiedCount = 0;
+
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefab = PrefabUtility.LoadPrefabContents(path);
+                if (prefab == null) continue;
+
+                Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
+                foreach (var r in renderers)
+                {
+                    if (r == null) continue;
+                    bool isRoad = IsRoadRenderer(r);
+                    Material targetMat = (isRoad && roadFoliageMaterial != null) ? roadFoliageMaterial : foliageMaterial;
+                    if (targetMat == null) continue;
+
+                    Material[] newMats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < newMats.Length; i++)
+                    {
+                        newMats[i] = targetMat;
+                    }
+                    r.sharedMaterials = newMats;
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(prefab, path);
+                PrefabUtility.UnloadPrefabContents(prefab);
+                modifiedCount++;
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"<color=green>[ChunkStudio]</color> Applied Foliage Material to {modifiedCount} chunk prefabs in '{bakeFolder}'.");
+            EditorUtility.DisplayDialog("Foliage Batch Complete", $"Successfully applied Foliage Material to {modifiedCount} chunk prefabs in '{bakeFolder}'!", "OK");
+        }
+
         private void GenerateScenePreview()
         {
             if (profile == null) return;
@@ -296,6 +948,18 @@ namespace EndlessRunner.LevelGen.Editor
             proc.profile = profile;
             proc.GenerateRandomLayout();
 
+            previewChunkIndex = (previewChunkIndex + 1) % 11;
+
+            if (autoApplyFoliageToPreview)
+            {
+                ApplyFoliageMaterialToTarget(currentPreviewChunk);
+                ApplyChunkNoiseOffsetToPreview(currentPreviewChunk, previewChunkIndex * 40f);
+            }
+            else
+            {
+                isFoliageAppliedToPreview = false;
+            }
+
             Selection.activeGameObject = currentPreviewChunk;
             SceneView.lastActiveSceneView?.FrameSelected();
             Debug.Log("<color=cyan>[ChunkStudio]</color> Generated live preview chunk in scene view.");
@@ -308,6 +972,8 @@ namespace EndlessRunner.LevelGen.Editor
             {
                 DestroyImmediate(existing);
             }
+            originalMaterialsCache.Clear();
+            isFoliageAppliedToPreview = false;
             currentPreviewChunk = null;
         }
 
