@@ -1227,6 +1227,18 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
 ### Bugs Fixed & Improvements
 - **Shader Graph Inactive Property Node**: Resolved compilation omission in `World Bend Foliage.shadergraph` where `_NoiseOffset` was not wired to the root graph structure.
 - **Highway Swapping Detection**: Fixed hierarchy traversal in `ProceduralChunkEditor.cs` and `ProceduralChunkEditorWindow.cs` so road meshes (`Path_1`/`RoadBase`) receive `M_PostApoc_Road_Foliage.mat` and barriers receive `M_PostApoc_Foliage_Sample.mat`.
+- **Weapon Unlock Pacing & Boss-Only Legendary Drops Overhaul (`UpgradeManager.cs`)**:
+  - **Issue Diagnosed**: In normal wave level-ups, clearing waves under 30s awarded a +5% flat bonus to Legendary rolls alongside level scaling, allowing players to roll Legendary cards (including weapon unlock cards like Desert Eagle, Minigun, and RPG) repeatedly in consecutive levels. Additionally, draws had no per-hand weapon cap or offer cooldown.
+  - **Boss-Only Legendary & Mythic Restriction**:
+    - Added `legendaryRestrictedToBoss` (default: `true`) to `UpgradeManager.cs`.
+    - In normal wave levels (`!isBossDrop`), `CalculateNormalRarity` strictly sets `legendaryWeight = 0f` (capped at Epic).
+    - In `GetRandomCardOfRarity`, fallback step-up loops, and the universal fallback pool, Legendary and Mythic cards are strictly barred when `!isBossDrop`.
+    - Legendary and Mythic cards (e.g. `Lethal Singularity`, `Dead Mans Switch`, `Singularity Chambers`, `WeaponUnlock_Minigun`, `WeaponUnlock_RPG`) now drop **exclusively as boss battle milestone rewards**.
+  - **Weapon Unlock Pacing & Single-Hand Capping**:
+    - **Max 1 Weapon Per Hand**: Added `HasWeaponUnlockInHand()` check enforcing that no 3-card draw can ever contain more than 1 weapon unlock card.
+    - **Normal Level Cooldown**: Added `minLevelsBetweenWeaponOffers = 3` and `lastWeaponOfferLevel` tracking. After a weapon unlock card is offered to the player, no weapon unlock card can be offered for at least 3 levels during normal wave progression.
+    - **Boss Drops Integration**: Boss battle milestone drops bypass the level cooldown to guarantee milestone weapon offers or high-tier perks while still strictly respecting the max 1 weapon per hand cap.
+  - **Automated Verification**: Simulated 30 levels of card rolls across normal and boss waves. Confirmed 0 Legendary/Mythic cards in normal waves, positive Legendary/Mythic boss drops, maximum 1 weapon per hand, and 0 weapon pacing violations.
 - **Chunk Boundary Seam Hard Cut Fix**: 
   - Diagnosed cause of abrupt vertical moss line cuts between adjacent chunks. Road mesh vertices span $Z \in [-25.0, +15.0]$ (centered at $Z = -5.0$, 40m long).
   - Implemented centered chunk seam falloff in `World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, and `WorldBend_Foliage.shader`: `seamFade = smoothstep(0.0, 4.0, 20.0 - abs(WorldPos.z + 5.0))`.

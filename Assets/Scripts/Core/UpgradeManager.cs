@@ -24,8 +24,6 @@ public class UpgradeManager : MonoBehaviour
 
     public List<UpgradeCard> bossDropPool = new List<UpgradeCard>();
 
-    
-
     [Tooltip("Percent chance a non-guaranteed boss card is Mythic")]
 
     [Range(0f, 100f)] public float bossMythicChance = 5f;
@@ -33,6 +31,18 @@ public class UpgradeManager : MonoBehaviour
     [Tooltip("Percent chance a non-guaranteed boss card is Legendary")]
 
     [Range(0f, 100f)] public float bossLegendaryChance = 30f;
+
+    [Header("Weapon Pacing & Rarity Restrictions")]
+
+    [Tooltip("Minimum number of levels between offering weapon unlock cards in normal level ups.")]
+    public int minLevelsBetweenWeaponOffers = 3;
+
+    [Tooltip("If true, Legendary and Mythic cards strictly only drop from boss battles.")]
+    public bool legendaryRestrictedToBoss = true;
+
+    private int lastWeaponOfferLevel = -99;
+
+    private int currentRollLevel = 1;
 
     [Header("Dynamic UI References")]
 
@@ -78,6 +88,8 @@ public class UpgradeManager : MonoBehaviour
         else Destroy(gameObject);
 
         claimedUniqueCards.Clear();
+        lastWeaponOfferLevel = -99;
+        currentRollLevel = 1;
 
 #if UNITY_EDITOR
         // Auto-discover all UpgradeCard assets in the project so newly created cards are immediately in the drop pool
@@ -224,9 +236,51 @@ public class UpgradeManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks whether an upgrade card contains a weapon unlock effect.
+    /// </summary>
+    public static bool IsWeaponUnlockCard(UpgradeCard card)
+    {
+        if (card == null || card.effects == null) return false;
+        foreach (var effect in card.effects)
+        {
+            if (effect.upgradeType == UpgradeType.WeaponUnlock) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if the hand currently being drawn already has a weapon unlock card.
+    /// </summary>
+    public static bool HasWeaponUnlockInHand(List<UpgradeCard> hand)
+    {
+        if (hand == null || hand.Count == 0) return false;
+        foreach (var card in hand)
+        {
+            if (IsWeaponUnlockCard(card)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Evaluates whether a weapon unlock card can be offered.
+    /// Enforces:
+    ///   1. Maximum 1 weapon unlock card per 3-card hand.
+    ///   2. In normal wave level-ups: minimum cooldown of minLevelsBetweenWeaponOffers levels between offers.
+    ///   3. Boss drops bypass the level cooldown to offer milestone weapons, but still obey max 1 per hand.
+    /// </summary>
+    public bool IsWeaponUnlockAllowed(int level, bool isBossDrop, List<UpgradeCard> hand)
+    {
+        if (HasWeaponUnlockInHand(hand)) return false;
+        if (isBossDrop) return true;
+        return (level - lastWeaponOfferLevel) >= minLevelsBetweenWeaponOffers;
+    }
+
     private List<UpgradeCard> DrawCards(int amountToDraw, int level, float clearTime, bool isBossDrop)
 
     {
+
+        currentRollLevel = level;
 
         List<UpgradeCard> hand = new List<UpgradeCard>();
 
@@ -262,7 +316,7 @@ public class UpgradeManager : MonoBehaviour
 
                     else chosenRarity = CardRarity.Epic;
 
-                    drawnCard = GetRandomCardOfRarity(chosenRarity, hand);
+                    drawnCard = GetRandomCardOfRarity(chosenRarity, hand, true);
 
                 }
 
@@ -274,41 +328,56 @@ public class UpgradeManager : MonoBehaviour
 
                 chosenRarity = CalculateNormalRarity(level, clearTime);
 
-                drawnCard = GetRandomCardOfRarity(chosenRarity, hand);
+                drawnCard = GetRandomCardOfRarity(chosenRarity, hand, false);
 
                 // Fallback 1: Step down through lower rarities
                 CardRarity stepDownRarity = chosenRarity;
                 while (drawnCard == null && stepDownRarity > CardRarity.Common)
                 {
                     stepDownRarity--;
-                    drawnCard = GetRandomCardOfRarity(stepDownRarity, hand);
+                    drawnCard = GetRandomCardOfRarity(stepDownRarity, hand, false);
                 }
 
                 // Fallback 2: Step up through higher rarities if lower rarities had no unselected cards
+                // When restricted to boss, normal wave level-ups strictly cap at Epic
                 if (drawnCard == null)
                 {
                     CardRarity stepUpRarity = chosenRarity;
-                    while (drawnCard == null && stepUpRarity < CardRarity.Mythic)
+                    CardRarity maxRarity = (legendaryRestrictedToBoss && !isBossDrop) ? CardRarity.Epic : CardRarity.Mythic;
+                    while (drawnCard == null && stepUpRarity < maxRarity)
                     {
                         stepUpRarity++;
-                        drawnCard = GetRandomCardOfRarity(stepUpRarity, hand);
+                        drawnCard = GetRandomCardOfRarity(stepUpRarity, hand, false);
                     }
                 }
 
             }
 
-            // Universal Fallback: If still null (e.g. boss drop was empty or normal roll found nothing in chosen rarities),
-            // scan all available cards for ANY unselected, unclaimed card
+            // Universal Fallback: If still null, scan all available cards for ANY unselected, unclaimed card
+            // that complies with boss-only rarity and weapon pacing rules
             if (drawnCard == null)
             {
-                List<UpgradeCard> anyValid = allAvailableCards.FindAll(c => c != null && !IsCardAlreadyClaimed(c) && !IsCardAlreadyInHand(c, hand));
+                List<UpgradeCard> anyValid = allAvailableCards.FindAll(c => 
+                    c != null && 
+                    !IsCardAlreadyClaimed(c) && 
+                    !IsCardAlreadyInHand(c, hand) &&
+                    (!legendaryRestrictedToBoss || isBossDrop || c.rarity < CardRarity.Legendary) &&
+                    (!IsWeaponUnlockCard(c) || IsWeaponUnlockAllowed(level, isBossDrop, hand))
+                );
                 if (anyValid.Count > 0)
                 {
                     drawnCard = anyValid[Random.Range(0, anyValid.Count)];
                 }
             }
 
-            if (drawnCard != null) hand.Add(drawnCard);
+            if (drawnCard != null)
+            {
+                hand.Add(drawnCard);
+                if (IsWeaponUnlockCard(drawnCard))
+                {
+                    lastWeaponOfferLevel = level;
+                }
+            }
 
         }
 
@@ -412,58 +481,37 @@ public class UpgradeManager : MonoBehaviour
 
         if (bossDropPool == null || bossDropPool.Count == 0) return null;
 
-        // 1. Prioritize unowned weapon unlock cards not in hand and not claimed
         List<UpgradeCard> candidates = new List<UpgradeCard>();
+        bool allowWeapons = !HasWeaponUnlockInHand(hand);
 
-        foreach (var card in bossDropPool)
-
+        // 1. Prioritize unowned weapon unlock cards not in hand and not claimed (if weapon not already in hand)
+        if (allowWeapons)
         {
-
-            if (card == null) continue;
-
-            if (IsCardAlreadyInHand(card, hand)) continue;
-
-            if (IsCardAlreadyClaimed(card)) continue;
-
-            bool isWeaponUnlock = false;
-            if (card.effects != null)
-            {
-                foreach (var effect in card.effects)
-                {
-                    if (effect.upgradeType == UpgradeType.WeaponUnlock)
-                    {
-                        isWeaponUnlock = true;
-                        break;
-                    }
-                }
-            }
-
-            if (isWeaponUnlock)
-            {
-                candidates.Add(card);
-            }
-
-        }
-
-        // 2. If no weapon drops available, pick other boss cards not in hand and not claimed
-        if (candidates.Count == 0)
-
-        {
-
             foreach (var card in bossDropPool)
-
             {
-
                 if (card == null) continue;
-
                 if (IsCardAlreadyInHand(card, hand)) continue;
-
                 if (IsCardAlreadyClaimed(card)) continue;
 
-                candidates.Add(card);
-
+                if (IsWeaponUnlockCard(card))
+                {
+                    candidates.Add(card);
+                }
             }
+        }
 
+        // 2. If no weapon drops available or weapon already in hand, pick other boss cards not in hand and not claimed
+        if (candidates.Count == 0)
+        {
+            foreach (var card in bossDropPool)
+            {
+                if (card == null) continue;
+                if (IsCardAlreadyInHand(card, hand)) continue;
+                if (IsCardAlreadyClaimed(card)) continue;
+                if (!allowWeapons && IsWeaponUnlockCard(card)) continue;
+
+                candidates.Add(card);
+            }
         }
 
         if (candidates.Count == 0) return null;
@@ -546,7 +594,11 @@ public class UpgradeManager : MonoBehaviour
 
         epicWeight += level * 1.5f;
 
-        legendaryWeight += level * 0.2f;
+        // In normal wave level-ups, Legendary cards are strictly 0% if restricted to boss
+        if (!legendaryRestrictedToBoss)
+        {
+            legendaryWeight += level * 0.2f;
+        }
 
         commonWeight -= level * 2f;
 
@@ -560,13 +612,18 @@ public class UpgradeManager : MonoBehaviour
 
             epicWeight += 5f;
 
+            if (!legendaryRestrictedToBoss)
+            {
+                legendaryWeight += 5f;
+            }
+
         }
 
         float totalWeight = commonWeight + uncommonWeight + rareWeight + epicWeight + legendaryWeight;
 
         float roll = Random.Range(0f, totalWeight);
 
-        if (roll <= legendaryWeight) return CardRarity.Legendary;
+        if (legendaryWeight > 0f && roll <= legendaryWeight) return CardRarity.Legendary;
 
         roll -= legendaryWeight;
 
@@ -584,14 +641,22 @@ public class UpgradeManager : MonoBehaviour
 
     }
 
-    private UpgradeCard GetRandomCardOfRarity(CardRarity rarity, List<UpgradeCard> hand = null)
+    private UpgradeCard GetRandomCardOfRarity(CardRarity rarity, List<UpgradeCard> hand = null, bool isBossDrop = false)
     {
+        // Strictly prevent Legendary and Mythic cards from dropping in normal wave level-ups
+        if (legendaryRestrictedToBoss && !isBossDrop && rarity >= CardRarity.Legendary) return null;
+
         if (!deckByRarity.ContainsKey(rarity)) return null;
 
         List<UpgradeCard> specificPile = deckByRarity[rarity];
         if (specificPile == null || specificPile.Count == 0) return null;
 
-        List<UpgradeCard> validCards = specificPile.FindAll(c => c != null && !IsCardAlreadyClaimed(c) && !IsCardAlreadyInHand(c, hand));
+        List<UpgradeCard> validCards = specificPile.FindAll(c => 
+            c != null && 
+            !IsCardAlreadyClaimed(c) && 
+            !IsCardAlreadyInHand(c, hand) &&
+            (!IsWeaponUnlockCard(c) || IsWeaponUnlockAllowed(currentRollLevel, isBossDrop, hand))
+        );
         if (validCards.Count == 0) return null;
 
         return validCards[Random.Range(0, validCards.Count)];
