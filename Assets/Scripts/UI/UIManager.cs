@@ -563,7 +563,7 @@ namespace UI.Control
                 bossMaxHp = Mathf.Max(maxHp, 1f);
                 if (bossNameText != null)
                 {
-                    bossNameText.text = $"⚠️ {bossName.ToUpper()}";
+                    bossNameText.text = bossName.ToUpper();
                 }
                 UpdateBossHealth(currentHp, maxHp);
             }

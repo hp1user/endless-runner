@@ -1306,7 +1306,16 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
   - **Anti-Stall Timeouts (`BossCombatDirectorRoutine`)**:
     - Minion wave wait timeout tightened from 25s down to **10s** (`maxWait = 10f`). If minions are stuck or missing, `ForceDespawnAllMinions()` cleans them up automatically.
     - Projectile attack safety check hold loop given an **8-second timeout** with fallback force despawn, ensuring the boss can never freeze permanently under any circumstances.
+- **TextMeshPro Missing Unicode Glyph Warnings Elimination (`LiberationSans SDF`, `GameView_EndlessRunner.unity`, `SciFiHUDBuilder.cs`, `UIManager.cs`, `PauseMenuUI.cs`, `UpgradeManager.cs`)**:
+  - **Issue Diagnosed**: TextMeshPro logged over 90,000 warnings (`The character with Unicode value \u26A1 was not found in the [LiberationSans SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Reload_Prompt]`). The font asset only contains Latin ASCII glyphs, so unicode symbols (lightning `\u26A1` ⚡, warning `\u26A0` ⚠️, and star `\u2605` ★) were missing. Every frame the HUD canvas rebuilt, TMP failed to find the glyph, logged a warning, caused garbage collection churn, and rendered an ugly missing-glyph square (`□ RELOAD`).
+  - **Build Impact Analysis**:
+    - *In Build*: Does not cause a fatal crash, but displays the ugly fallback replacement square `□` to players. Continuous per-frame fallback searches and logging cause GC allocation spikes and performance degradation on mobile devices.
+  - **Fixes Applied**:
+    - **Scene Text Objects (`GameView_EndlessRunner.unity`)**: Replaced `\u26A1 RELOAD` with `RELOAD` across all 3 `Reload_Prompt` text objects and replaced `\u26A0\uFE0F BUG BOSS` with clean `BUG BOSS`.
+    - **HUD Generation (`SciFiHUDBuilder.cs`)**: Removed `⚡` from reload prompt generation templates.
+    - **Runtime Scripts (`UIManager.cs`, `PauseMenuUI.cs`, `UpgradeManager.cs`)**: Removed unicode emoji characters (`⚠️` and `★`) in favor of clean, universally supported text formatting (`BUG BOSS`, `BOSS ENCOUNTER`, `BOSS DEFEATED`).
 - **Asset Integrity**: Verified `BossProjectile.cs` remains 100% untouched and unmodified (`git diff --stat | grep -i BossProjectile` is empty).
+
 
 
 

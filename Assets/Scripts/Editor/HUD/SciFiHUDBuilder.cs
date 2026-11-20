@@ -847,7 +847,7 @@ namespace EndlessRunner.Editor
                 TextAlignmentOptions.Center, new Vector2(centerX + 15f, textPosY), new Vector2(30f, 20f), new Vector2(0.5f, 0.5f));
 
             // Reload Prompt at Bottom of Right Dock
-            GameObject reloadGo = CreateTMPText("Reload_Prompt", rightCardGo.transform, font, "⚡ RELOAD", 10, FontStyles.Bold, new Color(1f, 0.25f, 0.25f, 1f),
+            GameObject reloadGo = CreateTMPText("Reload_Prompt", rightCardGo.transform, font, "RELOAD", 10, FontStyles.Bold, new Color(1f, 0.25f, 0.25f, 1f),
                 TextAlignmentOptions.Center, new Vector2(centerX, reloadPosY), new Vector2(80f, 16f), new Vector2(0.5f, 0.5f));
             reloadGo.SetActive(false);
 
@@ -963,7 +963,7 @@ namespace EndlessRunner.Editor
             GameObject ammoReserveGo = CreateTMPText("Ammo_Reserve", ammoCardGo.transform, font, "120", 26, FontStyles.Bold, ammoCol,
                 TextAlignmentOptions.Left, new Vector2(262, -56), new Vector2(85, 36), new Vector2(0f, 0.5f));
 
-            GameObject reloadPromptGo = CreateTMPText("Reload_Prompt", ammoCardGo.transform, font, "⚡ RELOAD", 13, FontStyles.Bold, new Color(1f, 0.3f, 0.3f, 1f),
+            GameObject reloadPromptGo = CreateTMPText("Reload_Prompt", ammoCardGo.transform, font, "RELOAD", 13, FontStyles.Bold, new Color(1f, 0.3f, 0.3f, 1f),
                 TextAlignmentOptions.Center, new Vector2(246, -100), new Vector2(170, 20), new Vector2(0.5f, 0.5f));
             reloadPromptGo.SetActive(false);
 

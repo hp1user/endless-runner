@@ -120,7 +120,7 @@ namespace EndlessRunner.UI
             bool isBoss = GameManager.Instance != null && GameManager.Instance.IsBossLevel(level);
 
             stageInfoText.text = isBoss
-                ? $"<color=#FF5252>★ BOSS ENCOUNTER ★</color>\n<size=70%>LEVEL {level}</size>"
+                ? $"<color=#FF5252>BOSS ENCOUNTER</color>\n<size=70%>LEVEL {level}</size>"
                 : $"<color=#00E5FF>STAGE / SECTOR {level}</color>";
         }
 
