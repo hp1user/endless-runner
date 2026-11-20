@@ -305,21 +305,20 @@ public class EnemyManager : MonoBehaviour
             yield break; // Stop the rest of the spawn code!
         }
 
-        Debug.Log("<color=yellow><b>[Boss Phase]</b></color> Bridge reached! Minion swarm advancing...");
+        Debug.Log("<color=yellow><b>[Boss Phase]</b></color> Bridge reached! Cinematic minion vanguard advancing...");
 
-        // 1. Staged Minion Intro Phase (0-12s): Spawn 3 waves of swarm minions on the bridge ahead of the boss
+        // Cinematic Intro Phase: Spawn a vanguard wave of minions on the bridge ahead of the boss
         float[] runnerLanes = new float[] { -2f, 0f, 2f };
         var candidateMinions = (bossData.minionTypes != null && bossData.minionTypes.Count > 0)
             ? bossData.minionTypes
             : enemyDatabase.enemyTypes.FindAll(e => e.category == EnemyCategory.Standard);
 
-        for (int wave = 0; wave < 3; wave++)
+        for (int wave = 0; wave < 2; wave++)
         {
-            yield return new WaitForSeconds(wave == 0 ? 0.8f : 3.6f);
+            yield return new WaitForSeconds(wave == 0 ? 0.8f : 2.5f);
 
             if (candidateMinions != null && candidateMinions.Count > 0 && player != null)
             {
-                // Spawn 2 minions across 2 different lanes
                 int firstLane = Random.Range(0, 3);
                 int secondLane = (firstLane + Random.Range(1, 3)) % 3;
                 int[] waveLanes = new int[] { firstLane, secondLane };
@@ -347,8 +346,8 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        // Brief delay before the Boss drops onto the bridge
-        yield return new WaitForSeconds(2.0f);
+        // Cinematic pause as the vanguard charges and the boss arrives
+        yield return new WaitForSeconds(1.8f);
 
         if (player == null) yield break;
 

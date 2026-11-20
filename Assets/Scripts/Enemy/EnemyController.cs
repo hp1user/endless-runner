@@ -53,7 +53,39 @@ namespace Enemy.Control
         private bool canSpawnMinions = false;
         private float minionSpawnInterval = 5f;
         private System.Collections.Generic.List<EnemyEntry> minionTypes;
-        private float nextMinionSpawnTime;
+
+        [Header("Boss Dynamic Combat & Action Mixing")]
+        [Tooltip("Minimum and maximum minions spawned in a single wave during normal phase (3-4).")]
+        [SerializeField] private Vector2Int minionsPerWaveRange = new Vector2Int(3, 4);
+        [Tooltip("Minimum and maximum minions spawned per wave when boss is in Phase 3 (both legs broken) (5-6).")]
+        [SerializeField] private Vector2Int phase3MinionsPerWaveRange = new Vector2Int(5, 6);
+        [Tooltip("Minimum and maximum minion waves in a minion phase (e.g. 1-2, or 1-3).")]
+        [SerializeField] private Vector2Int minionWavesRange = new Vector2Int(1, 2);
+        [Tooltip("Minimum and maximum projectile attacks in an attack sequence (e.g. 1-3).")]
+        [SerializeField] private Vector2Int attacksPerPhaseRange = new Vector2Int(1, 3);
+        [Tooltip("Delay (seconds) between spawning individual minions within a single wave.")]
+        [SerializeField] private float minionStaggerDelay = 0.45f;
+        [Tooltip("Breather duration (seconds) after player clears all minions before boss can attack.")]
+        [SerializeField] private float postMinionsBreather = 1.8f;
+        [Tooltip("Breather duration (seconds) between consecutive projectile attacks in an attack phase.")]
+        [SerializeField] private float timeBetweenAttacks = 1.8f;
+        [Tooltip("Breather duration (seconds) after completing an attack sequence before next action.")]
+        [SerializeField] private float breatherAfterAttacks = 2.0f;
+
+        [Header("Boss Projectile Attack Tuning")]
+        [Tooltip("Travel speed of the acid projectile in normal phases (m/s).")]
+        [SerializeField] private float projectileSpeed = 18f;
+        [Tooltip("Travel speed of the acid projectile in Phase 3 Enrage (m/s).")]
+        [SerializeField] private float phase3ProjectileSpeed = 21f;
+        [Tooltip("Telegraph warning duration before firing in normal phases (seconds).")]
+        [SerializeField] private float projectileWindup = 0.85f;
+        [Tooltip("Telegraph warning duration before firing in Phase 3 Enrage (seconds).")]
+        [SerializeField] private float phase3ProjectileWindup = 0.70f;
+        [Tooltip("Stationary recovery pause after shooting before resuming chase (seconds).")]
+        [SerializeField] private float projectileRecovery = 1.0f;
+
+        private Coroutine bossCombatCoroutine;
+        private System.Collections.Generic.List<EnemyController> activeMinions = new System.Collections.Generic.List<EnemyController>();
 
         // POOLING TRACKERS
         private EnemyEntry myData;
@@ -74,6 +106,14 @@ namespace Enemy.Control
             if (isDead) return;
             isDead = true;
             StopAllCoroutines();
+
+            if (bossCombatCoroutine != null)
+            {
+                StopCoroutine(bossCombatCoroutine);
+                bossCombatCoroutine = null;
+            }
+            ForceDespawnAllMinions();
+            SpawnTracker.ClearBossSafeLane();
 
             VFXPerformanceManager.ClearTarget(GetInstanceID());
 
@@ -108,13 +148,11 @@ namespace Enemy.Control
         private int verticalParamHash = Animator.StringToHash("Vertical");
         private int deathParamHash = Animator.StringToHash("Death");
 
-        [Header("Boss Projectile Attack")]
         private bool isAttacking = false;
         private float nextProjectileAttackTime;
         private float projectileMinInterval = 4f;
         private float projectileMaxInterval = 9f;
         private float projectileDamage = 25f;
-        private float projectileSpeed = 14f;
 
         private void Awake()
         {
@@ -138,6 +176,14 @@ namespace Enemy.Control
             {
                 animator = GetComponentInChildren<Animator>();
                 SetupBossBodyParts();
+            }
+        }
+
+        private void Start()
+        {
+            if (isBoss && bossCombatCoroutine == null && !isDead)
+            {
+                bossCombatCoroutine = StartCoroutine(BossCombatDirectorRoutine());
             }
         }
 
@@ -245,7 +291,6 @@ namespace Enemy.Control
             canSpawnMinions = data.canSpawnMinions;
             minionSpawnInterval = data.minionSpawnInterval;
             minionTypes = data.minionTypes;
-            nextMinionSpawnTime = Time.time + minionSpawnInterval;
 
             // Ensure enemies and all child colliders can be hit by raycasts
             SetLayerRecursively(gameObject, LayerMask.NameToLayer("Enemy"));
@@ -263,8 +308,10 @@ namespace Enemy.Control
                 rightLegBroken = false;
                 hasTriggeredPhase3Roar = false;
                 isAttacking = false;
-                nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
                 SetupBossBodyParts();
+
+                if (bossCombatCoroutine != null) StopCoroutine(bossCombatCoroutine);
+                bossCombatCoroutine = StartCoroutine(BossCombatDirectorRoutine());
             }
 
             // Roll dice for chasing based on database config (bosses always chase)
@@ -375,36 +422,31 @@ namespace Enemy.Control
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), Time.deltaTime * 5f);
             }
 
-            // Immediately notify manager to spawn a replacement if it crosses Z=-5 behind the player
-            if (spawnedInFront && !hasPassedPlayer && playerTransform != null && transform.position.z < playerTransform.position.z - 5f)
+            // Despawn enemy once it has passed behind the player
+            if (spawnedInFront && playerTransform != null && transform.position.z < playerTransform.position.z - 3.5f)
             {
-                hasPassedPlayer = true;
-                if (myManager != null) myManager.OnEnemyPassedPlayer();
+                if (!hasPassedPlayer)
+                {
+                    hasPassedPlayer = true;
+                    if (myManager != null) myManager.OnEnemyPassedPlayer();
+                }
+                Despawn();
+                return;
             }
 
-            // Safety net: Despawn if it falls off the bridge
-            if (transform.position.z < -40f)
+            // Safety net: Despawn if it falls off the bridge or too far behind
+            if (playerTransform != null && transform.position.z < playerTransform.position.z - 15f)
             {
                 Despawn();
+                return;
             }
-
-            // 3. Boss Projectile Attack (Stops and fires 2-lane acid projectile every 4-8s)
-            if (isBoss && !isDead && !isAttacking && playerTransform != null && Time.time >= nextProjectileAttackTime)
+            else if (transform.position.z < -40f)
             {
-                StartCoroutine(PerformProjectileAttackRoutine());
+                Despawn();
+                return;
             }
 
-            // 4. Boss Minion Spawning
-            if (isBoss && canSpawnMinions && minionTypes != null && minionTypes.Count > 0)
-            {
-                if (Time.time >= nextMinionSpawnTime)
-                {
-                    nextMinionSpawnTime = Time.time + minionSpawnInterval;
-                    SpawnMinion();
-                }
-            }
-
-            // 5. Boss Reached Player check (instantly kills player for Game Over)
+            // Boss Reached Player check (instantly kills player for Game Over)
             if (isBoss && !isDead && playerTransform != null)
             {
                 float deltaZ = Mathf.Abs(transform.position.z - playerTransform.position.z);
@@ -425,8 +467,8 @@ namespace Enemy.Control
             Obstacle[] activeObstacles = Object.FindObjectsByType<Obstacle>(FindObjectsSortMode.None);
             float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
             float bossZ = transform.position.z;
-            float minZ = Mathf.Min(playerZ, bossZ) - 2f;
-            float maxZ = Mathf.Max(playerZ, bossZ) + 5f;
+            float minZ = Mathf.Min(playerZ, bossZ) - 10f;
+            float maxZ = Mathf.Max(playerZ, bossZ) + 30f;
 
             int[] obstacleCountPerLane = new int[allLanes.Length];
             for (int i = 0; i < allLanes.Length; i++)
@@ -438,7 +480,7 @@ namespace Enemy.Control
                     Vector3 pos = obs.transform.position;
                     if (pos.z >= minZ && pos.z <= maxZ)
                     {
-                        if (Mathf.Abs(pos.x - laneX) < 0.8f)
+                        if (Mathf.Abs(pos.x - laneX) < 1.3f)
                         {
                             obstacleCountPerLane[i]++;
                         }
@@ -446,6 +488,22 @@ namespace Enemy.Control
                 }
             }
 
+            // Strictly prioritize lanes that have 0 obstacles
+            System.Collections.Generic.List<int> completelyFreeLanes = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < allLanes.Length; i++)
+            {
+                if (obstacleCountPerLane[i] == 0)
+                {
+                    completelyFreeLanes.Add(i);
+                }
+            }
+
+            if (completelyFreeLanes.Count > 0)
+            {
+                return completelyFreeLanes[Random.Range(0, completelyFreeLanes.Count)];
+            }
+
+            // Fallback: pick the lane with the minimum obstacles (which will then be purged)
             int minObstacles = int.MaxValue;
             System.Collections.Generic.List<int> bestLanes = new System.Collections.Generic.List<int>();
             for (int i = 0; i < allLanes.Length; i++)
@@ -470,16 +528,301 @@ namespace Enemy.Control
             Obstacle[] activeObstacles = Object.FindObjectsByType<Obstacle>(FindObjectsSortMode.None);
             float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
             float bossZ = transform.position.z;
-            float minZ = Mathf.Min(playerZ, bossZ) - 5f;
-            float maxZ = Mathf.Max(playerZ, bossZ) + 10f;
+            float minZ = Mathf.Min(playerZ, bossZ) - 10f;
+            float maxZ = Mathf.Max(playerZ, bossZ) + 30f;
 
             foreach (Obstacle obs in activeObstacles)
             {
                 if (obs == null || !obs.gameObject.activeInHierarchy) continue;
                 Vector3 pos = obs.transform.position;
-                if (pos.z >= minZ && pos.z <= maxZ && Mathf.Abs(pos.x - safeLaneX) < 0.8f)
+                if (pos.z >= minZ && pos.z <= maxZ && Mathf.Abs(pos.x - safeLaneX) < 1.3f)
                 {
                     obs.Recycle();
+                    if (obs.gameObject.activeInHierarchy)
+                    {
+                        obs.gameObject.SetActive(false);
+                    }
+                }
+            }
+
+            // Physical sweep fallback to guarantee clearing
+            Vector3 center = new Vector3(safeLaneX, 1f, (minZ + maxZ) * 0.5f);
+            Vector3 halfExtents = new Vector3(1.2f, 3f, (maxZ - minZ) * 0.5f);
+            Collider[] colliders = Physics.OverlapBox(center, halfExtents, Quaternion.identity);
+            foreach (var col in colliders)
+            {
+                if (col == null) continue;
+                Obstacle obs = col.GetComponentInParent<Obstacle>();
+                if (obs != null && obs.gameObject.activeInHierarchy)
+                {
+                    obs.Recycle();
+                    if (obs.gameObject.activeInHierarchy) obs.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks whether any active minions spawned by the boss or on the bridge are currently alive AND in front of the player.
+        /// Projectile attacks are strictly blocked as long as this returns true.
+        /// Any minions that have overshot the player (passed behind them) are automatically despawned and do not block attacks.
+        /// </summary>
+        public bool AreAnyMinionsActive()
+        {
+            CleanActiveMinionsList();
+            if (activeMinions.Count > 0) return true;
+
+            // Fallback check: ensure no active non-boss enemies remain in FRONT of player
+            float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
+            EnemyController[] allEnemies = Object.FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            foreach (var enemy in allEnemies)
+            {
+                if (enemy != null && enemy != this && !enemy.IsBoss && !enemy.IsDead && enemy.gameObject.activeInHierarchy)
+                {
+                    if (enemy.transform.position.z < playerZ - 2.5f)
+                    {
+                        // Overshot minion lingering behind player: force despawn so it doesn't block combat logic
+                        enemy.ForceDespawn();
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void CleanActiveMinionsList()
+        {
+            float playerZ = playerTransform != null ? playerTransform.position.z : 0f;
+            for (int i = activeMinions.Count - 1; i >= 0; i--)
+            {
+                var m = activeMinions[i];
+                if (m == null || m.IsDead || !m.gameObject.activeInHierarchy)
+                {
+                    activeMinions.RemoveAt(i);
+                }
+                else if (m.transform.position.z < playerZ - 2.5f)
+                {
+                    // Minion has overshot the player (passed behind them).
+                    // Player cannot shoot backwards; cleanly despawn it and remove from active combat tracking.
+                    m.ForceDespawn();
+                    activeMinions.RemoveAt(i);
+                }
+            }
+        }
+
+        private void ForceDespawnAllMinions()
+        {
+            if (activeMinions == null) return;
+            foreach (var m in activeMinions)
+            {
+                if (m != null && !m.IsDead && m.gameObject.activeInHierarchy)
+                {
+                    m.ForceDespawn();
+                }
+            }
+            activeMinions.Clear();
+        }
+
+        /// <summary>
+        /// Dynamic Boss Action Director:
+        /// Creates an unpredictable, unscripted combat mix:
+        /// - Sometimes 1-2 minion waves -> breather -> 1-3 projectile attacks.
+        /// - Sometimes 1-3 projectile attacks -> breather -> minion summon.
+        /// - Sometimes 1 attack -> breather -> 1 minion wave -> breather -> 2 attacks.
+        /// - Projectile attacks are STRICTLY BLOCKED as long as any minions remain on the road!
+        /// </summary>
+        private System.Collections.IEnumerator BossCombatDirectorRoutine()
+        {
+            // Initial grace window upon arrival (2.5s): player can observe entrance, shoot, and reposition
+            yield return new WaitForSeconds(2.5f);
+
+            int consecutiveMinionPhases = 0;
+            int consecutiveAttackPhases = 0;
+
+            while (!isDead && isBoss)
+            {
+                bool hasMinionsConfigured = canSpawnMinions && minionTypes != null && minionTypes.Count > 0;
+
+                int nextActionType;
+                if (!hasMinionsConfigured)
+                {
+                    nextActionType = 1; // Only attacks if no minions configured
+                }
+                else if (consecutiveMinionPhases >= 2)
+                {
+                    nextActionType = 1; // Force attack sequence to prevent endless minion loops
+                }
+                else if (consecutiveAttackPhases >= 2)
+                {
+                    nextActionType = 0; // Force minion sequence to maintain variety
+                }
+                else
+                {
+                    // Dynamic 50/50 roll for unpredictable flow
+                    nextActionType = Random.Range(0, 2);
+                }
+
+                if (nextActionType == 0)
+                {
+                    // === MINION SEQUENCE ===
+                    int currentLevel = GameManager.Instance != null ? GameManager.Instance.currentLevel : 5;
+                    int maxWaves = currentLevel >= 10 ? Mathf.Max(minionWavesRange.y, 3) : minionWavesRange.y;
+                    int wavesToSummon = Random.Range(minionWavesRange.x, maxWaves + 1);
+
+                    Debug.Log($"<color=yellow><b>[Boss Combat]</b></color> Boss initiating Minion Sequence ({wavesToSummon} wave{(wavesToSummon > 1 ? "s" : "")}).");
+
+                    for (int w = 0; w < wavesToSummon; w++)
+                    {
+                        if (isDead) yield break;
+
+                        yield return StartCoroutine(SpawnMinionWaveRoutine());
+
+                        // Wait for minions of this wave to be cleared (with anti-stall timeout)
+                        float maxWait = 10f;
+                        float timer = 0f;
+                        while (AreAnyMinionsActive() && timer < maxWait && !isDead)
+                        {
+                            timer += Time.deltaTime;
+                            yield return null;
+                        }
+
+                        if (AreAnyMinionsActive())
+                        {
+                            Debug.Log("<color=yellow><b>[Boss Combat]</b></color> Minion wave wait timeout reached; cleaning up lingering minions.");
+                            ForceDespawnAllMinions();
+                        }
+
+                        CleanActiveMinionsList();
+
+                        // Breather between minion waves or before next action
+                        float breather = (w < wavesToSummon - 1) ? Random.Range(2.0f, 2.8f) : postMinionsBreather;
+                        Debug.Log($"<color=green><b>[Boss Combat]</b></color> Minion wave {w + 1}/{wavesToSummon} cleared! Breather active ({breather:F1}s). Boss holds fire.");
+                        yield return new WaitForSeconds(breather);
+                    }
+
+                    consecutiveMinionPhases++;
+                    consecutiveAttackPhases = 0;
+                }
+                else
+                {
+                    // === PROJECTILE ATTACK SEQUENCE ===
+                    int numAttacks = Random.Range(attacksPerPhaseRange.x, attacksPerPhaseRange.y + 1);
+
+                    Debug.Log($"<color=red><b>[Boss Combat]</b></color> Boss initiating Attack Sequence ({numAttacks} projectile attack{(numAttacks > 1 ? "s" : "")}).");
+
+                    for (int a = 0; a < numAttacks; a++)
+                    {
+                        if (isDead) yield break;
+
+                        // Strict safety check: hold fire if any minions appeared on the road
+                        if (AreAnyMinionsActive())
+                        {
+                            Debug.Log("<color=yellow><b>[Boss Combat]</b></color> Minions detected on road. Holding projectile attack until cleared.");
+                            float holdTimer = 0f;
+                            while (AreAnyMinionsActive() && holdTimer < 8f && !isDead)
+                            {
+                                holdTimer += Time.deltaTime;
+                                yield return null;
+                            }
+                            if (AreAnyMinionsActive())
+                            {
+                                Debug.Log("<color=yellow><b>[Boss Combat]</b></color> Attack hold timeout reached; force-despawning lingering minions.");
+                                ForceDespawnAllMinions();
+                            }
+                            yield return new WaitForSeconds(postMinionsBreather);
+                        }
+
+                        if (isDead) yield break;
+
+                        yield return StartCoroutine(PerformProjectileAttackRoutine());
+
+                        // Paced breather between attacks in this sequence
+                        if (a < numAttacks - 1)
+                        {
+                            float attackGap = Random.Range(timeBetweenAttacks * 0.85f, timeBetweenAttacks * 1.15f);
+                            yield return new WaitForSeconds(attackGap);
+                        }
+                    }
+
+                    // Breather after completing the attack sequence
+                    yield return new WaitForSeconds(breatherAfterAttacks);
+
+                    consecutiveAttackPhases++;
+                    consecutiveMinionPhases = 0;
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator SpawnMinionWaveRoutine()
+        {
+            if (myManager == null || playerTransform == null || minionTypes == null || minionTypes.Count == 0) yield break;
+
+            bool isPhase3 = AreBothLegsBroken;
+            int countToSpawn;
+            if (isPhase3)
+            {
+                countToSpawn = Random.Range(phase3MinionsPerWaveRange.x, phase3MinionsPerWaveRange.y + 1);
+            }
+            else
+            {
+                countToSpawn = Random.Range(minionsPerWaveRange.x, minionsPerWaveRange.y + 1);
+            }
+
+            Debug.Log($"<color=yellow><b>[Boss Combat]</b></color> Boss summoning minion wave ({(isPhase3 ? "Phase 3 Rage: " : "")}{countToSpawn} minions across separate lanes)!");
+
+            EndlessRunner.Audio.AudioManager.Instance?.PlayBossSound(EndlessRunner.Audio.BossSoundType.Roar, transform.position);
+
+            float[] runnerLanes = new float[] { -2f, 0f, 2f };
+            System.Collections.Generic.List<int> lanePool = new System.Collections.Generic.List<int> { 0, 1, 2 };
+
+            for (int i = 0; i < countToSpawn; i++)
+            {
+                if (isDead) yield break;
+
+                int pick = Random.Range(0, lanePool.Count);
+                int laneIdx = lanePool[pick];
+                lanePool.RemoveAt(pick);
+                if (lanePool.Count == 0) lanePool.AddRange(new int[] { 0, 1, 2 });
+
+                float spawnX = runnerLanes[laneIdx];
+                SpawnSingleMinion(spawnX, i * 2.0f);
+
+                if (i < countToSpawn - 1)
+                {
+                    yield return new WaitForSeconds(minionStaggerDelay);
+                }
+            }
+        }
+
+        private void SpawnSingleMinion(float spawnX, float zStaggerOffset)
+        {
+            if (myManager == null || playerTransform == null || minionTypes == null || minionTypes.Count == 0) return;
+
+            EnemyEntry minionData = minionTypes[Random.Range(0, minionTypes.Count)];
+            if (minionData == null || minionData.prefab == null) return;
+
+            float playerZ = playerTransform.position.z;
+            float bossZ = transform.position.z;
+
+            float spawnZ = Mathf.Clamp(playerZ + (bossZ - playerZ) * 0.5f + zStaggerOffset, playerZ + 8f, bossZ - 3.5f);
+            float spawnY = minionData.groundYPosition > 0f ? minionData.groundYPosition : 0.45f;
+            Vector3 spawnPos = new Vector3(spawnX, spawnY, spawnZ);
+
+            if (PoolManager.Instance != null)
+            {
+                GameObject minionObj = PoolManager.Instance.SpawnFromPool(minionData.prefab.gameObject, spawnPos, Quaternion.identity);
+                if (minionObj != null)
+                {
+                    EnemyController minionController = minionObj.GetComponent<EnemyController>();
+                    if (minionController == null) minionController = minionObj.AddComponent<EnemyController>();
+                    minionController.Initialize(minionData, playerTransform, myManager, minionData.prefab.gameObject);
+                    if (minionController.MoveSpeed < 2.5f)
+                    {
+                        minionController.MoveSpeed = 2.5f;
+                    }
+                    activeMinions.Add(minionController);
                 }
             }
         }
@@ -487,6 +830,13 @@ namespace Enemy.Control
         private System.Collections.IEnumerator PerformProjectileAttackRoutine()
         {
             if (isDead || playerTransform == null) yield break;
+
+            // Strictly hold fire if any minions are on the road
+            if (AreAnyMinionsActive())
+            {
+                Debug.Log("<color=yellow><b>[Boss Attack]</b></color> Aborting projectile attack: Minions detected on road.");
+                yield break;
+            }
 
             isAttacking = true;
 
@@ -502,15 +852,19 @@ namespace Enemy.Control
             }
             float[] targetedLanes = targetedLanesList.ToArray();
 
+            // Dynamic Phase 3 Enrage Scaling
+            bool isPhase3 = AreBothLegsBroken;
+            float currentWindup = isPhase3 ? phase3ProjectileWindup : projectileWindup;
+            float currentSpeed = isPhase3 ? phase3ProjectileSpeed : projectileSpeed;
+            float currentRecovery = isPhase3 ? 0.65f : projectileRecovery;
+
             // Lock safe lane in SpawnTracker to prevent ObstacleManager from spawning into it
-            float windupDuration = 1.0f;
-            float recoveryDuration = 4.5f;
-            SpawnTracker.SetBossSafeLane(safeLaneIndex, windupDuration + recoveryDuration);
+            SpawnTracker.SetBossSafeLane(safeLaneIndex, currentWindup + currentRecovery + 1.2f);
 
             // Clean up any remaining obstacle in safe lane corridor so escape is 100% fair
             ClearObstaclesInSafeLane(safeLaneX);
 
-            Debug.Log($"<color=red><b>[Boss Attack]</b></color> Boss telegraphing 2-lane projectile! (Safe Lane: {safeLaneX})");
+            Debug.Log($"<color=red><b>[Boss Attack]</b></color> Boss telegraphing 2-lane projectile! (Safe Lane: {safeLaneX}{(isPhase3 ? " [ENRAGED]" : "")})");
 
             // Halt walk animation during attack stop
             if (animator != null)
@@ -521,11 +875,11 @@ namespace Enemy.Control
             // 2. Visual telegraph overlay matching attack trajectory & safe lane corridor
             float startZ = transform.position.z;
             float endZ = playerTransform.position.z - 5f;
-            float telegraphDuration = windupDuration + 2.0f;
+            float telegraphDuration = currentWindup + 1.2f;
             BossAttackTelegraph.Create(targetedLanes, safeLaneX, startZ, endZ, telegraphDuration);
 
-            // Yield readable 1.0s windup before firing
-            yield return new WaitForSeconds(windupDuration);
+            // Yield crisp windup before firing
+            yield return new WaitForSeconds(currentWindup);
 
             if (isDead)
             {
@@ -538,10 +892,10 @@ namespace Enemy.Control
             spawnOrigin.y += 0.8f;
             spawnOrigin.z -= 1.5f;
 
-            BossProjectile.Spawn(targetedLanes, spawnOrigin, projectileSpeed, projectileDamage, playerTransform, deathVFX);
+            BossProjectile.Spawn(targetedLanes, spawnOrigin, currentSpeed, projectileDamage, playerTransform, deathVFX);
 
-            // 4. Post-shot recovery: wait stationary before resuming chase
-            yield return new WaitForSeconds(recoveryDuration);
+            // 4. Post-shot recovery: short pause, then immediately resume charging
+            yield return new WaitForSeconds(currentRecovery);
 
             SpawnTracker.ClearBossSafeLane();
 
@@ -549,48 +903,6 @@ namespace Enemy.Control
             if (isBoss && !isDead)
             {
                 UpdateLegCrippleState();
-            }
-
-            // Schedule next attack ONLY AFTER recovery finishes, guaranteeing the boss walks for 4-8s before next attack
-            nextProjectileAttackTime = Time.time + Random.Range(projectileMinInterval, projectileMaxInterval);
-        }
-
-        private void SpawnMinion()
-        {
-            if (myManager == null || playerTransform == null) return;
-            if (minionTypes == null || minionTypes.Count == 0) return;
-
-            EnemyEntry minionData = minionTypes[Random.Range(0, minionTypes.Count)];
-            if (minionData == null || minionData.prefab == null) return;
-
-            // Spawn minions in front of the boss (closer to player) so they are clearly visible and charge forward
-            float playerZ = playerTransform.position.z;
-            float bossZ = transform.position.z;
-            
-            // Spawn position midway between boss and player (clamped safely in front)
-            float spawnZ = Mathf.Clamp(playerZ + (bossZ - playerZ) * 0.5f, playerZ + 8f, bossZ - 4f);
-            
-            // Pick a clean runner lane (-2, 0, +2)
-            float[] lanes = new float[] { -2f, 0f, 2f };
-            float spawnX = lanes[Random.Range(0, lanes.Length)];
-            float spawnY = minionData.groundYPosition > 0f ? minionData.groundYPosition : 0.45f;
-
-            Vector3 spawnPos = new Vector3(spawnX, spawnY, spawnZ);
-
-            if (PoolManager.Instance != null)
-            {
-                GameObject minionObj = PoolManager.Instance.SpawnFromPool(minionData.prefab.gameObject, spawnPos, Quaternion.identity);
-                if (minionObj != null)
-                {
-                    EnemyController minionController = minionObj.GetComponent<EnemyController>();
-                    if (minionController == null) minionController = minionObj.AddComponent<EnemyController>();
-                    minionController.Initialize(minionData, playerTransform, myManager, minionData.prefab.gameObject);
-                    // Ensure boss-spawned minions charge forward towards the player aggressively
-                    if (minionController.MoveSpeed < 2.5f)
-                    {
-                        minionController.MoveSpeed = 2.5f;
-                    }
-                }
             }
         }
 
@@ -964,6 +1276,14 @@ namespace Enemy.Control
 
             if (isBoss)
             {
+                if (bossCombatCoroutine != null)
+                {
+                    StopCoroutine(bossCombatCoroutine);
+                    bossCombatCoroutine = null;
+                }
+                ForceDespawnAllMinions();
+                SpawnTracker.ClearBossSafeLane();
+
                 if (UI.Control.UIManager.Instance != null)
                 {
                     UI.Control.UIManager.Instance.ShowBossHealth(false);

@@ -53,6 +53,14 @@ public static class SpawnTracker
     }
 
     /// <summary>
+    /// Returns true if the Boss is currently telegraphing or executing a projectile attack.
+    /// </summary>
+    public static bool IsBossAttackActive()
+    {
+        return currentBossSafeLaneIndex >= 0 && Time.time < bossSafeLaneExpiryTime;
+    }
+
+    /// <summary>
     /// Clears the boss safe lane lock.
     /// </summary>
     public static void ClearBossSafeLane()

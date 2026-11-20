@@ -1227,6 +1227,16 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
 ### Bugs Fixed & Improvements
 - **Shader Graph Inactive Property Node**: Resolved compilation omission in `World Bend Foliage.shadergraph` where `_NoiseOffset` was not wired to the root graph structure.
 - **Highway Swapping Detection**: Fixed hierarchy traversal in `ProceduralChunkEditor.cs` and `ProceduralChunkEditorWindow.cs` so road meshes (`Path_1`/`RoadBase`) receive `M_PostApoc_Road_Foliage.mat` and barriers receive `M_PostApoc_Foliage_Sample.mat`.
+- **Boss Battle Dynamic Action Director & Unscripted Combat Mix Overhaul (`EnemyController.cs`, `EnemyManager.cs`)**:
+  - **Issue Diagnosed**: Rigid sequential loops (e.g. fixed 1 minion wave -> 2 attacks) felt scripted and predictable, whereas un-coordinated Update timers caused chaotic swarms.
+  - **Dynamic Action Mixing & Unscripted Combos**:
+    - Replaced the rigid sequential loop with an organic **Boss Action Director** that rolls varied combat combos on-the-fly.
+    - **Minion Phase Variation**: Spawns 1 to 2 waves (up to 3 waves on Level 10+) with `minionsPerWaveRange = (1, 2)`.
+    - **Attack Phase Variation**: Executes 1, 2, or 3 projectile attacks per sequence (`attacksPerPhaseRange = (1, 3)`), with randomized intervals (`timeBetweenAttacks = 2.8s ± 15%`).
+    - **Dynamic Flow & Anti-Streak Rules**: Boss dynamically mixes actions (e.g. Attack 1-2x -> Breather -> Minions 1x -> Breather -> Attack 2x; or Minions 2x -> Breather -> Attack 1x; or Attacks 3x -> Breather -> Minions), with streak counters capping consecutive identical phases at 2 to guarantee constant variety.
+  - **Absolute Minion Attack Suppression**: Projectile attacks remain **strictly blocked and suppressed** as long as any minions spawned by the boss or on the bridge are alive. The boss only chases during minion fights, and grants fair 2.5s–3.5s breather windows after clearing.
+  - **Eliminated Dual Spawner Conflict**: Streamlined `EnemyManager.SpawnBossRoutine()` to remove redundant pre-spawn waves; all minion spawning and combat pacing during the boss encounter is coordinated exclusively by the Boss.
+  - **Boss Death Cleanup**: Defeating the boss automatically halts the director and instantly despawns any remaining minions on the bridge.
 - **Weapon Unlock Pacing & Boss-Only Legendary Drops Overhaul (`UpgradeManager.cs`)**:
   - **Issue Diagnosed**: In normal wave level-ups, clearing waves under 30s awarded a +5% flat bonus to Legendary rolls alongside level scaling, allowing players to roll Legendary cards (including weapon unlock cards like Desert Eagle, Minigun, and RPG) repeatedly in consecutive levels. Additionally, draws had no per-hand weapon cap or offer cooldown.
   - **Boss-Only Legendary & Mythic Restriction**:
@@ -1239,12 +1249,66 @@ ull, leaving Initialize() uncalled. Movement defaulted to Backward (Vector3.back
     - **Normal Level Cooldown**: Added `minLevelsBetweenWeaponOffers = 3` and `lastWeaponOfferLevel` tracking. After a weapon unlock card is offered to the player, no weapon unlock card can be offered for at least 3 levels during normal wave progression.
     - **Boss Drops Integration**: Boss battle milestone drops bypass the level cooldown to guarantee milestone weapon offers or high-tier perks while still strictly respecting the max 1 weapon per hand cap.
   - **Automated Verification**: Simulated 30 levels of card rolls across normal and boss waves. Confirmed 0 Legendary/Mythic cards in normal waves, positive Legendary/Mythic boss drops, maximum 1 weapon per hand, and 0 weapon pacing violations.
-- **Chunk Boundary Seam Hard Cut Fix**: 
-  - Diagnosed cause of abrupt vertical moss line cuts between adjacent chunks. Road mesh vertices span $Z \in [-25.0, +15.0]$ (centered at $Z = -5.0$, 40m long).
-  - Implemented centered chunk seam falloff in `World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, and `WorldBend_Foliage.shader`: `seamFade = smoothstep(0.0, 4.0, 20.0 - abs(WorldPos.z + 5.0))`.
-  - Both leading ($Z = +15$) and trailing ($Z = -25$) edges of every chunk smoothly taper off into clean asphalt over 4 meters, guaranteeing 100% seamless, continuous road merging with zero hard edges.
-- **Play Mode YAML Scalar Mapping Errors Resolved**: Fixed `Tried to get mapping information from scalar node` / `Assertion failed on expression: 'IsMapping()'` error triggered during Play Mode.
-- **Asset Integrity**: Verified `BossProjectile.cs` remains 100% untouched and unmodified.
+- **Boss Combat Pacing & High-Engagement Overhaul (`EnemyController.cs`)**:
+  - **Issue Diagnosed**: Boss felt sluggish and easy to dodge; prolonged stationary pauses (2.5s post-shot) and slow projectile travel (14 m/s) allowed players to treat the boss like a stationary target dummy and melt its HP easily.
+  - **High-Velocity Projectile & Reflex Dodge**:
+    - **Crisp Windup**: Reduced telegraph windup from `1.0s` to **`0.65s`** (and **`0.50s`** in Phase 3 Enrage). Gives a clear visual cue while demanding an immediate reflex lane change.
+    - **Projectile Speed Boost**: Increased flight velocity from `14 m/s` to **`22 m/s`** (and **`26 m/s`** in Phase 3 Enrage). Halves flight time from ~2.2s to ~1s, making incoming acid spit feel dangerous and urgent.
+    - **Aggressive Recovery**: Drastically slashed stationary post-shot recovery from `2.5s` down to **`0.85s`** (and **`0.65s`** in Phase 3). The boss immediately resumes charging forward instead of sitting idle.
+  - **Rhythmic Lane-Dancing (Multi-Shot Combos)**:
+    - Tightened interval between consecutive shots from `2.8s` to **`1.4s`**. When the boss fires a 2-shot or 3-shot barrage, the player is forced into a rhythmic dash across lanes (e.g. Right $\rightarrow$ Left).
+  - **Asset Integrity**: Verified `BossProjectile.cs` remains 100% untouched and unmodified.
+- **Boss Battle Minion Scaling & Cinematic Vanguard Restoration (`EnemyController.cs`, `EnemyManager.cs`)**:
+  - **Cinematic Vanguard Intro Restored (`EnemyManager.SpawnBossRoutine`)**: Re-introduced the cinematic 2-wave vanguard advance (2 minions per wave across staggered lanes) when reaching the bridge before the boss makes its entrance. Adds anticipation and tactical flow.
+  - **Minion Swarm Scaling Overhaul**:
+    - **Normal Boss Waves**: Increased minions per wave from 1–2 to **3–4 minions** (`minionsPerWaveRange = new Vector2Int(3, 4)`).
+    - **Phase 3 Rage Waves**: Added dedicated `phase3MinionsPerWaveRange = new Vector2Int(5, 6)` triggered when both legs are broken (`AreBothLegsBroken`). The boss now unleashes an intense swarm of **5 to 6 minions** across all 3 lanes.
+    - **Fluid Stagger Delay**: Reduced `minionStaggerDelay` from 0.7s to **0.45s**, allowing 5–6 minions to stream onto the roadway dynamically in ~2.2s without overlapping or lagging.
+  - **Strict Minion Attack Suppression Maintained**: Boss continues to strictly hold and suppress projectile attacks as long as any vanguard or spawned minions are alive on the bridge.
+- **Chunk Boundary Seam Buffer & Object-Space Texture Anchoring Overhaul (`World Bend Foliage.shadergraph`, `FoliageBlend.hlsl`, `WorldBend_Foliage.shader`)**:
+  - **Issue Diagnosed**: In `World Bend Foliage.shadergraph`, `WorldPos` in world coordinates was used for seam falloff and noise. As chunks moved down the highway during gameplay, world position shifted, causing the falloff window to stay frozen at world $Z \in [-25, 15]$ rather than moving with the chunk. This caused abrupt vertical straight-line moss cutoffs when chunks crossed the world boundary and texture sliding during movement.
+  - **Object-Space Conversion (`TransformWorldToObject`)**: Converted fragment coordinates to mesh local space using `TransformWorldToObject(WorldPos)`. On road meshes, local bounds span $Z \in [-25.0, +15.0]$ (length 40m, center at $Z = -5.0$).
+  - **Clean Boundary Buffer & Smooth Center Blending**:
+    - Configured a dedicated 4.0-meter clean asphalt buffer at both the start and end of every chunk: `seamFade = smoothstep(4.0, 8.0, 20.0 - abs(objectPos.z + 5.0))`.
+    - At both chunk boundaries (within 4m of the edges), `seamFade = 0`, leaving 100% clean asphalt and white road markings across every seam.
+    - Between 4m and 8m, moss and gravel smoothly blend into the central 24 meters of the chunk.
+    - Chunks now merge seamlessly and cleanly with zero visible cutoffs, and textures remain locked to the road without sliding.
+- **Play Mode YAML Scalar Mapping Errors Resolved**: Fixed `Tried to get mapping information from scalar node` / `Assertion failed on expression: 'IsMapping()'` error triggered during Play Mode by reverting the dirty texture data in `LiberationSans SDF - Fallback.asset`.
+- **Boss Safe Lane Trapping Elimination & Obstacle Suppression (`EnemyController.cs`, `ObstacleManager.cs`, `SpawnTracker.cs`)**:
+  - **Issue Diagnosed**: During consecutive projectile attacks, the boss could target lanes 2 and 3 while lane 1 already contained an obstacle, creating an unavoidable hit. Furthermore, narrow checking envelopes allowed obstacles to be overlooked or spawned during the attack telegraph.
+  - **Active Attack Lockout (`SpawnTracker.IsBossAttackActive()`, `ObstacleManager.cs`)**:
+    - Added `SpawnTracker.IsBossAttackActive()` returning `true` during active boss attack windup and projectile travel.
+    - Updated `ObstacleManager.SpawnObstacle()` to immediately abort and suppress all obstacle spawns whenever `SpawnTracker.IsBossAttackActive()` is true, ensuring no new obstacles can appear anywhere on the road while the player is dodging.
+  - **Zero-Obstacle Lane Priority (`EnemyController.SelectOptimalSafeLane`)**:
+    - Expanded detection envelope to $Z \in [\min(\text{player}, \text{boss}) - 10\text{m}, \max(\text{player}, \text{boss}) + 30\text{m}]$ and lane lateral tolerance to $1.3\text{m}$.
+    - System strictly tallies obstacles across all lanes and checks `obstacleCountPerLane == 0`. If any completely empty lanes exist, the safe lane is chosen exclusively from that zero-obstacle pool.
+  - **Guaranteed Obstacle Purge (`EnemyController.ClearObstaclesInSafeLane`)**:
+    - Expanded corridor purge to $Z \in [\min(\text{player}, \text{boss}) - 10\text{m}, \max(\text{player}, \text{boss}) + 30\text{m}]$.
+    - Calls both `obs.Recycle()` and sets `obs.gameObject.SetActive(false)` to prevent lingering collision.
+    - Added physical overlap sweep (`Physics.OverlapBox`) covering the full safe lane corridor to sweep away any unmanaged obstacle colliders.
+- **Boss Projectile Speed & Dodge Window Tuning (`EnemyController.cs`)**:
+  - **Issue Diagnosed**: When moving from Lane 3 to Lane 1 (crossing 2 lanes = 4.0m distance) at player strafe speed (6.0 m/s = ~0.67s travel time), the previous 22 m/s projectile speed and 0.65s windup gave insufficient margin, occasionally clipping the player mid-transition.
+  - **Tuning Refinements**:
+    - **Projectile Flight Velocity**: Reduced from `22 m/s` to **`18 m/s`** (and Enrage Phase 3 from `26 m/s` to **`21 m/s`**). Over the ~25m combat separation, flight time increased from ~1.1s to **~1.4s**.
+    - **Telegraph Windup**: Increased from `0.65s` to **`0.85s`** (and Enrage Phase 3 from `0.50s` to **`0.70s`**).
+    - **Total Dodge Window**: Player now has **~2.25 seconds** total reaction time ($0.85\text{s} + 1.4\text{s}$), providing comfortable headroom to complete a full 2-lane transition (~0.67s) with more than 1.5s of safety cushion.
+    - **Attack Interval**: Relaxed `timeBetweenAttacks` from `1.4s` to **`1.8s`** and `projectileRecovery` from `0.85s` to **`1.0s`**, preventing rapid barrages from suffocating player movement.
+- **Weakpoint & Armor Clarification**:
+  - Confirmed and preserved existing weakpoint architecture: Head already had 90% armor protection (`[ARMOR]` damage reduction factor of 0.10f) active until both legs are destroyed. Verified that no redundant or duplicate torso reductions interfere with this design.
+- **Boss Minion Overshoot Handling & Combat Stall Prevention (`EnemyController.cs`)**:
+  - **Issue Diagnosed**: When the player avoids minions (e.g. while reloading or dodging across lanes), minions run past the player ($Z < \text{player}.z$). Since the player and weapons face forward, the player cannot shoot backwards to kill them. Previously, minions did not despawn until reaching $Z < -40\text{f}$ (often 100+ meters behind the player), causing `AreAnyMinionsActive()` to remain `true` indefinitely. This caused the boss to freeze and do nothing because projectile attacks were blocked waiting for unreachable minions.
+  - **Immediate Overshoot Despawn (`EnemyController.Update`)**:
+    - Any enemy that spawned in front is now immediately recycled and despawned once it crosses $3.5\text{m}$ behind the player (`transform.position.z < playerTransform.position.z - 3.5f`).
+    - Added secondary distance safety net (`transform.position.z < playerTransform.position.z - 15f`) to prevent any unlinked enemies from lingering.
+  - **Spatial Filtering in `AreAnyMinionsActive()` & `CleanActiveMinionsList()`**:
+    - `CleanActiveMinionsList()` now checks minion position relative to the player: if `m.transform.position.z < playerZ - 2.5f`, it calls `m.ForceDespawn()` and removes the minion from tracking.
+    - `AreAnyMinionsActive()` only considers minions actually in front of the player (`z >= playerZ - 2.5f`) as active threats. Lingering background minions are instantly purged and no longer block attacks.
+  - **Anti-Stall Timeouts (`BossCombatDirectorRoutine`)**:
+    - Minion wave wait timeout tightened from 25s down to **10s** (`maxWait = 10f`). If minions are stuck or missing, `ForceDespawnAllMinions()` cleans them up automatically.
+    - Projectile attack safety check hold loop given an **8-second timeout** with fallback force despawn, ensuring the boss can never freeze permanently under any circumstances.
+- **Asset Integrity**: Verified `BossProjectile.cs` remains 100% untouched and unmodified (`git diff --stat | grep -i BossProjectile` is empty).
+
+
 
 
 

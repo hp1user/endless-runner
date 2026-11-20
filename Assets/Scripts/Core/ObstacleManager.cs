@@ -108,6 +108,12 @@ public class ObstacleManager : MonoBehaviour
     {
         if (obstaclePool == null || obstaclePool.Count == 0) return;
 
+        // Never spawn obstacles while the Boss is actively telegraphing or executing an attack!
+        if (protectBossSafeLane && SpawnTracker.IsBossAttackActive())
+        {
+            return;
+        }
+
         // Clone list of candidates to try picking valid prefab with available lanes
         List<GameObject> candidates = new List<GameObject>(obstaclePool);
 
